@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 
 namespace RentalService.Models
 {
-    public class User
+    public class User : IdentityUser<Guid>
     {
-        public Guid Id { get; set; }
         public required string Name { get; set; }
-        public required string Email { get; set; }
-        public required string PasswordHash { get; set; }
-        public required string Phone { get; set; }
         public required string AvatarUrl { get; set; }
         public UserRole Role { get; set; }
         public DateTime CreatedAt { get; set; }
