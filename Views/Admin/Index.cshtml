@@ -1,0 +1,24 @@
+@model IEnumerable<RentalService.Models.User>
+@{
+    ViewData["Title"] = "User Management";
+}
+<h2>User Management</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.Name</td>
+            <td>@user.Email</td>
+            <td>@user.Role</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,8 +1,9 @@
+@model dynamic
 @{
     ViewData["Title"] = "Login";
 }
 <h2>Login</h2>
-<form asp-action="Login" method="post">
+<form asp-action="Login" method="post" novalidate>
     <div>
         <label>Email</label>
         <input name="email" type="email" required />
@@ -15,4 +16,7 @@
 </form>
 @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors)) {
     <div style="color:red">@error.ErrorMessage</div>
+}
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
