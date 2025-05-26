@@ -1,4 +1,4 @@
-# Database Schema
+# Database Schema (Updated to match C# Models)
 
 ## 1. Users & Roles
 ```sql
@@ -9,7 +9,7 @@ Users (
   password_hash TEXT,
   phone TEXT,
   avatar_url TEXT,
-  role ENUM('guest', 'registered_customer', 'host', 'admin', 'consultant'),
+  role ENUM('Guest', 'RegisteredCustomer', 'Host', 'Admin', 'Consultant'),
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 )
@@ -31,10 +31,10 @@ Buildings (
 Rooms (
   id UUID PK,
   building_id UUID FK -> Buildings(id),
-  name TEXT, -- ví dụ: "Phòng 101"
+  name TEXT, -- e.g. "Phòng 101"
   description TEXT,
   price DECIMAL,
-  status ENUM('active', 'inactive', 'hidden'),
+  status ENUM('Active', 'Inactive', 'Hidden'),
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 )
@@ -46,7 +46,7 @@ RoomImages (
 )
 ```
 
-## 3. Tiện nghi phòng
+## 3. Room Amenities
 ```sql
 Amenities (
   id UUID PK,
@@ -60,7 +60,7 @@ RoomAmenities (
 )
 ```
 
-## 4. Favorites (Yêu thích phòng)
+## 4. Favorites
 ```sql
 Favorites (
   id UUID PK,
@@ -70,44 +70,44 @@ Favorites (
 )
 ```
 
-## 5. Lịch hẹn xem phòng
+## 5. View Appointments
 ```sql
 ViewAppointments (
   id UUID PK,
   user_id UUID FK -> Users(id),
   room_id UUID FK -> Rooms(id),
   appointment_time TIMESTAMP,
-  status ENUM('pending', 'confirmed', 'cancelled'),
+  status ENUM('Pending', 'Confirmed', 'Cancelled'),
   created_at TIMESTAMP
 )
 ```
 
-## 6. Yêu cầu thuê phòng
+## 6. Booking Requests
 ```sql
 BookingRequests (
   id UUID PK,
   user_id UUID FK -> Users(id),
   room_id UUID FK -> Rooms(id),
   message TEXT,
-  status ENUM('pending', 'approved', 'rejected', 'cancelled'),
+  status ENUM('Pending', 'Approved', 'Rejected', 'Cancelled'),
   created_at TIMESTAMP,
   updated_at TIMESTAMP
 )
 ```
 
-## 7. Hợp đồng thuê (nếu có)
+## 7. Contracts
 ```sql
 Contracts (
   id UUID PK,
   booking_request_id UUID FK -> BookingRequests(id),
-  start_date DATE,
-  end_date DATE,
+  start_date TIMESTAMP,
+  end_date TIMESTAMP,
   contract_file_url TEXT,
   created_at TIMESTAMP
 )
 ```
 
-## 8. Chat & Tin nhắn
+## 8. Chat & Messages
 ```sql
 ChatRooms (
   id UUID PK,
@@ -125,47 +125,47 @@ Messages (
 )
 ```
 
-## 9. Đánh giá phòng
+## 9. Reviews
 ```sql
 Reviews (
   id UUID PK,
   room_id UUID FK -> Rooms(id),
   user_id UUID FK -> Users(id),
-  rating INT CHECK(rating BETWEEN 1 AND 5),
+  rating INT,
   comment TEXT,
   created_at TIMESTAMP
 )
 ```
 
-## 10. Thông báo
+## 10. Notifications
 ```sql
 Notifications (
   id UUID PK,
   user_id UUID FK -> Users(id),
   title TEXT,
   message TEXT,
-  is_read BOOLEAN DEFAULT FALSE,
+  is_read BOOLEAN,
   created_at TIMESTAMP
 )
 ```
 
-## 11. Báo cáo vi phạm / khiếu nại
+## 11. Reports
 ```sql
 Reports (
   id UUID PK,
   reported_by UUID FK -> Users(id),
   reported_user UUID FK -> Users(id),
   reason TEXT,
-  status ENUM('open', 'resolved'),
+  status ENUM('Open', 'Resolved'),
   created_at TIMESTAMP
 )
 ```
 
-## 12. Danh mục dùng chung (tiện nghi, khu vực…)
+## 12. Categories
 ```sql
 Categories (
   id UUID PK,
   name TEXT,
-  type ENUM('amenity', 'location')
+  type ENUM('Amenity', 'Location')
 )
 ```
