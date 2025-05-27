@@ -1,0 +1,80 @@
+@model IEnumerable<RentalService.Models.ViewAppointment>
+@{
+    ViewData["Title"] = "Room View Appointments";
+    var rooms = ViewBag.Rooms as List<RentalService.Models.Room>;
+    var selectedRoomId = ViewBag.SelectedRoomId as Guid?;
+    var status = ViewBag.Status as string;
+}
+<h2>Room View Appointments</h2>
+<form method="get">
+    <label>Room:</label>
+    <select name="roomId">
+        <option value="">All</option>
+        @if (rooms != null)
+        {
+            foreach (var r in rooms)
+            {
+                if (selectedRoomId == r.Id)
+                {
+                    @:<option value="@r.Id" selected>@r.Name</option>
+                }
+                else
+                {
+                    @:<option value="@r.Id">@r.Name</option>
+                }
+            }
+        }
+    </select>
+    <label>Status:</label>
+    <select name="status">
+        <option value="">All</option>
+        @foreach (var st in Enum.GetNames(typeof(RentalService.Models.ViewAppointmentStatus)))
+        {
+            if (status == st)
+            {
+                @:<option value="@st" selected>@st</option>
+            }
+            else
+            {
+                @:<option value="@st">@st</option>
+            }
+        }
+    </select>
+    <button type="submit">Filter</button>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Customer</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var appt in Model)
+        {
+            <tr>
+                @* <td>@appt.Room?.Name</td> *@
+                <td>
+                    <a href="@Url.Action("Details", "Rooms", new { id = appt.Room.Id })" target="_blank">@appt.Room.Name</a>
+                </td>
+                <td>@appt.User?.Name</td>
+                <td>@appt.AppointmentTime</td>
+                <td>@appt.Status</td>
+                <td>
+                    @if (appt.Status == RentalService.Models.ViewAppointmentStatus.Pending)
+                    {
+                        <form asp-action="UpdateAppointmentStatus" method="post" style="display:inline">
+                            <input type="hidden" name="id" value="@appt.Id" />
+                            <button type="submit" name="action" value="accept" class="btn btn-success btn-sm">Accept</button>
+                            <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm">Decline</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a href="@Url.Action("Index", "HostRooms")">Back to My Rooms</a>

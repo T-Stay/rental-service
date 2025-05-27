@@ -3,40 +3,63 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - _</title>
+    <title>@ViewData["Title"] - T-Stay</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/_.styles.css" asp-append-version="true" />
+    <!-- Removed old _.styles.css -->
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">_</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">T-Stay</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-controller="Rooms" asp-action="Index">Rooms</a>
                         </li>
+                        @* Only show Bookings for customers *@
+                        @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="BookingRequests" asp-action="Index">Bookings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ViewAppointments" asp-action="Index">Appointments</a>
+                            </li>
+                        }
+                        @* Only show My Buildings and My Rooms for hosts *@
+                        @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "host"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="HostBuildings" asp-action="Index">My Buildings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="HostRooms" asp-action="Index">My Rooms</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ViewAppointments" asp-action="HostRoomAppointments">Host Room Appointments</a>
+                            </li>
+                        }
+                        @* Only show Admin for admins *@
+                        @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger" asp-controller="Admin" asp-action="Index">Admin</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav">
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
                             var role = User.FindFirst("role")?.Value ?? "User";
-                            if (role == "admin")
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Admin</a>
-                                </li>
-                            }
                             <li class="nav-item">
                                 <span class="nav-link">Hello, @User.Identity.Name (@role)</span>
                             </li>
@@ -49,10 +72,10 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
                     </ul>
@@ -65,10 +88,9 @@
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-4">
         <div class="container">
-            &copy; 2025 - _ - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - T-Stay - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

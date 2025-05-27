@@ -3,6 +3,27 @@
     ViewData["Title"] = "My View Appointments";
 }
 <h2>My View Appointments</h2>
+<form method="get">
+    <label>Status:</label>
+    <select name="status">
+        <option value="">All</option>
+        @{
+            var selectedStatus = Context.Request.Query["status"].ToString();
+        }
+        @foreach (var st in Enum.GetNames(typeof(RentalService.Models.ViewAppointmentStatus)))
+        {
+            if (selectedStatus == st)
+            {
+                <option value="@st" selected>@st</option>
+            }
+            else
+            {
+                <option value="@st">@st</option>
+            }
+        }
+    </select>
+    <button type="submit">Filter</button>
+</form>
 <table class="table">
     <thead>
         <tr>
@@ -15,7 +36,16 @@
     @foreach (var appt in Model)
     {
         <tr>
-            <td>@appt.RoomId</td>
+            <td>
+                @if (appt.Room != null)
+                {
+                    <a href="@Url.Action("Details", "Rooms", new { id = appt.Room.Id })" target="_blank">@appt.Room.Name</a>
+                }
+                else
+                {
+                    <span>Unknown</span>
+                }
+            </td>
             <td>@appt.AppointmentTime</td>
             <td>@appt.Status</td>
         </tr>

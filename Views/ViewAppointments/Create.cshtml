@@ -1,6 +1,18 @@
 @model dynamic
 @{
     ViewData["Title"] = "Book a Viewing";
+    var room = ViewBag.Room as RentalService.Models.Room;
+}
+@if (room != null)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@room.Name</h5>
+            <p class="card-text"><strong>Location:</strong> @room.Building?.Location</p>
+            <p class="card-text"><strong>Price:</strong> @room.Price</p>
+            <p class="card-text"><strong>Description:</strong> @room.Description</p>
+        </div>
+    </div>
 }
 <h2>Book a Viewing</h2>
 <form asp-action="Create" method="post">

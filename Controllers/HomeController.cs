@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using _.Models;
+using RentalService.Models;
 
 namespace _.Controllers;
 
