@@ -5,6 +5,6 @@ namespace RentalService.Models
 {
     public class Host : User
     {
-        public required List<Building> Buildings { get; set; }
+        public List<Building>? Buildings { get; set; }
     }
 }

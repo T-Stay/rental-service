@@ -11,6 +11,6 @@ namespace RentalService.Models
         public Guid User2Id { get; set; }
         public User? User2 { get; set; }
         public DateTime CreatedAt { get; set; }
-        public required List<Message> Messages { get; set; }
+        public List<Message>? Messages { get; set; }
     }
 }

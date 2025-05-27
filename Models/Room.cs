@@ -13,8 +13,8 @@ namespace RentalService.Models
         public required string Description { get; set; }
         public decimal Price { get; set; }
         public RoomStatus Status { get; set; }
-        public required List<RoomImage> Images { get; set; }
-        public required List<Amenity> Amenities { get; set; }
+        public List<RoomImage>? Images { get; set; }
+        public List<Amenity>? Amenities { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public List<BookingRequest>? BookingRequests { get; set; }

@@ -1,14 +1,36 @@
 @model IEnumerable<RentalService.Models.Room>
 @{
     ViewData["Title"] = "My Rooms";
+    var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
+    var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
 }
 <h2>My Rooms</h2>
-<a href="@Url.Action("Create")">Post New Room</a>
+<form method="get">
+    <label>Building:</label>
+    <select name="buildingId" onchange="this.form.submit()">
+        <option value="">All</option>
+        @if (buildings != null)
+        {
+            foreach (var b in buildings)
+            {
+                if (selectedBuildingId == b.Id)
+                {
+                    <option value="@b.Id" selected>@b.Name</option>
+                }
+                else
+                {
+                    <option value="@b.Id">@b.Name</option>
+                }
+            }
+        }
+    </select>
+</form>
+<a href="@Url.Action("Create", new { buildingId = selectedBuildingId })">Post New Room</a>
 <table class="table">
     <thead>
         <tr>
             <th>Name</th>
-            <th>Location</th>
+            <th>Building</th>
             <th>Price</th>
             <th></th>
         </tr>
@@ -18,7 +40,7 @@
     {
         <tr>
             <td>@room.Name</td>
-            <td>@room.Building?.Location</td>
+            <td>@room.Building?.Name</td>
             <td>@room.Price</td>
             <td>
                 <a href="@Url.Action("Edit", new { id = room.Id })">Edit</a> |

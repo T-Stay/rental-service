@@ -15,6 +15,6 @@ namespace RentalService.Models
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
-        public required List<Room> Rooms { get; set; }
+        public List<Room>? Rooms { get; set; }
     }
 }

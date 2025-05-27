@@ -17,15 +17,19 @@ namespace RentalService.Controllers
         }
 
         // GET: /Rooms
-        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice)
+        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice, Guid? buildingId)
         {
             var rooms = _context.Rooms.Include(r => r.Images).Include(r => r.Amenities).Include(r => r.Building).AsQueryable();
+            if (buildingId.HasValue)
+                rooms = rooms.Where(r => r.BuildingId == buildingId);
             if (!string.IsNullOrEmpty(location))
-                rooms = rooms.Where(r => r.Building.Location.Contains(location));
+                rooms = rooms.Where(r => r.Building != null && r.Building.Location.Contains(location));
             if (minPrice.HasValue)
                 rooms = rooms.Where(r => r.Price >= minPrice);
             if (maxPrice.HasValue)
                 rooms = rooms.Where(r => r.Price <= maxPrice);
+            ViewBag.Buildings = await _context.Buildings.ToListAsync();
+            ViewBag.SelectedBuildingId = buildingId;
             return View(await rooms.ToListAsync());
         }
 

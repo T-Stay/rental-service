@@ -1,9 +1,31 @@
 @model RentalService.Models.Room
 @{
     ViewData["Title"] = "Post New Room";
+    var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
+    var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
 }
 <h2>Post New Room</h2>
 <form asp-action="Create" method="post">
+    <div>
+        <label>Building</label>
+        <select asp-for="BuildingId">
+            <option value="">Select Building</option>
+            @if (buildings != null)
+            {
+                foreach (var b in buildings)
+                {
+                    if (selectedBuildingId == b.Id)
+                    {
+                        <option value="@b.Id" selected>@b.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@b.Id">@b.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
     <div>
         <label>Name</label>
         <input asp-for="Name" />
@@ -18,4 +40,4 @@
     </div>
     <button type="submit">Create</button>
 </form>
-<a href="@Url.Action("Index")">Back to list</a>
+<a href="@Url.Action("Index", new { buildingId = selectedBuildingId })">Back to list</a>

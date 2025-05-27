@@ -1,12 +1,25 @@
 @model IEnumerable<RentalService.Models.Room>
 @{
     ViewData["Title"] = "Room Search";
+    var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
+    var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
 }
 <h2>Room Search</h2>
 <form method="get">
     <input type="text" name="location" placeholder="Location" value="@Context.Request.Query["location"]" />
     <input type="number" name="minPrice" placeholder="Min Price" value="@Context.Request.Query["minPrice"]" />
     <input type="number" name="maxPrice" placeholder="Max Price" value="@Context.Request.Query["maxPrice"]" />
+    <label>Building:</label>
+    <select name="buildingId">
+        <option value="">All</option>
+        @if (buildings != null)
+        {
+            foreach (var b in buildings)
+            {
+                @:<option value="@b.Id" @(selectedBuildingId == b.Id ? "selected=\"selected\"" : "")>@b.Name</option>
+            }
+        }
+    </select>
     <button type="submit">Search</button>
 </form>
 <table class="table">
@@ -14,6 +27,7 @@
         <tr>
             <th>Name</th>
             <th>Location</th>
+            <th>Building</th>
             <th>Price</th>
             <th></th>
         </tr>
@@ -24,6 +38,7 @@
         <tr>
             <td>@room.Name</td>
             <td>@room.Building?.Location</td>
+            <td>@room.Building?.Name</td>
             <td>@room.Price</td>
             <td><a href="@Url.Action("Details", new { id = room.Id })">Details</a></td>
         </tr>

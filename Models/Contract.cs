@@ -9,7 +9,7 @@ namespace RentalService.Models
         public BookingRequest? BookingRequest { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public required string ContractFileUrl { get; set; }
+        public string? ContractFileUrl { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }
