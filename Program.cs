@@ -39,12 +39,39 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    string[] roles = new[] { "customer", "host", "admin" };
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+    string[] roles = new[] { "customer", "host", "admin", "consultant", "guest" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
             await roleManager.CreateAsync(new IdentityRole<Guid>(role));
+        }
+    }
+    // Seed admin user
+    var adminEmail = Environment.GetEnvironmentVariable("ADMIN_EMAIL");
+    var adminPassword = Environment.GetEnvironmentVariable("ADMIN_PASSWORD");
+    if (!string.IsNullOrEmpty(adminEmail) && !string.IsNullOrEmpty(adminPassword))
+    {
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
+        {
+            adminUser = new Admin
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                Name = "Admin",
+                AvatarUrl = "",
+                Role = UserRole.Admin,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            var result = await userManager.CreateAsync(adminUser, adminPassword);
+            if (result.Succeeded)
+            {
+                await userManager.ConfirmEmailAsync(adminUser, await userManager.GenerateEmailConfirmationTokenAsync(adminUser));
+                await userManager.AddToRoleAsync(adminUser, UserRoleHelper.ToIdentityRoleString(UserRole.Admin));
+            }
         }
     }
 }

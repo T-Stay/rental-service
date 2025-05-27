@@ -1,0 +1,34 @@
+@model IEnumerable<RentalService.Models.Room>
+@{
+    ViewData["Title"] = "Rooms Pending Approval";
+}
+<h2>Rooms Pending Approval</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var room in Model)
+    {
+        <tr>
+            <td>@room.Name</td>
+            <td>@room.Description</td>
+            <td>@room.Price</td>
+            <td>@room.Status</td>
+            <td>
+                <form asp-action="ApproveRoom" method="post" style="display:inline">
+                    <input type="hidden" name="id" value="@room.Id" />
+                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<a href="@Url.Action("Index")">Back to Admin Home</a>

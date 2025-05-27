@@ -1,0 +1,22 @@
+@model RentalService.Models.Room
+@{
+    ViewData["Title"] = "Room Details";
+}
+<h2>@Model.Name</h2>
+<p><strong>Location:</strong> @Model.Building?.Location</p>
+<p><strong>Price:</strong> @Model.Price</p>
+<p><strong>Description:</strong> @Model.Description</p>
+@if (Model.Images != null && Model.Images.Count > 0)
+{
+    <div>
+        @foreach (var img in Model.Images)
+        {
+            <img src="@img.ImageUrl" alt="Room Image" style="max-width:200px; margin:5px;" />
+        }
+    </div>
+}
+@if (Model.Amenities != null && Model.Amenities.Count > 0)
+{
+    <p><strong>Amenities:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</p>
+}
+<a href="@Url.Action("Index")">Back to list</a>

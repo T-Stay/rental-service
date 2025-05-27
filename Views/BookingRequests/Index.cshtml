@@ -1,0 +1,28 @@
+@model IEnumerable<RentalService.Models.BookingRequest>
+@{
+    ViewData["Title"] = "My Booking Requests";
+}
+<h2>My Booking Requests</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var req in Model)
+    {
+        <tr>
+            <td>@req.RoomId</td>
+            <td>@req.Message</td>
+            <td>@req.Status</td>
+            <td>@req.CreatedAt.ToShortDateString()</td>
+            <td><a href="@Url.Action("Details", new { id = req.Id })">Details</a></td>
+        </tr>
+    }
+    </tbody>
+</table>

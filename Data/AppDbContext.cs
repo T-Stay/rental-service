@@ -66,122 +66,134 @@ namespace RentalService.Data
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<Customer>()
-                .HasMany(c => c.Bookings)
+                .HasMany(c => c.BookingRequests)
                 .WithOne()
                 .HasForeignKey(b => b.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Building - Host (one-to-many)
             modelBuilder.Entity<Building>()
-                .HasOne<RentalService.Models.Host>()
+                .HasOne(b => b.Host)
                 .WithMany(h => h.Buildings)
                 .HasForeignKey(b => b.HostId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Room - Building (one-to-many)
             modelBuilder.Entity<Room>()
-                .HasOne<Building>()
+                .HasOne(r => r.Building)
                 .WithMany(b => b.Rooms)
                 .HasForeignKey(r => r.BuildingId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // RoomImage - Room (one-to-many)
             modelBuilder.Entity<RoomImage>()
-                .HasOne<Room>()
-                .WithMany(r => r.Images)
+                .HasOne(ri => ri.Room)
+                .WithMany(r => r.RoomImages)
                 .HasForeignKey(ri => ri.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Room - Amenity (many-to-many)
             modelBuilder.Entity<Room>()
                 .HasMany(r => r.Amenities)
-                .WithMany(); // If you want a join entity, define it explicitly
+                .WithMany();
 
             // Favorite (User-Room, many-to-one)
             modelBuilder.Entity<Favorite>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(f => f.User)
+                .WithMany(u => u.Favorites)
                 .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Favorite>()
-                .HasOne<Room>()
-                .WithMany()
+                .HasOne(f => f.Room)
+                .WithMany(r => r.Favorites)
                 .HasForeignKey(f => f.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // ViewAppointment (User-Room)
             modelBuilder.Entity<ViewAppointment>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(v => v.User)
+                .WithMany(u => u.ViewAppointments)
                 .HasForeignKey(v => v.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<ViewAppointment>()
-                .HasOne<Room>()
-                .WithMany()
+                .HasOne(v => v.Room)
+                .WithMany(r => r.ViewAppointments)
                 .HasForeignKey(v => v.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // BookingRequest (User-Room)
             modelBuilder.Entity<BookingRequest>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(b => b.User)
+                .WithMany(u => u.BookingRequests)
                 .HasForeignKey(b => b.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict); // Ensure restrict to avoid cascade path
             modelBuilder.Entity<BookingRequest>()
-                .HasOne<Room>()
-                .WithMany()
+                .HasOne(b => b.Room)
+                .WithMany(r => r.BookingRequests)
                 .HasForeignKey(b => b.RoomId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent deletion of Room if there are BookingRequests
+                .OnDelete(DeleteBehavior.Restrict); // Ensure restrict to avoid cascade path
 
             // Contract - BookingRequest (one-to-one)
             modelBuilder.Entity<Contract>()
-                .HasOne<BookingRequest>()
+                .HasOne(c => c.BookingRequest)
                 .WithOne()
                 .HasForeignKey<Contract>(c => c.BookingRequestId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // ChatRoom - Messages (one-to-many)
             modelBuilder.Entity<Message>()
-                .HasOne<ChatRoom>()
+                .HasOne(m => m.ChatRoom)
                 .WithMany(c => c.Messages)
                 .HasForeignKey(m => m.ChatRoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Message - Sender (User)
             modelBuilder.Entity<Message>()
-                .HasOne<User>()
+                .HasOne(m => m.Sender)
                 .WithMany()
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // ChatRoom - User1/User2
+            modelBuilder.Entity<ChatRoom>()
+                .HasOne(c => c.User1)
+                .WithMany()
+                .HasForeignKey(c => c.User1Id)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ChatRoom>()
+                .HasOne(c => c.User2)
+                .WithMany()
+                .HasForeignKey(c => c.User2Id)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Review (User-Room)
             modelBuilder.Entity<Review>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Review>()
-                .HasOne<Room>()
-                .WithMany()
+                .HasOne(r => r.Room)
+                .WithMany(rm => rm.Reviews)
                 .HasForeignKey(r => r.RoomId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Notification - User (many-to-one)
             modelBuilder.Entity<Notification>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Report (User-User)
             modelBuilder.Entity<Report>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(r => r.Reporter)
+                .WithMany(u => u.ReportsFiled)
                 .HasForeignKey(r => r.ReportedBy)
                 .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Report>()
-                .HasOne<User>()
-                .WithMany()
+                .HasOne(r => r.Reported)
+                .WithMany(u => u.ReportsAgainst)
                 .HasForeignKey(r => r.ReportedUser)
                 .OnDelete(DeleteBehavior.Restrict);
 

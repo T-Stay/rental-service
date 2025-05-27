@@ -1,0 +1,14 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Book a Viewing";
+}
+<h2>Book a Viewing</h2>
+<form asp-action="Create" method="post">
+    <input type="hidden" name="roomId" value="@ViewBag.RoomId" />
+    <div>
+        <label>Appointment Time</label>
+        <input type="datetime-local" name="appointmentTime" />
+    </div>
+    <button type="submit">Book</button>
+</form>
+<a href="@Url.Action("Index")">Back to list</a>

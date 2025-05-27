@@ -7,5 +7,6 @@ namespace RentalService.Models
         public Guid Id { get; set; }
         public Guid RoomId { get; set; }
         public required string ImageUrl { get; set; }
+        public Room? Room { get; set; }
     }
 }

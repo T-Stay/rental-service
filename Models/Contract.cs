@@ -6,6 +6,7 @@ namespace RentalService.Models
     {
         public Guid Id { get; set; }
         public Guid BookingRequestId { get; set; }
+        public BookingRequest? BookingRequest { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public required string ContractFileUrl { get; set; }

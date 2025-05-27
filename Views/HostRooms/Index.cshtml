@@ -1,0 +1,30 @@
+@model IEnumerable<RentalService.Models.Room>
+@{
+    ViewData["Title"] = "My Rooms";
+}
+<h2>My Rooms</h2>
+<a href="@Url.Action("Create")">Post New Room</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var room in Model)
+    {
+        <tr>
+            <td>@room.Name</td>
+            <td>@room.Building?.Location</td>
+            <td>@room.Price</td>
+            <td>
+                <a href="@Url.Action("Edit", new { id = room.Id })">Edit</a> |
+                <a href="@Url.Action("Delete", new { id = room.Id })">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

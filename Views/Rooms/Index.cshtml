@@ -1,0 +1,32 @@
+@model IEnumerable<RentalService.Models.Room>
+@{
+    ViewData["Title"] = "Room Search";
+}
+<h2>Room Search</h2>
+<form method="get">
+    <input type="text" name="location" placeholder="Location" value="@Context.Request.Query["location"]" />
+    <input type="number" name="minPrice" placeholder="Min Price" value="@Context.Request.Query["minPrice"]" />
+    <input type="number" name="maxPrice" placeholder="Max Price" value="@Context.Request.Query["maxPrice"]" />
+    <button type="submit">Search</button>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var room in Model)
+    {
+        <tr>
+            <td>@room.Name</td>
+            <td>@room.Building?.Location</td>
+            <td>@room.Price</td>
+            <td><a href="@Url.Action("Details", new { id = room.Id })">Details</a></td>
+        </tr>
+    }
+    </tbody>
+</table>

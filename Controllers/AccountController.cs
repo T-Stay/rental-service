@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RentalService.Models;
@@ -26,28 +27,64 @@ namespace RentalService.Controllers
         public IActionResult Register() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Register(string email, string password, string name)
+        public async Task<IActionResult> Register(string email, string password, string name, string role)
         {
-            var user = new User
+            User user;
+            var userRoleEnum = UserRoleHelper.FromIdentityRoleString(role);
+            if (userRoleEnum == UserRole.Host)
             {
-                UserName = email,
-                Email = email,
-                Name = name,
-                AvatarUrl = "",
-                Role = UserRole.RegisteredCustomer,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow,
-                PhoneNumber = ""
-            };
+                user = new RentalService.Models.Host
+                {
+                    UserName = email,
+                    Email = email,
+                    Name = name,
+                    AvatarUrl = "",
+                    Role = userRoleEnum,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    PhoneNumber = "",
+                    Buildings = new List<Building>()
+                };
+            }
+            else
+            {
+                user = new Customer
+                {
+                    UserName = email,
+                    Email = email,
+                    Name = name,
+                    AvatarUrl = "",
+                    Role = userRoleEnum,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    PhoneNumber = "",
+                    Favorites = new List<Favorite>(),
+                    BookingRequests = new List<BookingRequest>(),
+                    ViewAppointments = new List<ViewAppointment>(),
+                    Reviews = new List<Review>(),
+                    Notifications = new List<Notification>()
+                };
+            }
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, "customer");
+                var identityRole = UserRoleHelper.ToIdentityRoleString(userRoleEnum);
+                await _userManager.AddToRoleAsync(user, identityRole);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code = code }, protocol: Request.Scheme) ?? string.Empty;
                 if (!string.IsNullOrEmpty(user.Email) && !string.IsNullOrEmpty(callbackUrl))
                 {
-                    SendEmail(user.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    // Improved email content for better deliverability
+                    var emailBody = $@"<html><body style='font-family:sans-serif;'>
+                        <h2>Welcome to Rental Service!</h2>
+                        <p>Hi {System.Net.WebUtility.HtmlEncode(user.Name)},</p>
+                        <p>Thank you for registering. Please confirm your account by clicking the button below:</p>
+                        <p><a href='{HtmlEncoder.Default.Encode(callbackUrl)}' style='background:#007bff;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;'>Confirm Email</a></p>
+                        <p>If you did not register, please ignore this email.</p>
+                        <hr>
+                        <p style='font-size:12px;color:#888;'>Rental Service Team</p>
+                    </body></html>";
+                    SendEmail(user.Email, "Confirm your email - Rental Service", emailBody);
                 }
                 ViewBag.Message = "Registration successful! Please check your email to confirm your account.";
                 return View();
@@ -73,9 +110,29 @@ namespace RentalService.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string email, string password)
         {
-            var result = await _signInManager.PasswordSignInAsync(email, password, false, false);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                return View();
+            }
+            var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
             if (result.Succeeded)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var identity = new System.Security.Claims.ClaimsIdentity("Identity.Application");
+                identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, user.Id.ToString()));
+                identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, user.UserName ?? user.Email ?? ""));
+                if (roles.Count > 0)
+                {
+                    identity.AddClaim(new System.Security.Claims.Claim("role", roles[0]));
+                    identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, roles[0]));
+                }
+                var principal = new System.Security.Claims.ClaimsPrincipal(identity);
+                await _signInManager.SignOutAsync();
+                await HttpContext.SignInAsync("Identity.Application", principal);
                 return RedirectToAction("Index", "Home");
+            }
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View();
         }
@@ -94,7 +151,7 @@ namespace RentalService.Controllers
         public async Task<IActionResult> ForgotPassword(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null )
+            if (user == null)
             {
                 // Don't reveal user not found or not confirmed
                 return RedirectToAction("ForgotPasswordConfirmation");
@@ -103,7 +160,17 @@ namespace RentalService.Controllers
             var callbackUrl = Url.Action("ResetPassword", "Account", new { code }, protocol: Request.Scheme) ?? string.Empty;
             if (!string.IsNullOrEmpty(user.Email) && !string.IsNullOrEmpty(callbackUrl))
             {
-                SendEmail(user.Email, "Reset Password", $"Reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                // Improved email content for better deliverability
+                var emailBody = $@"<html><body style='font-family:sans-serif;'>
+                    <h2>Password Reset Request</h2>
+                    <p>Hi {System.Net.WebUtility.HtmlEncode(user.Name)},</p>
+                    <p>We received a request to reset your password. Click the button below to reset it:</p>
+                    <p><a href='{HtmlEncoder.Default.Encode(callbackUrl)}' style='background:#28a745;color:#fff;padding:10px 20px;text-decoration:none;border-radius:5px;'>Reset Password</a></p>
+                    <p>If you did not request a password reset, you can safely ignore this email.</p>
+                    <hr>
+                    <p style='font-size:12px;color:#888;'>Rental Service Team</p>
+                </body></html>";
+                SendEmail(user.Email, "Reset your password - Rental Service", emailBody);
             }
             return RedirectToAction("ForgotPasswordConfirmation");
         }

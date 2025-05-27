@@ -1,0 +1,10 @@
+@model RentalService.Models.BookingRequest
+@{
+    ViewData["Title"] = "Booking Request Details";
+}
+<h2>Booking Request Details</h2>
+<p><strong>Room:</strong> @Model.RoomId</p>
+<p><strong>Message:</strong> @Model.Message</p>
+<p><strong>Status:</strong> @Model.Status</p>
+<p><strong>Created:</strong> @Model.CreatedAt</p>
+<a href="@Url.Action("Index")">Back to list</a>

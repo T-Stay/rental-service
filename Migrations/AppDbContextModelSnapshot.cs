@@ -292,6 +292,10 @@ namespace RentalService.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("User1Id");
+
+                    b.HasIndex("User2Id");
+
                     b.ToTable("ChatRooms");
                 });
 
@@ -520,9 +524,14 @@ namespace RentalService.Migrations
                     b.Property<Guid>("RoomId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("RoomId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RoomId");
+
+                    b.HasIndex("RoomId1");
 
                     b.ToTable("RoomImages");
                 });
@@ -742,165 +751,193 @@ namespace RentalService.Migrations
 
             modelBuilder.Entity("RentalService.Models.BookingRequest", b =>
                 {
-                    b.HasOne("RentalService.Models.Room", null)
-                        .WithMany()
+                    b.HasOne("RentalService.Models.Room", "Room")
+                        .WithMany("BookingRequests")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.Customer", null)
-                        .WithMany("Bookings")
+                    b.HasOne("RentalService.Models.User", "User")
+                        .WithMany("BookingRequests")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Room");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RentalService.Models.Building", b =>
                 {
-                    b.HasOne("RentalService.Models.Host", null)
+                    b.HasOne("RentalService.Models.Host", "Host")
                         .WithMany("Buildings")
                         .HasForeignKey("HostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Host");
+                });
+
+            modelBuilder.Entity("RentalService.Models.ChatRoom", b =>
+                {
+                    b.HasOne("RentalService.Models.User", "User1")
+                        .WithMany()
+                        .HasForeignKey("User1Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("RentalService.Models.User", "User2")
+                        .WithMany()
+                        .HasForeignKey("User2Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("RentalService.Models.Contract", b =>
                 {
-                    b.HasOne("RentalService.Models.BookingRequest", null)
+                    b.HasOne("RentalService.Models.BookingRequest", "BookingRequest")
                         .WithOne()
                         .HasForeignKey("RentalService.Models.Contract", "BookingRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("BookingRequest");
                 });
 
             modelBuilder.Entity("RentalService.Models.Favorite", b =>
                 {
-                    b.HasOne("RentalService.Models.Room", null)
-                        .WithMany()
+                    b.HasOne("RentalService.Models.Room", "Room")
+                        .WithMany("Favorites")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.Customer", null)
+                    b.HasOne("RentalService.Models.User", "User")
                         .WithMany("Favorites")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("RentalService.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Navigation("Room");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RentalService.Models.Message", b =>
                 {
-                    b.HasOne("RentalService.Models.ChatRoom", null)
+                    b.HasOne("RentalService.Models.ChatRoom", "ChatRoom")
                         .WithMany("Messages")
                         .HasForeignKey("ChatRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.User", null)
+                    b.HasOne("RentalService.Models.User", "Sender")
                         .WithMany()
                         .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("RentalService.Models.Notification", b =>
                 {
-                    b.HasOne("RentalService.Models.Customer", null)
+                    b.HasOne("RentalService.Models.User", "User")
                         .WithMany("Notifications")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RentalService.Models.Report", b =>
                 {
-                    b.HasOne("RentalService.Models.User", null)
-                        .WithMany()
+                    b.HasOne("RentalService.Models.User", "Reporter")
+                        .WithMany("ReportsFiled")
                         .HasForeignKey("ReportedBy")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.User", null)
-                        .WithMany()
+                    b.HasOne("RentalService.Models.User", "Reported")
+                        .WithMany("ReportsAgainst")
                         .HasForeignKey("ReportedUser")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Reported");
+
+                    b.Navigation("Reporter");
                 });
 
             modelBuilder.Entity("RentalService.Models.Review", b =>
                 {
-                    b.HasOne("RentalService.Models.Room", null)
-                        .WithMany()
+                    b.HasOne("RentalService.Models.Room", "Room")
+                        .WithMany("Reviews")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.Customer", null)
+                    b.HasOne("RentalService.Models.User", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("Room");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RentalService.Models.Room", b =>
                 {
-                    b.HasOne("RentalService.Models.Building", null)
+                    b.HasOne("RentalService.Models.Building", "Building")
                         .WithMany("Rooms")
                         .HasForeignKey("BuildingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Building");
                 });
 
             modelBuilder.Entity("RentalService.Models.RoomImage", b =>
                 {
-                    b.HasOne("RentalService.Models.Room", null)
-                        .WithMany("Images")
+                    b.HasOne("RentalService.Models.Room", "Room")
+                        .WithMany("RoomImages")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("RentalService.Models.Room", null)
+                        .WithMany("Images")
+                        .HasForeignKey("RoomId1");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("RentalService.Models.ViewAppointment", b =>
                 {
-                    b.HasOne("RentalService.Models.Room", null)
-                        .WithMany()
+                    b.HasOne("RentalService.Models.Room", "Room")
+                        .WithMany("ViewAppointments")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.Customer", null)
+                    b.HasOne("RentalService.Models.User", "User")
                         .WithMany("ViewAppointments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("RentalService.Models.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("Room");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("RentalService.Models.Building", b =>
@@ -915,16 +952,30 @@ namespace RentalService.Migrations
 
             modelBuilder.Entity("RentalService.Models.Room", b =>
                 {
+                    b.Navigation("BookingRequests");
+
+                    b.Navigation("Favorites");
+
                     b.Navigation("Images");
+
+                    b.Navigation("Reviews");
+
+                    b.Navigation("RoomImages");
+
+                    b.Navigation("ViewAppointments");
                 });
 
-            modelBuilder.Entity("RentalService.Models.Customer", b =>
+            modelBuilder.Entity("RentalService.Models.User", b =>
                 {
-                    b.Navigation("Bookings");
+                    b.Navigation("BookingRequests");
 
                     b.Navigation("Favorites");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("ReportsAgainst");
+
+                    b.Navigation("ReportsFiled");
 
                     b.Navigation("Reviews");
 

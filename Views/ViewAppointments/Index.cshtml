@@ -1,0 +1,24 @@
+@model IEnumerable<RentalService.Models.ViewAppointment>
+@{
+    ViewData["Title"] = "My View Appointments";
+}
+<h2>My View Appointments</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Time</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var appt in Model)
+    {
+        <tr>
+            <td>@appt.RoomId</td>
+            <td>@appt.AppointmentTime</td>
+            <td>@appt.Status</td>
+        </tr>
+    }
+    </tbody>
+</table>
