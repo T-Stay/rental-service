@@ -19,10 +19,10 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore rental-service.sln
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build rental-service.sln --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test rental-service.sln --no-build --verbosity normal
