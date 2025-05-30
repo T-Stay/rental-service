@@ -1,0 +1,21 @@
+@model RentalService.Models.Room
+@if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
+{
+    <form asp-controller="Reviews" asp-action="Create" method="post">
+        <input type="hidden" name="roomId" value="@Model.Id" />
+        <div class="mb-2">
+            <label>Rating</label>
+            <select name="rating" class="form-select">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <option value="@i">@i</option>
+                }
+            </select>
+        </div>
+        <div class="mb-2">
+            <label>Comment</label>
+            <textarea name="comment" class="form-control"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
+    </form>
+}

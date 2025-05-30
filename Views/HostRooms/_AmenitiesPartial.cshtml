@@ -1,0 +1,16 @@
+@model List<RentalService.Models.Amenity>
+@{
+    var selectedAmenities = ViewBag.SelectedAmenities as List<Guid> ?? new List<Guid>();
+}
+<div>
+    <label>Amenities</label>
+    <div>
+        @foreach (var amenity in Model)
+        {
+            <label class="form-check-label me-2">
+                <input type="checkbox" name="AmenityIds" value="@amenity.Id" class="form-check-input" @(selectedAmenities.Contains(amenity.Id) ? "checked" : "") />
+                @amenity.Name
+            </label>
+        }
+    </div>
+</div>

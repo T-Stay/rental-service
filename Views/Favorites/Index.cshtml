@@ -1,0 +1,26 @@
+@model IEnumerable<RentalService.Models.Favorite>
+@{
+    ViewData["Title"] = "My Favorites";
+}
+<h2>My Favorite Rooms</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Building</th>
+            <th>Price</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var fav in Model)
+    {
+        <tr>
+            <td>@fav.Room?.Name</td>
+            <td>@fav.Room?.Building?.Name</td>
+            <td>@fav.Room?.Price</td>
+            <td><a href="@Url.Action("Details", "Rooms", new { id = fav.RoomId })">Details</a></td>
+        </tr>
+    }
+    </tbody>
+</table>

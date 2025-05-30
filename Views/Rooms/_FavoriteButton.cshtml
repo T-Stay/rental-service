@@ -1,0 +1,21 @@
+@model RentalService.Models.Room
+@{
+    var isFavorite = ViewBag.IsFavorite as bool? ?? false;
+}
+@if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
+{
+    if (isFavorite)
+    {
+        <form asp-controller="Favorites" asp-action="Remove" method="post" style="display:inline">
+            <input type="hidden" name="roomId" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger btn-sm">Remove Favorite</button>
+        </form>
+    }
+    else
+    {
+        <form asp-controller="Favorites" asp-action="Add" method="post" style="display:inline">
+            <input type="hidden" name="roomId" value="@Model.Id" />
+            <button type="submit" class="btn btn-outline-primary btn-sm">Add to Favorites</button>
+        </form>
+    }
+}

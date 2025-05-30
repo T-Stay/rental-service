@@ -40,8 +40,21 @@ namespace RentalService.Controllers
                 .Include(r => r.Images)
                 .Include(r => r.Amenities)
                 .Include(r => r.Building)
+                .Include(r => r.Reviews)
+                    .ThenInclude(review => review.User)
                 .FirstOrDefaultAsync(r => r.Id == id);
             if (room == null) return NotFound();
+            // Check if current user has favorited this room
+            bool isFavorite = false;
+            if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
+            {
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    isFavorite = await _context.Favorites.AnyAsync(f => f.UserId.ToString() == userId && f.RoomId == id);
+                }
+            }
+            ViewBag.IsFavorite = isFavorite;
             return View(room);
         }
     }

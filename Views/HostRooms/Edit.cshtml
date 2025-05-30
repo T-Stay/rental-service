@@ -5,7 +5,7 @@
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
 }
 <h2>Edit Room</h2>
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
     <div>
         <label>Building</label>
@@ -38,6 +38,16 @@
     <div>
         <label>Price</label>
         <input asp-for="Price" type="number" />
+    </div>
+    @await Html.PartialAsync("_AmenitiesPartial", ViewBag.AllAmenities as List<RentalService.Models.Amenity>)
+    @await Html.PartialAsync("_RoomImagesPartial", Model.Images as List<RentalService.Models.RoomImage>)
+    <div>
+        <label>Status</label>
+        <select asp-for="Status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Hidden">Hidden</option>
+        </select>
     </div>
     <button type="submit">Save</button>
 </form>

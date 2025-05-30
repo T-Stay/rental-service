@@ -5,7 +5,7 @@
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
 }
 <h2>Post New Room</h2>
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" enctype="multipart/form-data">
     <div>
         <label>Building</label>
         <select asp-for="BuildingId">
@@ -38,6 +38,8 @@
         <label>Price</label>
         <input asp-for="Price" type="number" />
     </div>
+    @await Html.PartialAsync("_AmenitiesPartial", ViewBag.AllAmenities as List<RentalService.Models.Amenity>)
+    @await Html.PartialAsync("_RoomImagesPartial", Model.Images as List<RentalService.Models.RoomImage>)
     <button type="submit">Create</button>
 </form>
 <a href="@Url.Action("Index", new { buildingId = selectedBuildingId })">Back to list</a>

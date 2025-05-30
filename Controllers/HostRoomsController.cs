@@ -39,6 +39,8 @@ namespace RentalService.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
             ViewBag.SelectedBuildingId = buildingId;
+            ViewBag.AllAmenities = await _context.Amenities.ToListAsync();
+            ViewBag.SelectedAmenities = new List<Guid>();
             return View();
         }
 
@@ -47,6 +49,13 @@ namespace RentalService.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Room room)
         {
+            // Handle amenities
+            var amenityIds = Request.Form["AmenityIds"].ToList();
+            if (amenityIds.Any())
+            {
+                room.Amenities = await _context.Amenities.Where(a => amenityIds.Contains(a.Id.ToString())).ToListAsync();
+            }
+            // TODO: Handle image upload and save RoomImages
             if (ModelState.IsValid)
             {
                 room.Id = Guid.NewGuid();
@@ -58,17 +67,21 @@ namespace RentalService.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
             ViewBag.SelectedBuildingId = room.BuildingId;
+            ViewBag.AllAmenities = await _context.Amenities.ToListAsync();
+            ViewBag.SelectedAmenities = amenityIds.Where(x => !string.IsNullOrEmpty(x)).Select(x => Guid.Parse(x!)).ToList();
             return View(room);
         }
 
         // GET: /HostRooms/Edit/{id}
         public async Task<IActionResult> Edit(Guid id)
         {
-            var room = await _context.Rooms.FindAsync(id);
+            var room = await _context.Rooms.Include(r => r.Amenities).Include(r => r.RoomImages).FirstOrDefaultAsync(r => r.Id == id);
             if (room == null) return NotFound();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
             ViewBag.SelectedBuildingId = room.BuildingId;
+            ViewBag.AllAmenities = await _context.Amenities.ToListAsync();
+            ViewBag.SelectedAmenities = room.Amenities?.Select(a => a.Id).ToList() ?? new List<Guid>();
             return View(room);
         }
 
@@ -78,6 +91,13 @@ namespace RentalService.Controllers
         public async Task<IActionResult> Edit(Guid id, Room room)
         {
             if (id != room.Id) return NotFound();
+            // Handle amenities
+            var amenityIds = Request.Form["AmenityIds"].ToList();
+            if (amenityIds.Any())
+            {
+                room.Amenities = await _context.Amenities.Where(a => amenityIds.Contains(a.Id.ToString())).ToListAsync();
+            }
+            // TODO: Handle image upload and save RoomImages
             if (ModelState.IsValid)
             {
                 room.UpdatedAt = DateTime.UtcNow;
@@ -88,6 +108,8 @@ namespace RentalService.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             ViewBag.Buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
             ViewBag.SelectedBuildingId = room.BuildingId;
+            ViewBag.AllAmenities = await _context.Amenities.ToListAsync();
+            ViewBag.SelectedAmenities = amenityIds.Where(x => !string.IsNullOrEmpty(x)).Select(x => Guid.Parse(x!)).ToList();
             return View(room);
         }
 
@@ -111,6 +133,22 @@ namespace RentalService.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        // POST: /HostRooms/SetStatus
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetStatus(Guid id, string status)
+        {
+            var room = await _context.Rooms.FindAsync(id);
+            if (room == null) return NotFound();
+            if (Enum.TryParse<RoomStatus>(status, out var newStatus))
+            {
+                room.Status = newStatus;
+                room.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index), new { buildingId = room?.BuildingId });
         }
     }
 }

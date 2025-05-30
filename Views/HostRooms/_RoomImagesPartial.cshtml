@@ -1,0 +1,14 @@
+@model List<RentalService.Models.RoomImage>
+<div>
+    <label>Room Images</label>
+    <div>
+        @if (Model != null && Model.Count > 0)
+        {
+            foreach (var img in Model)
+            {
+                <img src="@img.ImageUrl" alt="Room Image" style="max-width:100px; margin:5px;" />
+            }
+        }
+        <input type="file" name="RoomImages" multiple />
+    </div>
+</div>

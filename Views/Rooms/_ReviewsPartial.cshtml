@@ -1,0 +1,15 @@
+@model IEnumerable<RentalService.Models.Review>
+@if (Model != null && Model.Any())
+{
+    <h4>Reviews</h4>
+    <ul class="list-group mb-3">
+        @foreach (var review in Model)
+        {
+            <li class="list-group-item">
+                <strong>@review.User?.Name</strong> - <span>@review.Rating</span>/5<br />
+                <span>@review.Comment</span><br />
+                <small>@review.CreatedAt.ToShortDateString()</small>
+            </li>
+        }
+    </ul>
+}
