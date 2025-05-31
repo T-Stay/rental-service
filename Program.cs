@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RentalService.Data;
 using RentalService.Models;
 using dotenv.net;
+using Pomelo.EntityFrameworkCore.MySql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,7 @@ var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddIdentity<User, IdentityRole<Guid>>(options =>
 {
     options.Password.RequireDigit = false;
@@ -40,7 +41,7 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-    string[] roles = new[] { "customer", "host", "admin", "consultant", "guest" };
+    string[] roles = ["customer", "host", "admin", "consultant", "guest"];
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
@@ -73,6 +74,27 @@ using (var scope = app.Services.CreateScope())
                 await userManager.AddToRoleAsync(adminUser, UserRoleHelper.ToIdentityRoleString(UserRole.Admin));
             }
         }
+    }
+
+    // Seed amenities if empty
+    if (!scope.ServiceProvider.GetRequiredService<AppDbContext>().Amenities.Any())
+    {
+        var amenities = new[]
+        {
+            new Amenity { Id = Guid.NewGuid(), Name = "WiFi" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Air Conditioning" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Heating" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Kitchen" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Washer" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Dryer" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Free Parking" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Pool" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Gym" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Pet Friendly" }
+        };
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Amenities.AddRange(amenities);
+        await db.SaveChangesAsync();
     }
 }
 
