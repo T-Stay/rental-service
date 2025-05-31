@@ -1,0 +1,14 @@
+bin/
+obj/
+*.md
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+Dockerfile
+*.db
+*.sqlite
+*.log
+Properties/launchSettings.json
+wwwroot/lib/
