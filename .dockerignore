@@ -11,4 +11,4 @@ Dockerfile
 *.sqlite
 *.log
 Properties/launchSettings.json
-wwwroot/lib/
+# wwwroot/lib/ (commented out to allow static files in Docker)
