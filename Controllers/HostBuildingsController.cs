@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using RentalService.Data;
 using RentalService.Models;
 using System;
@@ -14,20 +15,31 @@ namespace RentalService.Controllers
     public class HostBuildingsController : Controller
     {
         private readonly AppDbContext _context;
-        public HostBuildingsController(AppDbContext context)
+        private readonly ILogger<HostBuildingsController> _logger;
+        public HostBuildingsController(AppDbContext context, ILogger<HostBuildingsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: /HostBuildings
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var buildings = await _context.Buildings
-                .Where(b => b.HostId.ToString() == userId)
-                .Include(b => b.Rooms)
-                .ToListAsync();
-            return View(buildings);
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var buildings = await _context.Buildings
+                    .Where(b => b.HostId.ToString() == userId)
+                    .Include(b => b.Rooms)
+                    .ToListAsync();
+                return View(buildings);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading buildings for user {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
+                ViewBag.Error = "An error occurred loading your buildings. Please try again later.";
+                return View(new List<Building>());
+            }
         }
 
         // GET: /HostBuildings/Create
@@ -38,35 +50,58 @@ namespace RentalService.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Building building)
         {
-            // log the incoming building data
-            Console.WriteLine($"Creating building: {building.Name}, Address: {building.Address}, Description: {building.Description}, Location: {building.Location}");
-            if (ModelState.IsValid)
+            try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                building.Id = Guid.NewGuid();
-                building.HostId = Guid.Parse(userId);
-                building.CreatedAt = building.UpdatedAt = DateTime.UtcNow;
-                _context.Buildings.Add(building);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            else 
-            {
-                // log the model state errors
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                // log the incoming building data
+                Console.WriteLine($"Creating building: {building.Name}, Address: {building.Address}, Description: {building.Description}, Location: {building.Location}");
+                if (ModelState.IsValid)
                 {
-                    Console.WriteLine($"Model error: {error.ErrorMessage}");
+                    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (string.IsNullOrEmpty(userId))
+                    {
+                        ViewBag.Error = "User not found.";
+                        return View(building);
+                    }
+                    building.Id = Guid.NewGuid();
+                    building.HostId = Guid.Parse(userId);
+                    building.CreatedAt = building.UpdatedAt = DateTime.UtcNow;
+                    _context.Buildings.Add(building);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
+                else 
+                {
+                    // log the model state errors
+                    foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        Console.WriteLine($"Model error: {error.ErrorMessage}");
+                    }
+                }
+                return View(building);
             }
-            return View(building);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating building for user {UserId}", User.FindFirstValue(ClaimTypes.NameIdentifier));
+                ViewBag.Error = "An error occurred while creating the building. Please try again later.";
+                return View(building);
+            }
         }
 
         // GET: /HostBuildings/Edit/{id}
         public async Task<IActionResult> Edit(Guid id)
         {
-            var building = await _context.Buildings.FindAsync(id);
-            if (building == null) return NotFound();
-            return View(building);
+            try
+            {
+                var building = await _context.Buildings.FindAsync(id);
+                if (building == null) return NotFound();
+                return View(building);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading building edit for building {BuildingId}", id);
+                ViewBag.Error = "An error occurred loading the building. Please try again later.";
+                return RedirectToAction("Index");
+            }
         }
 
         // POST: /HostBuildings/Edit/{id}
@@ -75,22 +110,40 @@ namespace RentalService.Controllers
         public async Task<IActionResult> Edit(Guid id, Building building)
         {
             if (id != building.Id) return NotFound();
-            if (ModelState.IsValid)
+            try
             {
-                building.UpdatedAt = DateTime.UtcNow;
-                _context.Update(building);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    building.UpdatedAt = DateTime.UtcNow;
+                    _context.Update(building);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(building);
             }
-            return View(building);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error editing building {BuildingId}", id);
+                ViewBag.Error = "An error occurred while editing the building. Please try again later.";
+                return View(building);
+            }
         }
 
         // GET: /HostBuildings/Delete/{id}
         public async Task<IActionResult> Delete(Guid id)
         {
-            var building = await _context.Buildings.FindAsync(id);
-            if (building == null) return NotFound();
-            return View(building);
+            try
+            {
+                var building = await _context.Buildings.FindAsync(id);
+                if (building == null) return NotFound();
+                return View(building);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting building {BuildingId}", id);
+                ViewBag.Error = "An error occurred while deleting the building. Please try again later.";
+                return RedirectToAction("Index");
+            }
         }
 
         // POST: /HostBuildings/Delete/{id}
@@ -98,13 +151,21 @@ namespace RentalService.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var building = await _context.Buildings.FindAsync(id);
-            if (building != null)
+            try
             {
-                _context.Buildings.Remove(building);
-                await _context.SaveChangesAsync();
+                var building = await _context.Buildings.FindAsync(id);
+                if (building != null)
+                {
+                    _context.Buildings.Remove(building);
+                    await _context.SaveChangesAsync();
+                }
+                return RedirectToAction(nameof(Index));
             }
-            return RedirectToAction(nameof(Index));
+            catch (Exception)
+            {
+                ViewBag.Error = "An error occurred while deleting the building. Please try again later.";
+                return RedirectToAction(nameof(Index));
+            }
         }
     }
 }

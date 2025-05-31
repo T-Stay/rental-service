@@ -3,66 +3,79 @@
     ViewData["Title"] = "My Rooms";
     var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
+    var error = ViewBag.Error as string;
 }
-<h2>My Rooms</h2>
-<form method="get">
-    <label>Building:</label>
-    <select name="buildingId" onchange="this.form.submit()">
-        <option value="">All</option>
-        @if (buildings != null)
-        {
-            foreach (var b in buildings)
+<div class="container mt-4">
+    <h2>My Rooms</h2>
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    <form method="get" class="mb-3">
+        <label>Building:</label>
+        <select name="buildingId" onchange="this.form.submit()" class="form-select d-inline w-auto ms-2">
+            <option value="">All</option>
+            @if (buildings != null)
             {
-                if (selectedBuildingId == b.Id)
+                foreach (var b in buildings)
                 {
-                    <option value="@b.Id" selected>@b.Name</option>
-                }
-                else
-                {
-                    <option value="@b.Id">@b.Name</option>
+                    if (selectedBuildingId == b.Id)
+                    {
+                        <option value="@b.Id" selected>@b.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@b.Id">@b.Name</option>
+                    }
                 }
             }
+        </select>
+        <a href="@Url.Action("Create", new { buildingId = selectedBuildingId })" class="btn btn-success ms-3">Post New Room</a>
+    </form>
+    <table class="table table-hover table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Building</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var room in Model)
+        {
+            <tr>
+                <td>@room.Name</td>
+                <td>@room.Building?.Name</td>
+                <td>@room.Price.ToString("C0")</td>
+                <td>@room.Status</td>
+                <td>
+                    <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm me-1" title="View Details">
+                        Details
+                    </a>
+                    <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Delete</a>
+                    @if (room.Status == RentalService.Models.RoomStatus.Active)
+                    {
+                        <form asp-action="SetStatus" method="post" style="display:inline">
+                            <input type="hidden" name="id" value="@room.Id" />
+                            <input type="hidden" name="status" value="Inactive" />
+                            <button type="submit" class="btn btn-warning btn-sm">Hide</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="SetStatus" method="post" style="display:inline">
+                            <input type="hidden" name="id" value="@room.Id" />
+                            <input type="hidden" name="status" value="Active" />
+                            <button type="submit" class="btn btn-success btn-sm">Show</button>
+                        </form>
+                    }
+                </td>
+            </tr>
         }
-    </select>
-</form>
-<a href="@Url.Action("Create", new { buildingId = selectedBuildingId })">Post New Room</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Building</th>
-            <th>Price</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var room in Model)
-    {
-        <tr>
-            <td>@room.Name</td>
-            <td>@room.Building?.Name</td>
-            <td>@room.Price</td>
-            <td>
-                <a href="@Url.Action("Edit", new { id = room.Id })">Edit</a> |
-                <a href="@Url.Action("Delete", new { id = room.Id })">Delete</a> |
-                @if (room.Status == RentalService.Models.RoomStatus.Active)
-                {
-                    <form asp-action="SetStatus" method="post" style="display:inline">
-                        <input type="hidden" name="id" value="@room.Id" />
-                        <input type="hidden" name="status" value="Inactive" />
-                        <button type="submit" class="btn btn-warning btn-sm">Hide</button>
-                    </form>
-                }
-                else
-                {
-                    <form asp-action="SetStatus" method="post" style="display:inline">
-                        <input type="hidden" name="id" value="@room.Id" />
-                        <input type="hidden" name="status" value="Active" />
-                        <button type="submit" class="btn btn-success btn-sm">Show</button>
-                    </form>
-                }
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+        </tbody>
+    </table>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Back to Dashboard</a>
+</div>

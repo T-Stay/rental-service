@@ -1,11 +1,18 @@
 @model RentalService.Models.Room
 @{
     ViewData["Title"] = "Delete Room";
+    var error = ViewBag.Error as string;
 }
-<h2>Delete Room</h2>
-<p>Are you sure you want to delete <strong>@Model.Name</strong>?</p>
-<form asp-action="DeleteConfirmed" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit">Delete</button>
-    <a href="@Url.Action("Index")">Cancel</a>
-</form>
+<div class="container mt-4">
+    <h2>Delete Room</h2>
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    <p>Are you sure you want to delete <strong>@Model.Name</strong>?</p>
+    <form asp-action="DeleteConfirmed" method="post" class="d-inline">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+    <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Cancel</a>
+</div>

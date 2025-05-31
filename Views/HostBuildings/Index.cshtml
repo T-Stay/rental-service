@@ -1,32 +1,41 @@
 @model IEnumerable<RentalService.Models.Building>
 @{
     ViewData["Title"] = "My Buildings";
+    var error = ViewBag.Error as string;
 }
-<h2>My Buildings</h2>
-<a href="@Url.Action("Create")">Add New Building</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Description</th>
-            <th>Rooms</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var building in Model)
+<div class="container mt-4">
+    <h2>My Buildings</h2>
+    @if (!string.IsNullOrEmpty(error))
     {
-        <tr>
-            <td>@building.Name</td>
-            <td>@building.Address</td>
-            <td>@building.Description</td>
-            <td>@(building.Rooms?.Count ?? 0)</td>
-            <td>
-                <a href="@Url.Action("Edit", new { id = building.Id })">Edit</a> |
-                <a href="@Url.Action("Delete", new { id = building.Id })">Delete</a>
-            </td>
-        </tr>
+        <div class="alert alert-danger">@error</div>
     }
-    </tbody>
-</table>
+    <a href="@Url.Action("Create")" class="btn btn-success mb-3">Add New Building</a>
+    <table class="table table-hover table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Description</th>
+                <th>Rooms</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var building in Model)
+        {
+            <tr>
+                <td>@building.Name</td>
+                <td>@building.Address</td>
+                <td>@building.Description</td>
+                <td>@(building.Rooms?.Count ?? 0)</td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = building.Id })" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="@Url.Action("Delete", new { id = building.Id })" class="btn btn-danger btn-sm">Delete</a>
+                    <a href="@Url.Action("Index", "HostRooms", new { buildingId = building.Id })" class="btn btn-secondary btn-sm">View Rooms</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Back to Dashboard</a>
+</div>
