@@ -34,3 +34,10 @@ jobs:
             ghcr.io/t-stay/rental-service:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
+
+      - name: Trigger Render Deploy Webhook
+        run: |
+          curl -X POST "$RENDER_DEPLOY_WEBHOOK"
+        env:
+          RENDER_DEPLOY_WEBHOOK: ${{ secrets.RENDER_DEPLOY_WEBHOOK }}
+          CI: true
