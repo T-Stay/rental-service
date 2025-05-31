@@ -1,4 +1,3 @@
-# GitHub Actions workflow to build and push Docker image
 name: Build and Push Docker Image
 
 on:
