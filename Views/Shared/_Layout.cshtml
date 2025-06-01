@@ -7,91 +7,133 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <!-- Removed old _.styles.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        .main-header-bar {
+            background: linear-gradient(90deg, #1b6ec2 0%, #0077cc 100%);
+            color: #fff;
+            padding: 0.5rem 0;
+            margin-bottom: 0;
+        }
+        .main-header-bar .navbar-brand {
+            color: #fff !important;
+        }
+        .main-header-bar .nav-link.active, .main-header-bar .nav-link[aria-current="page"] {
+            background: rgba(255,255,255,0.15);
+            border-radius: 0.5rem;
+            color: #fff !important;
+            font-weight: bold;
+        }
+        .main-header-bar .nav-link {
+            color: #e3e3e3 !important;
+            margin-right: 0.5rem;
+        }
+        .main-header-bar .nav-link:hover {
+            color: #fff !important;
+        }
+        .page-header {
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 1.5rem 0 1rem 0;
+            margin-bottom: 2rem;
+        }
+        .footer {
+            background: #f8fafc;
+            text-align: center;
+            padding: 1rem 0;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg main-header-bar shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">T-Stay</a>
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa-solid fa-house-chimney"></i> T-Stay</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav nav nav-pills me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Rooms" asp-action="Index">Rooms</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")" asp-controller="Rooms" asp-action="Index">Rooms</a>
                         </li>
-                        @* Only show Bookings for customers *@
-                        @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
+                        @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="BookingRequests" asp-action="Index">Bookings</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="ViewAppointments" asp-action="Index">Appointments</a>
-                            </li>
-                        }
-                        @* Only show My Buildings and My Rooms for hosts *@
-                        @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "host"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="HostBuildings" asp-action="Index">My Buildings</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="HostRooms" asp-action="Index">My Rooms</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="ViewAppointments" asp-action="HostRoomAppointments">Host Room Appointments</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="HostDashboard" asp-action="Index">Host Dashboard</a>
-                            </li>
-                        }
-                        @* Only show Admin for admins *@
-                        @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-danger" asp-controller="Admin" asp-action="Index">Admin</a>
-                            </li>
+                            var role = User.FindFirst("role")?.Value ?? "user";
+                            if (role == "customer")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "BookingRequests" ? "active" : "")" asp-controller="BookingRequests" asp-action="Index">Bookings</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-controller="ViewAppointments" asp-action="Index">Appointments</a>
+                                </li>
+                            }
+                            else if (role == "host")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" ? "active" : "")" asp-controller="HostBuildings" asp-action="Index">My Buildings</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")" asp-controller="HostRooms" asp-action="Index">My Rooms</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")" asp-controller="ViewAppointments" asp-action="HostRoomAppointments">Room Appointments</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" asp-controller="HostDashboard" asp-action="Index">Dashboard</a>
+                                </li>
+                            }
+                            else if (role == "admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">Admin</a>
+                                </li>
+                            }
                         }
                     </ul>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav nav nav-pills">
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
                             var role = User.FindFirst("role")?.Value ?? "User";
                             <li class="nav-item">
-                                <span class="nav-link">Hello, @User.Identity.Name (@role)</span>
+                                <span class="nav-link disabled"><i class="fa-solid fa-user"></i> @User.Identity.Name (@role)</span>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                    <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0;">Logout</button>
+                                    <button type="submit" class="nav-link btn btn-link text-white" style="display:inline; padding:0;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                                 </form>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Login" ? "active" : "")" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Register" ? "active" : "")" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
                     </ul>
                 </div>
             </div>
         </nav>
+        <div class="page-header text-center">
+            <h1 class="fw-bold mb-0">@ViewData["Title"]</h1>
+        </div>
     </header>
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-    <footer class="border-top footer text-muted mt-4">
+    <footer class="footer mt-4">
         <div class="container">
             &copy; 2025 - T-Stay - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
