@@ -9,7 +9,7 @@
         <div class="card-body">
             <h5 class="card-title">@room.Name</h5>
             <p class="card-text"><strong>Location:</strong> @room.Building?.Location</p>
-            <p class="card-text"><strong>Price:</strong> @room.Price</p>
+            <p class="card-text"><strong>Price:</strong> @room.Price.ToString("N0") ₫</p>
             <p class="card-text"><strong>Description:</strong> @room.Description</p>
         </div>
     </div>

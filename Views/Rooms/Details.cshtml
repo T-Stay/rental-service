@@ -18,7 +18,7 @@
                 }
             </div>
             <div class="mb-2 text-muted"><i class="fa-solid fa-location-dot"></i> @Model.Building?.Location</div>
-            <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("C0")</div>
+            <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("N0") ₫</div>
             <div class="mb-3">@Model.Description</div>
             @if (Model.Amenities != null && Model.Amenities.Count > 0)
             {

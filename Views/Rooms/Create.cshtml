@@ -17,8 +17,8 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="Price" class="form-label">Price per night</label>
-                <input asp-for="Price" class="form-control" placeholder="0.00" />
+                <label asp-for="Price" class="form-label">Price per night (VND)</label>
+                <input asp-for="Price" class="form-control" placeholder="0" step="1" min="0" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">

@@ -33,6 +33,9 @@
             }
         </p>
         <p><strong>Created:</strong> @Model.CreatedAt</p>
+        @if (Model.Room != null) {
+            <p><strong>Price:</strong> @Model.Room.Price.ToString("N0") ₫</p>
+        }
         @if (Model.Room != null && Model.Room.Building != null && Model.Room.Building.Host != null && Model.Room.Building.Host.ContactInformations != null && Model.Room.Building.Host.ContactInformations.Count > 0)
         {
             <div class="mt-3">

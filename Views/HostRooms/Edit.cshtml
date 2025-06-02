@@ -38,8 +38,8 @@
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Price" class="form-label">Price</label>
-                <input asp-for="Price" type="number" class="form-control" placeholder="0.00" />
+                <label asp-for="Price" class="form-label">Price (VND)</label>
+                <input asp-for="Price" type="number" class="form-control" placeholder="0" step="1" min="0" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             @await Html.PartialAsync("_AmenitiesPartial", ViewBag.AllAmenities as List<RentalService.Models.Amenity>)
