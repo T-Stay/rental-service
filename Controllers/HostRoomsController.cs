@@ -301,18 +301,47 @@ namespace RentalService.Controllers
         {
             try
             {
-                var room = await _context.Rooms.FindAsync(id);
+                var room = await _context.Rooms
+                    .Include(r => r.BookingRequests)
+                    .Include(r => r.RoomImages)
+                    .Include(r => r.Images)
+                    .FirstOrDefaultAsync(r => r.Id == id);
                 if (room != null)
                 {
+                    if (room.BookingRequests != null && room.BookingRequests.Any())
+                    {
+                        TempData["ToastError"] = "Cannot delete room with existing booking requests.";
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    // Delete all related S3 images (RoomImages and Images)
+                    var allImages = new List<RoomImage>();
+                    if (room.RoomImages != null)
+                        allImages.AddRange(room.RoomImages);
+                    if (room.Images != null)
+                        allImages.AddRange(room.Images);
+                    foreach (var img in allImages)
+                    {
+                        if (!string.IsNullOrEmpty(img.ImageUrl))
+                        {
+                            var key = img.ImageUrl.Split(new[] { ".amazonaws.com/" }, StringSplitOptions.None).LastOrDefault();
+                            if (!string.IsNullOrEmpty(key))
+                            {
+                                await _s3Service.DeleteFileAsync(key);
+                            }
+                        }
+                    }
+
                     _context.Rooms.Remove(room);
                     await _context.SaveChangesAsync();
+                    TempData["ToastSuccess"] = "Room deleted successfully.";
                 }
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting room {RoomId}", id);
-                ViewBag.Error = "An error occurred while deleting the room. Please try again later.";
+                TempData["ToastError"] = "An error occurred while deleting the room. Please try again later.";
                 return RedirectToAction(nameof(Index));
             }
         }

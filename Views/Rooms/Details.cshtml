@@ -78,24 +78,24 @@
                 @if (Model.RoomImages != null && Model.RoomImages.Count > 0)
                 {
                     <div id="mainRoomImage" class="mb-2">
-                        <img src="@Model.RoomImages[0].ImageUrl" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image" />
+                        <img src="@Model.RoomImages[0].ImageUrl" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                     </div>
                     <div class="d-flex flex-row flex-wrap gap-2">
                         @for (int i = 0; i < Model.RoomImages.Count; i++)
                         {
-                            <img src="@Model.RoomImages[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.RoomImages[i].ImageUrl', this)" alt="Room Thumbnail" />
+                            <img src="@Model.RoomImages[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.RoomImages[i].ImageUrl', this)" alt="Room Thumbnail" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         }
                     </div>
                 }
                 else if (Model.Images != null && Model.Images.Count > 0)
                 {
                     <div id="mainRoomImage" class="mb-2">
-                        <img src="@Model.Images[0].ImageUrl" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image" />
+                        <img src="@Model.Images[0].ImageUrl" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                     </div>
                     <div class="d-flex flex-row flex-wrap gap-2">
                         @for (int i = 0; i < Model.Images.Count; i++)
                         {
-                            <img src="@Model.Images[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.Images[i].ImageUrl', this)" alt="Room Thumbnail" />
+                            <img src="@Model.Images[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.Images[i].ImageUrl', this)" alt="Room Thumbnail" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         }
                     </div>
                 }

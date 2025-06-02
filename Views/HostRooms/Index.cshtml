@@ -13,6 +13,14 @@
     {
         <div class="alert alert-danger">@error</div>
     }
+    @if (TempData["ToastError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ToastError"]</div>
+    }
+    @if (TempData["ToastSuccess"] != null)
+    {
+        <div class="alert alert-success">@TempData["ToastSuccess"]</div>
+    }
     <form method="get" class="mb-3">
         <label>Building:</label>
         <select name="buildingId" onchange="this.form.submit()" class="form-select d-inline w-auto ms-2">
@@ -41,11 +49,11 @@
             <div class="room-card h-100">
                 @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
                 {
-                    <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                    <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                 }
                 else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
                 {
-                    <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                    <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                 }
                 else
                 {

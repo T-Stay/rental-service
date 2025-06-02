@@ -19,12 +19,21 @@
                 <div class="mb-3"><strong>Amenities:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
             }
             <div class="d-flex flex-wrap gap-2 mb-3 mt-3">
-                <a href="@Url.Action("Index", "HostRooms", new { buildingId = Model.BuildingId })" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Back to list</a>
-                <a href="@Url.Action("Edit", "HostRooms", new { id = Model.Id })" class="btn btn-warning"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-                <form method="post" action="@Url.Action("Delete", "HostRooms", new { id = Model.Id })" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this room?');">
-                    <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete</button>
-                </form>
+                <a href="@Url.Action("Index", "HostRooms", new { buildingId = Model.BuildingId })"
+                    class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Back to list</a>
+                <a href="@Url.Action("Edit", "HostRooms", new { id = Model.Id })" class="btn btn-warning"><i
+                        class="fa-solid fa-pen-to-square"></i> Edit</a>
+                <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger"><i
+                        class="fa-solid fa-trash"></i>Delete</a>
             </div>
+            @if (TempData["ToastError"] != null)
+            {
+                <div class="alert alert-danger mt-3">@TempData["ToastError"]</div>
+            }
+            @if (TempData["ToastSuccess"] != null)
+            {
+                <div class="alert alert-success mt-3">@TempData["ToastSuccess"]</div>
+            }
             <hr class="my-4" />
             @* Optionally, add reviews or other host-specific info here *@
         </div>
@@ -33,30 +42,41 @@
                 @if (Model.RoomImages != null && Model.RoomImages.Count > 0)
                 {
                     <div id="mainRoomImage" class="mb-2">
-                        <img src="@Model.RoomImages[0].ImageUrl" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image" />
+                        <img src="@Model.RoomImages[0].ImageUrl" class="img-fluid rounded shadow-sm"
+                            style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image"
+                            onerror="this.onerror=null;this.src='/images/no-image.png';" />
                     </div>
                     <div class="d-flex flex-row flex-wrap gap-2">
                         @for (int i = 0; i < Model.RoomImages.Count; i++)
                         {
-                            <img src="@Model.RoomImages[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.RoomImages[i].ImageUrl', this)" alt="Room Thumbnail" />
+                            <img src="@Model.RoomImages[i].ImageUrl" class="img-thumbnail room-thumb"
+                                style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i == 0 ? "border:2px solid #007bff;" : "")"
+                                onclick="showRoomImage('@Model.RoomImages[i].ImageUrl', this)" alt="Room Thumbnail"
+                                onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         }
                     </div>
                 }
                 else if (Model.Images != null && Model.Images.Count > 0)
                 {
                     <div id="mainRoomImage" class="mb-2">
-                        <img src="@Model.Images[0].ImageUrl" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image" />
+                        <img src="@Model.Images[0].ImageUrl" class="img-fluid rounded shadow-sm"
+                            style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image"
+                            onerror="this.onerror=null;this.src='/images/no-image.png';" />
                     </div>
                     <div class="d-flex flex-row flex-wrap gap-2">
                         @for (int i = 0; i < Model.Images.Count; i++)
                         {
-                            <img src="@Model.Images[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.Images[i].ImageUrl', this)" alt="Room Thumbnail" />
+                            <img src="@Model.Images[i].ImageUrl" class="img-thumbnail room-thumb"
+                                style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i == 0 ? "border:2px solid #007bff;" : "")"
+                                onclick="showRoomImage('@Model.Images[i].ImageUrl', this)" alt="Room Thumbnail"
+                                onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         }
                     </div>
                 }
                 else
                 {
-                    <img src="/images/no-image.png" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="No Image" />
+                    <img src="/images/no-image.png" class="img-fluid rounded shadow-sm"
+                        style="max-height:340px;object-fit:cover;width:100%;" alt="No Image" />
                 }
             </div>
         </div>
@@ -70,6 +90,11 @@
     }
 </script>
 <style>
-    .room-gallery img { transition: border 0.2s; }
-    .room-thumb:hover { border:2px solid #198754 !important; }
+    .room-gallery img {
+        transition: border 0.2s;
+    }
+
+    .room-thumb:hover {
+        border: 2px solid #198754 !important;
+    }
 </style>

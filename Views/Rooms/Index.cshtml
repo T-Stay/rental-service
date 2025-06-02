@@ -59,11 +59,11 @@
         <div class="room-card">
             @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
             {
-                <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
             }
             else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
             {
-                <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
             }
             else
             {
