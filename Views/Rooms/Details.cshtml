@@ -27,6 +27,10 @@
         <input type="hidden" name="roomId" value="@Model.Id" />
         <button type="submit" class="btn btn-primary mt-2">Book a Viewing Appointment</button>
     </form>
+    <form method="get" action="@Url.Action("Create", "BookingRequests")">
+        <input type="hidden" name="roomId" value="@Model.Id" />
+        <button type="submit" class="btn btn-success mt-2">Request Booking</button>
+    </form>
 }
 @await Html.PartialAsync("_ReviewsPartial", Model.Reviews)
 @await Html.PartialAsync("_ReviewForm", Model)

@@ -4,8 +4,15 @@
     var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
 }
+<link rel="stylesheet" href="~/css/room-cards.css" />
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    <a href="@Url.Action("Index", "Favorites")" class="btn btn-outline-danger"><i class="fa-solid fa-heart"></i> Favorites</a>
+    <a href="@Url.Action("Index", "BookingRequests")" class="btn btn-outline-info"><i class="fa-solid fa-envelope-open-text"></i> Bookings</a>
+    <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+</div>
 <h2>Room Search</h2>
-<form method="get">
+<form method="get" class="mb-4">
     <input type="text" name="location" placeholder="Location" value="@Context.Request.Query["location"]" />
     <input type="number" name="minPrice" placeholder="Min Price" value="@Context.Request.Query["minPrice"]" />
     <input type="number" name="maxPrice" placeholder="Max Price" value="@Context.Request.Query["maxPrice"]" />
@@ -22,26 +29,42 @@
     </select>
     <button type="submit">Search</button>
 </form>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Building</th>
-            <th>Price</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var room in Model)
-    {
-        <tr>
-            <td>@room.Name</td>
-            <td>@room.Building?.Location</td>
-            <td>@room.Building?.Name</td>
-            <td>@room.Price</td>
-            <td><a href="@Url.Action("Details", new { id = room.Id })">Details</a></td>
-        </tr>
-    }
-    </tbody>
-</table>
+<div class="row g-4">
+@foreach (var room in Model)
+{
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="room-card">
+            @if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
+            {
+                <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
+            }
+            else
+            {
+                <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
+            }
+            <div class="room-card-body">
+                <div class="room-card-title">@room.Name</div>
+                <div class="room-card-location"><i class="fa-solid fa-location-dot"></i> @room.Building?.Location</div>
+                <div class="room-card-price">@room.Price.ToString("C0")</div>
+                <div class="room-card-amenities">
+                    @if (room.Amenities != null && room.Amenities.Count > 0)
+                    {
+                        <span><i class="fa-solid fa-list"></i> @string.Join(", ", room.Amenities.Take(3).Select(a => a.Name))</span>
+                        @if (room.Amenities.Count > 3)
+                        {
+                            <span> +@((room.Amenities.Count - 3)) more</span>
+                        }
+                    }
+                </div>
+                <div class="room-card-link">
+                    <a href="@Url.Action("Details", new { id = room.Id })" class="btn btn-outline-primary btn-sm">Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</div>
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-4">No rooms found.</div>
+}

@@ -1,13 +1,10 @@
 @model IEnumerable<RentalService.Models.BookingRequest>
 @{
-    ViewData["Title"] = "My Booking Requests";
+    ViewData["Title"] = "Room Booking Requests";
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="fw-bold text-info mb-0"><i class="fa-solid fa-envelope-open-text me-2"></i>My Booking Requests</h2>
-    <div>
-        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-        <a href="@Url.Action("Create")" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Request</a>
-    </div>
+    <h2 class="fw-bold text-danger mb-0"><i class="fa-solid fa-envelope-open-text me-2"></i>Room Booking Requests</h2>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
 </div>
 <div class="card shadow-sm">
     <div class="card-body p-0">
@@ -15,6 +12,7 @@
             <thead class="table-light">
                 <tr>
                     <th>Room</th>
+                    <th>Customer</th>
                     <th>Message</th>
                     <th>Status</th>
                     <th>Created</th>
@@ -25,7 +23,8 @@
             @foreach (var req in Model)
             {
                 <tr>
-                    <td>@req.RoomId</td>
+                    <td><a href="@Url.Action("Details", "Rooms", new { id = req.Room?.Id })" target="_blank">@req.Room?.Name</a></td>
+                    <td>@req.User?.Name</td>
                     <td>@req.Message</td>
                     <td>
                         @if (req.Status.ToString() == "Pending")
@@ -40,12 +39,16 @@
                         {
                             <span class="badge bg-danger">Rejected</span>
                         }
+                        else if (req.Status.ToString() == "Cancelled")
+                        {
+                            <span class="badge bg-secondary">Cancelled</span>
+                        }
                         else
                         {
                             <span class="badge bg-secondary">@req.Status</span>
                         }
                     </td>
-                    <td>@req.CreatedAt.ToShortDateString()</td>
+                    <td>@req.CreatedAt.ToString("g")</td>
                     <td><a href="@Url.Action("Details", new { id = req.Id })" class="btn btn-outline-info btn-sm">Details</a></td>
                 </tr>
             }

@@ -31,23 +31,41 @@ namespace RentalService.Controllers
         }
 
         // GET: /BookingRequests/Create/{roomId}
-        public IActionResult Create(Guid roomId)
+        public async Task<IActionResult> Create(Guid? roomId)
         {
-            ViewBag.RoomId = roomId;
+            if (roomId.HasValue)
+            {
+                ViewBag.RoomId = roomId.Value;
+                return View();
+            }
+            // No roomId provided, show dropdown of available rooms
+            var rooms = await _context.Rooms.Where(r => r.Status == RoomStatus.Active).ToListAsync();
+            ViewBag.Rooms = rooms;
             return View();
         }
 
         // POST: /BookingRequests/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Guid roomId, string message)
+        public async Task<IActionResult> Create(Guid? roomId, string message)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            if (!roomId.HasValue)
+            {
+                ModelState.AddModelError("roomId", "Room is required.");
+                var rooms = await _context.Rooms.Where(r => r.Status == RoomStatus.Active).ToListAsync();
+                ViewBag.Rooms = rooms;
+                return View();
+            }
             var request = new BookingRequest
             {
                 Id = Guid.NewGuid(),
                 UserId = Guid.Parse(userId),
-                RoomId = roomId,
+                RoomId = roomId.Value,
                 Message = message,
                 Status = BookingRequestStatus.Pending,
                 CreatedAt = DateTime.UtcNow,

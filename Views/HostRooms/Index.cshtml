@@ -32,50 +32,49 @@
         </select>
         <a href="@Url.Action("Create", new { buildingId = selectedBuildingId })" class="btn btn-success ms-3">Post New Room</a>
     </form>
-    <table class="table table-hover table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Name</th>
-                <th>Building</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var room in Model)
-        {
-            <tr>
-                <td>@room.Name</td>
-                <td>@room.Building?.Name</td>
-                <td>@room.Price.ToString("C0")</td>
-                <td>@room.Status</td>
-                <td>
-                    <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm me-1" title="View Details">
-                        Details
-                    </a>
-                    <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Edit</a>
-                    <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Delete</a>
-                    @if (room.Status == RentalService.Models.RoomStatus.Active)
-                    {
-                        <form asp-action="SetStatus" method="post" style="display:inline">
-                            <input type="hidden" name="id" value="@room.Id" />
-                            <input type="hidden" name="status" value="Inactive" />
-                            <button type="submit" class="btn btn-warning btn-sm">Hide</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <form asp-action="SetStatus" method="post" style="display:inline">
-                            <input type="hidden" name="id" value="@room.Id" />
-                            <input type="hidden" name="status" value="Active" />
-                            <button type="submit" class="btn btn-success btn-sm">Show</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    <div class="row g-4">
+    @foreach (var room in Model)
+    {
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="room-card h-100">
+                @if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
+                {
+                    <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                }
+                else
+                {
+                    <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
+                }
+                <div class="room-card-body">
+                    <div class="room-card-title">@room.Name</div>
+                    <div class="room-card-location"><i class="fa-solid fa-building"></i> @room.Building?.Name</div>
+                    <div class="room-card-price">@room.Price.ToString("C0")</div>
+                    <div class="room-card-status"><span class="badge bg-secondary">@room.Status</span></div>
+                    <div class="room-card-link mt-2 d-flex gap-1 flex-wrap">
+                        <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm">Details</a>
+                        <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Delete</a>
+                        @if (room.Status == RentalService.Models.RoomStatus.Active)
+                        {
+                            <form asp-action="SetStatus" method="post" style="display:inline">
+                                <input type="hidden" name="id" value="@room.Id" />
+                                <input type="hidden" name="status" value="Inactive" />
+                                <button type="submit" class="btn btn-warning btn-sm">Hide</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="SetStatus" method="post" style="display:inline">
+                                <input type="hidden" name="id" value="@room.Id" />
+                                <input type="hidden" name="status" value="Active" />
+                                <button type="submit" class="btn btn-success btn-sm">Show</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    </div>
     <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Back to Dashboard</a>
 </div>

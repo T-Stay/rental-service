@@ -2,25 +2,49 @@
 @{
     ViewData["Title"] = "My Favorites";
 }
-<h2>My Favorite Rooms</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Room</th>
-            <th>Building</th>
-            <th>Price</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var fav in Model)
-    {
-        <tr>
-            <td>@fav.Room?.Name</td>
-            <td>@fav.Room?.Building?.Name</td>
-            <td>@fav.Room?.Price</td>
-            <td><a href="@Url.Action("Details", "Rooms", new { id = fav.RoomId })">Details</a></td>
-        </tr>
-    }
-    </tbody>
-</table>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-danger mb-0"><i class="fa-solid fa-heart me-2"></i>My Favorite Rooms</h2>
+    <div>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+        <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Find Rooms</a>
+    </div>
+</div>
+@if (!Model.Any())
+{
+    <div class="alert alert-info">You have no favorite rooms yet.</div>
+}
+<div class="row g-3">
+@foreach (var fav in Model)
+{
+    <div class="col-md-6 col-lg-4">
+        <div class="room-card h-100">
+            @if (fav.Room?.Images != null && fav.Room.Images.Count > 0 && !string.IsNullOrEmpty(fav.Room.Images[0].ImageUrl))
+            {
+                <img src="@fav.Room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
+            }
+            else
+            {
+                <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
+            }
+            <div class="room-card-body">
+                <div class="room-card-title">@fav.Room?.Name</div>
+                <div class="room-card-location"><i class="fa-solid fa-location-dot"></i> @fav.Room?.Building?.Location</div>
+                <div class="room-card-price">@fav.Room?.Price.ToString("C0")</div>
+                <div class="room-card-amenities">
+                    @if (fav.Room?.Amenities != null && fav.Room.Amenities.Count > 0)
+                    {
+                        <span><i class="fa-solid fa-list"></i> @string.Join(", ", fav.Room.Amenities.Take(3).Select(a => a.Name))</span>
+                        @if (fav.Room.Amenities.Count > 3)
+                        {
+                            <span> +@((fav.Room.Amenities.Count - 3)) more</span>
+                        }
+                    }
+                </div>
+                <div class="room-card-link">
+                    <a href="@Url.Action("Details", "Rooms", new { id = fav.RoomId })" class="btn btn-outline-info btn-sm mt-2">View Room</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+</div>

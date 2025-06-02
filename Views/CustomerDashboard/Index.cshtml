@@ -1,0 +1,159 @@
+@{
+    ViewData["Title"] = "Customer Dashboard";
+    var favorites = ViewBag.Favorites as List<RentalService.Models.Favorite>;
+    var bookings = ViewBag.BookingRequests as List<RentalService.Models.BookingRequest>;
+    var appointments = ViewBag.Appointments as List<RentalService.Models.ViewAppointment>;
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<div class="container mt-4">
+    <h2 class="mb-4 fw-bold text-primary"><i class="fa-solid fa-gauge-high me-2"></i>Customer Dashboard</h2>
+    <div class="row mb-4 g-4">
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-heart fa-2x text-danger mb-2"></i>
+                    <h5 class="card-title">Favorites</h5>
+                    <p class="display-6 fw-semibold">@(favorites?.Count ?? 0)</p>
+                    <a href="@Url.Action("Index", "Favorites")" class="btn btn-outline-danger btn-sm w-100">View Favorites</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-envelope-open-text fa-2x text-info mb-2"></i>
+                    <h5 class="card-title">Booking Requests</h5>
+                    <p class="display-6 fw-semibold">@(bookings?.Count ?? 0)</p>
+                    <a href="@Url.Action("Index", "BookingRequests")" class="btn btn-outline-info btn-sm w-100">View Bookings</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-calendar-check fa-2x text-success mb-2"></i>
+                    <h5 class="card-title">Appointments</h5>
+                    <p class="display-6 fw-semibold">@(appointments?.Count ?? 0)</p>
+                    <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success btn-sm w-100">View Appointments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-magnifying-glass fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title">Find Rooms</h5>
+                    <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary btn-sm w-100">Search Rooms</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-info text-white fw-bold">
+                    <i class="fa-solid fa-envelope me-2"></i>Recent Booking Requests
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Room</th>
+                                <th>Message</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (bookings != null && bookings.Count > 0)
+                        {
+                            foreach (var req in bookings.Take(5))
+                            {
+                                <tr>
+                                    <td><a href="@Url.Action("Details", "Rooms", new { id = req.Room?.Id })" target="_blank">@req.Room?.Name</a></td>
+                                    <td>@req.Message</td>
+                                    <td>
+                                        @if (req.Status.ToString() == "Pending")
+                                        {
+                                            <span class="badge bg-warning">Pending</span>
+                                        }
+                                        else if (req.Status.ToString() == "Approved")
+                                        {
+                                            <span class="badge bg-success">Approved</span>
+                                        }
+                                        else if (req.Status.ToString() == "Rejected")
+                                        {
+                                            <span class="badge bg-danger">Rejected</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@req.Status</span>
+                                        }
+                                    </td>
+                                    <td>@req.CreatedAt.ToString("g")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="4" class="text-center text-muted">No recent booking requests.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white fw-bold">
+                    <i class="fa-solid fa-calendar-day me-2"></i>Recent Appointments
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Room</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (appointments != null && appointments.Count > 0)
+                        {
+                            foreach (var appt in appointments.Take(5))
+                            {
+                                <tr>
+                                    <td><a href="@Url.Action("Details", "Rooms", new { id = appt.Room?.Id })" target="_blank">@appt.Room?.Name</a></td>
+                                    <td>@appt.AppointmentTime.ToString("g")</td>
+                                    <td>
+                                        @if (appt.Status.ToString() == "Pending")
+                                        {
+                                            <span class="badge bg-warning">Pending</span>
+                                        }
+                                        else if (appt.Status.ToString() == "Confirmed")
+                                        {
+                                            <span class="badge bg-success">Confirmed</span>
+                                        }
+                                        else if (appt.Status.ToString() == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@appt.Status</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="3" class="text-center text-muted">No recent appointments.</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
