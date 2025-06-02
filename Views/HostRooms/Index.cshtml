@@ -5,6 +5,8 @@
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
     var error = ViewBag.Error as string;
 }
+<link rel="stylesheet" href="~/css/room-cards.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="container mt-4">
     <h2>My Rooms</h2>
     @if (!string.IsNullOrEmpty(error))
@@ -49,8 +51,8 @@
                     <div class="room-card-title">@room.Name</div>
                     <div class="room-card-location"><i class="fa-solid fa-building"></i> @room.Building?.Name</div>
                     <div class="room-card-price">@room.Price.ToString("C0")</div>
-                    <div class="room-card-status"><span class="badge bg-secondary">@room.Status</span></div>
-                    <div class="room-card-link mt-2 d-flex gap-1 flex-wrap">
+                    <div class="room-card-status mb-2"><span class="badge bg-secondary">@room.Status</span></div>
+                    <div class="room-card-link d-flex gap-1 flex-wrap">
                         <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm">Details</a>
                         <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Edit</a>
                         <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Delete</a>

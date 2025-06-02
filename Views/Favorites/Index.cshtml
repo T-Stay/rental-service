@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "My Favorites";
 }
+<link rel="stylesheet" href="~/css/room-cards.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="fw-bold text-danger mb-0"><i class="fa-solid fa-heart me-2"></i>My Favorite Rooms</h2>
     <div>
@@ -13,10 +15,10 @@
 {
     <div class="alert alert-info">You have no favorite rooms yet.</div>
 }
-<div class="row g-3">
+<div class="row g-4">
 @foreach (var fav in Model)
 {
-    <div class="col-md-6 col-lg-4">
+    <div class="col-12 col-md-6 col-lg-4">
         <div class="room-card h-100">
             @if (fav.Room?.Images != null && fav.Room.Images.Count > 0 && !string.IsNullOrEmpty(fav.Room.Images[0].ImageUrl))
             {
