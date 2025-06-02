@@ -1,15 +1,24 @@
 @model IEnumerable<RentalService.Models.Review>
 @if (Model != null && Model.Any())
 {
-    <h4>Reviews</h4>
     <ul class="list-group mb-3">
-        @foreach (var review in Model)
+        @foreach (var review in Model.OrderByDescending(r => r.CreatedAt))
         {
-            <li class="list-group-item">
-                <strong>@review.User?.Name</strong> - <span>@review.Rating</span>/5<br />
-                <span>@review.Comment</span><br />
-                <small>@review.CreatedAt.ToShortDateString()</small>
+            <li class="list-group-item py-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div class="fw-bold">@review.User?.Name</div>
+                    <div>@Html.Raw(RenderStars(review.Rating)) <span class="text-muted small">@review.CreatedAt.ToShortDateString()</span></div>
+                </div>
+                <div class="mb-1">@review.Comment</div>
             </li>
         }
     </ul>
+}
+@functions {
+    private string RenderStars(int rating)
+    {
+        var html = string.Concat(Enumerable.Repeat("<i class='fa fa-star text-warning'></i>", rating));
+        html += string.Concat(Enumerable.Repeat("<i class='fa fa-star text-secondary'></i>", 5 - rating));
+        return html;
+    }
 }

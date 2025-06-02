@@ -1,21 +1,43 @@
 @model RentalService.Models.Room
+@using System.Linq;
+@inject RentalService.Data.AppDbContext _context;
+@{
+    var userId = User?.Identity != null && User.Identity.IsAuthenticated ? User.FindFirst("sub")?.Value : null;
+    var canReview = false;
+    if (userId != null)
+    {
+        var confirmed = Model.BookingRequests?.Any(b => b.UserId.ToString() == userId && b.Status == RentalService.Models.BookingRequestStatus.Approved) ?? false;
+        canReview = confirmed;
+    }
+}
 @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
 {
-    <form asp-controller="Reviews" asp-action="Create" method="post">
-        <input type="hidden" name="roomId" value="@Model.Id" />
-        <div class="mb-2">
-            <label>Rating</label>
-            <select name="rating" class="form-select">
-                @for (int i = 1; i <= 5; i++)
-                {
-                    <option value="@i">@i</option>
-                }
-            </select>
+    if (canReview)
+    {
+        <form asp-controller="Reviews" asp-action="Create" method="post" class="mb-3">
+            <input type="hidden" name="roomId" value="@Model.Id" />
+            <div class="mb-2">
+                <label>Rating</label>
+                <div>
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <input type="radio" class="btn-check" name="rating" id="star@i" value="@i" autocomplete="off" @(i==5?"checked":"") />
+                        <label class="btn btn-sm btn-outline-warning" for="star@i"><i class="fa fa-star"></i></label>
+                    }
+                </div>
+            </div>
+            <div class="mb-2">
+                <label>Comment</label>
+                <textarea name="comment" class="form-control" required maxlength="500" placeholder="Share your experience..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Submit Review</button>
+        </form>
+    }
+    else
+    {
+        <div class="alert alert-info mb-3" data-bs-toggle="tooltip" title="You need a confirmed booking to leave a review.">
+            <i class="fa fa-info-circle"></i> Only users with a <b>confirmed booking</b> for this room can leave a review. <br />
+            <span class="small">Book and complete your stay to share your experience!</span>
         </div>
-        <div class="mb-2">
-            <label>Comment</label>
-            <textarea name="comment" class="form-control"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary btn-sm">Submit Review</button>
-    </form>
+    }
 }

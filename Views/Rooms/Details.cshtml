@@ -1,101 +1,148 @@
 @model RentalService.Models.Room
+@using System.Linq;
 @{
     ViewData["Title"] = "Room Details";
+    var avgRating = Model.Reviews != null && Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
+    var reviewCount = Model.Reviews?.Count ?? 0;
 }
-<h2>@Model.Name</h2>
-<p><strong>Location:</strong> @Model.Building?.Location</p>
-<p><strong>Price:</strong> @Model.Price</p>
-<p><strong>Description:</strong> @Model.Description</p>
-@if (Model.Images != null && Model.Images.Count > 0)
-{
-    <div>
-        @foreach (var img in Model.Images)
-        {
-            <img src="@img.ImageUrl" alt="Room Image" style="max-width:200px; margin:5px;" />
-        }
-    </div>
-}
-@if (Model.Amenities != null && Model.Amenities.Count > 0)
-{
-    <p><strong>Amenities:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</p>
-}
-<a href="@Url.Action("Index")">Back to list</a>
-@if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
-{
-    @await Html.PartialAsync("_FavoriteButton", Model)
-    <form method="get" action="@Url.Action("Create", "ViewAppointments")">
-        <input type="hidden" name="roomId" value="@Model.Id" />
-        <button type="submit" class="btn btn-primary mt-2">Book a Viewing Appointment</button>
-    </form>
-    <form method="get" action="@Url.Action("Create", "BookingRequests")">
-        <input type="hidden" name="roomId" value="@Model.Id" />
-        <button type="submit" class="btn btn-success mt-2">Request Booking</button>
-    </form>
-}
-@if (Model.Building?.Host?.ContactInformations != null && Model.Building.Host.ContactInformations.Count > 0)
-{
-    <div class="mt-3">
-        <h5>Host Contact Information</h5>
-        <ul>
-            @foreach (var c in Model.Building.Host.ContactInformations)
+<div class="container mt-4">
+    <div class="row g-4">
+        <div class="col-md-7 order-2 order-md-1">
+            <div class="d-flex align-items-center mb-2">
+                <h2 class="fw-bold mb-0 me-2">@Model.Name</h2>
+                @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
+                {
+                    <span class="ms-1" style="font-size:1.7rem; vertical-align:middle;">
+                        @await Html.PartialAsync("_FavoriteButton", Model)
+                    </span>
+                }
+            </div>
+            <div class="mb-2 text-muted"><i class="fa-solid fa-location-dot"></i> @Model.Building?.Location</div>
+            <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("C0")</div>
+            <div class="mb-3">@Model.Description</div>
+            @if (Model.Amenities != null && Model.Amenities.Count > 0)
             {
-                if (c.Type.ToString() == "FacebookLink")
+                <div class="mb-3"><strong>Amenities:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
+            }
+            @if (Model.Building?.Host?.ContactInformations != null && Model.Building.Host.ContactInformations.Count > 0)
+            {
+                <div class="mt-3">
+                    <h5>Host Contact Information</h5>
+                    <ul>
+                        @foreach (var c in Model.Building.Host.ContactInformations)
+                        {
+                            if (c.Type.ToString() == "FacebookLink")
+                            {
+                                <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                            }
+                            else if (c.Type.ToString() == "Email")
+                            {
+                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                            }
+                            else if (c.Type.ToString() == "PhoneNumber")
+                            {
+                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                            }
+                            else
+                            {
+                                <li><strong>@c.Type:</strong> @c.Data</li>
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+            <div class="d-flex flex-wrap gap-2 mb-3 mt-3">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Back to list</a>
+                @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
                 {
-                    <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                    <form method="get" action="@Url.Action("Create", "ViewAppointments")" class="d-inline">
+                        <input type="hidden" name="roomId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-primary">Book a Viewing Appointment</button>
+                    </form>
+                    <form method="get" action="@Url.Action("Create", "BookingRequests")" class="d-inline">
+                        <input type="hidden" name="roomId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-success">Request Booking</button>
+                    </form>
                 }
-                else if (c.Type.ToString() == "Email")
+            </div>
+            <hr class="my-4" />
+            <div class="mt-4">
+                <span class="fs-5 fw-bold">Reviews</span>
+                <span class="ms-2">@Html.Raw(RenderStars(avgRating)) <span class="text-muted">(@avgRating.ToString("0.0"))/5 from @reviewCount reviews</span></span>
+            </div>
+            @await Html.PartialAsync("_ReviewsPartial", Model.Reviews)
+            @await Html.PartialAsync("_ReviewForm", Model)
+        </div>
+        <div class="col-md-5 order-1 order-md-2">
+            <div class="room-gallery">
+                @if (Model.Images != null && Model.Images.Count > 0)
                 {
-                    <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
-                }
-                else if (c.Type.ToString() == "PhoneNumber")
-                {
-                    <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                    <div id="mainRoomImage" class="mb-2">
+                        <img src="@Model.Images[0].ImageUrl" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="Room Image" />
+                    </div>
+                    <div class="d-flex flex-row flex-wrap gap-2">
+                        @for (int i = 0; i < Model.Images.Count; i++)
+                        {
+                            <img src="@Model.Images[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.Images[i].ImageUrl', this)" alt="Room Thumbnail" />
+                        }
+                    </div>
                 }
                 else
                 {
-                    <li><strong>@c.Type:</strong> @c.Data</li>
+                    <img src="/images/no-image.png" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="No Image" />
                 }
-            }
-        </ul>
+            </div>
+        </div>
     </div>
-    <script>
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text);
-            if (!document.getElementById('copyToast')) {
-                var toast = document.createElement('div');
-                toast.id = 'copyToast';
-                toast.innerText = 'Copied!';
-                toast.style.position = 'fixed';
-                toast.style.left = '50%';
-                toast.style.bottom = '30px';
-                toast.style.transform = 'translateX(-50%)';
-                toast.style.background = '#333';
-                toast.style.color = '#fff';
-                toast.style.padding = '8px 16px';
-                toast.style.borderRadius = '4px';
-                toast.style.zIndex = 9999;
-                toast.style.opacity = 0;
-                toast.style.transition = 'opacity 0.3s';
-                document.body.appendChild(toast);
-            }
-            var toast = document.getElementById('copyToast');
-            toast.style.opacity = 1;
-            toast.style.visibility = 'visible';
-            setTimeout(function () {
-                toast.style.opacity = 0;
-                toast.style.visibility = 'hidden';
-            }, 1500);
+</div>
+<script>
+    function showRoomImage(url, thumb) {
+        document.getElementById('mainRoomImage').innerHTML = `<img src="${url}" class='img-fluid rounded shadow-sm' style='max-height:340px;object-fit:cover;width:100%;' alt='Room Image' />`;
+        document.querySelectorAll('.room-thumb').forEach(t => t.style.border = '');
+        thumb.style.border = '2px solid #007bff';
+    }
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+        if (!document.getElementById('copyToast')) {
+            var toast = document.createElement('div');
+            toast.id = 'copyToast';
+            toast.innerText = 'Copied!';
+            toast.style.position = 'fixed';
+            toast.style.left = '50%';
+            toast.style.bottom = '30px';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.background = '#333';
+            toast.style.color = '#fff';
+            toast.style.padding = '8px 16px';
+            toast.style.borderRadius = '4px';
+            toast.style.zIndex = 9999;
+            toast.style.opacity = 0;
+            toast.style.transition = 'opacity 0.3s';
+            document.body.appendChild(toast);
         }
-    </script>
-    <style>
-        .copy-btn {
-            border: none;
-            background: none;
-            color: #007bff;
-            cursor: pointer;
-            margin-left: 0.5rem;
-        }
-    </style>
+        var toast = document.getElementById('copyToast');
+        toast.style.opacity = 1;
+        toast.style.visibility = 'visible';
+        setTimeout(function () {
+            toast.style.opacity = 0;
+            toast.style.visibility = 'hidden';
+        }, 1500);
+    }
+</script>
+<style>
+    .room-gallery img { transition: border 0.2s; }
+    .room-thumb:hover { border:2px solid #198754 !important; }
+    .copy-btn { border: none; background: none; color: #007bff; cursor: pointer; margin-left: 0.5rem; }
+</style>
+@functions {
+    private string RenderStars(double rating)
+    {
+        int full = (int)rating;
+        bool half = (rating - full) >= 0.5;
+        int empty = 5 - full - (half ? 1 : 0);
+        var html = string.Concat(Enumerable.Repeat("<i class='fa fa-star text-warning'></i>", full));
+        if (half) html += "<i class='fa fa-star-half-alt text-warning'></i>";
+        html += string.Concat(Enumerable.Repeat("<i class='fa fa-star text-secondary'></i>", empty));
+        return html;
+    }
 }
-@await Html.PartialAsync("_ReviewsPartial", Model.Reviews)
-@await Html.PartialAsync("_ReviewForm", Model)

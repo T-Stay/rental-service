@@ -12,22 +12,45 @@
     <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
 </div>
 <h2>Room Search</h2>
-<form method="get" class="mb-4">
-    <input type="text" name="location" placeholder="Location" value="@Context.Request.Query["location"]" />
-    <input type="number" name="minPrice" placeholder="Min Price" value="@Context.Request.Query["minPrice"]" />
-    <input type="number" name="maxPrice" placeholder="Max Price" value="@Context.Request.Query["maxPrice"]" />
-    <label>Building:</label>
-    <select name="buildingId">
-        <option value="">All</option>
-        @if (buildings != null)
-        {
-            foreach (var b in buildings)
-            {
-                @:<option value="@b.Id" @(selectedBuildingId == b.Id ? "selected=\"selected\"" : "")>@b.Name</option>
-            }
-        }
-    </select>
-    <button type="submit">Search</button>
+<form method="get" class="mb-4 p-3 rounded shadow-sm bg-light">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label mb-1">Location</label>
+            <input type="text" name="location" class="form-control" placeholder="Location" value="@Context.Request.Query["location"]" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label mb-1">Min Price</label>
+            <input type="number" name="minPrice" class="form-control" placeholder="Min Price" value="@Context.Request.Query["minPrice"]" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label mb-1">Max Price</label>
+            <input type="number" name="maxPrice" class="form-control" placeholder="Max Price" value="@Context.Request.Query["maxPrice"]" />
+        </div>
+        <div class="col-md-3">
+            <label class="form-label mb-1">Building</label>
+            <select name="buildingId" class="form-select">
+                <option value="">All</option>
+                @if (buildings != null)
+                {
+                    foreach (var b in buildings)
+                    {
+                        if (selectedBuildingId == b.Id)
+                        {
+                            <option value="@b.Id" selected>@b.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@b.Id">@b.Name</option>
+                        }
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-grid">
+            <label class="form-label mb-1" style="visibility:hidden">Search</label>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
+        </div>
+    </div>
 </form>
 <div class="row g-4">
 @foreach (var room in Model)
@@ -43,7 +66,14 @@
                 <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
             }
             <div class="room-card-body">
-                <div class="room-card-title">@room.Name</div>
+                <div class="room-card-title d-flex align-items-center justify-content-between">
+                    <span>@room.Name</span>
+                    @if (room.Reviews != null && room.Reviews.Count > 0)
+                    {
+                        var avg = room.Reviews.Average(r => r.Rating);
+                        <span class="ms-2 small text-warning">@Html.Raw(RenderStars(avg)) <span class="text-muted">@avg.ToString("0.0")</span></span>
+                    }
+                </div>
                 <div class="room-card-location"><i class="fa-solid fa-location-dot"></i> @room.Building?.Location</div>
                 <div class="room-card-price">@room.Price.ToString("C0")</div>
                 <div class="room-card-amenities">
@@ -67,4 +97,16 @@
 @if (!Model.Any())
 {
     <div class="alert alert-info mt-4">No rooms found.</div>
+}
+@functions {
+    private string RenderStars(double rating)
+    {
+        int full = (int)rating;
+        bool half = (rating - full) >= 0.5;
+        int empty = 5 - full - (half ? 1 : 0);
+        var html = string.Concat(Enumerable.Repeat("<i class='fa fa-star text-warning'></i>", full));
+        if (half) html += "<i class='fa fa-star-half-alt text-warning'></i>";
+        html += string.Concat(Enumerable.Repeat("<i class='fa fa-star text-secondary'></i>", empty));
+        return html;
+    }
 }

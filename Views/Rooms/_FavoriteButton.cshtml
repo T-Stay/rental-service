@@ -4,18 +4,10 @@
 }
 @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
 {
-    if (isFavorite)
-    {
-        <form asp-controller="Favorites" asp-action="Remove" method="post" style="display:inline">
-            <input type="hidden" name="roomId" value="@Model.Id" />
-            <button type="submit" class="btn btn-danger btn-sm">Remove Favorite</button>
-        </form>
-    }
-    else
-    {
-        <form asp-controller="Favorites" asp-action="Add" method="post" style="display:inline">
-            <input type="hidden" name="roomId" value="@Model.Id" />
-            <button type="submit" class="btn btn-outline-primary btn-sm">Add to Favorites</button>
-        </form>
-    }
+    <form asp-controller="Favorites" asp-action="@(isFavorite ? "Remove" : "Add")" method="post" style="display:inline">
+        <input type="hidden" name="roomId" value="@Model.Id" />
+        <button type="submit" class="btn p-0 border-0 bg-transparent" title="@(isFavorite ? "Remove from favorites" : "Add to favorites")">
+            <i class="fa@(isFavorite ? "s" : "r") fa-heart" style="color:@(isFavorite ? "#e63946" : "#bbb"); font-size:1.7rem;"></i>
+        </button>
+    </form>
 }
