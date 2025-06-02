@@ -25,7 +25,16 @@
             @foreach (var req in Model)
             {
                 <tr>
-                    <td>@req.RoomId</td>
+                    <td>
+                        @if (req.Room != null)
+                        {
+                            <a href="@Url.Action("Details", "Rooms", new { id = req.Room.Id })" target="_blank">@req.Room.Name</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Unknown</span>
+                        }
+                    </td>
                     <td>@req.Message</td>
                     <td>
                         @if (req.Status.ToString() == "Pending")
