@@ -27,6 +27,7 @@ namespace RentalService.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<ContactInformation> ContactInformations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -218,6 +219,13 @@ namespace RentalService.Data
             modelBuilder.Entity<Category>()
                 .Property(c => c.Type)
                 .HasConversion<string>();
+
+            // ContactInformation - User (many-to-one)
+            modelBuilder.Entity<ContactInformation>()
+                .HasOne(ci => ci.User)
+                .WithMany(u => u.ContactInformations)
+                .HasForeignKey(ci => ci.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

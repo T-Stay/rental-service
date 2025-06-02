@@ -283,6 +283,29 @@ namespace RentalService.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "ContactInformations",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    UserId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Data = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContactInformations", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ContactInformations_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
@@ -658,6 +681,11 @@ namespace RentalService.Migrations
                 column: "User2Id");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ContactInformations_UserId",
+                table: "ContactInformations",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Contracts_BookingRequestId",
                 table: "Contracts",
                 column: "BookingRequestId",
@@ -757,6 +785,9 @@ namespace RentalService.Migrations
 
             migrationBuilder.DropTable(
                 name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "ContactInformations");
 
             migrationBuilder.DropTable(
                 name: "Contracts");

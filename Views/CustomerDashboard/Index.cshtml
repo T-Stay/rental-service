@@ -3,6 +3,8 @@
     var favorites = ViewBag.Favorites as List<RentalService.Models.Favorite>;
     var bookings = ViewBag.BookingRequests as List<RentalService.Models.BookingRequest>;
     var appointments = ViewBag.Appointments as List<RentalService.Models.ViewAppointment>;
+    // Get total active rooms from ViewBag (set in controller)
+    int totalActiveRooms = ViewBag.TotalActiveRooms != null ? (int)ViewBag.TotalActiveRooms : 0;
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="container mt-4">
@@ -43,6 +45,7 @@
                 <div class="card-body text-center">
                     <i class="fa-solid fa-magnifying-glass fa-2x text-primary mb-2"></i>
                     <h5 class="card-title">Find Rooms</h5>
+                    <p class="display-6 fw-semibold">@totalActiveRooms</p>
                     <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary btn-sm w-100">Search Rooms</a>
                 </div>
             </div>

@@ -74,6 +74,34 @@
                     }
                 </td>
             </tr>
+            <tr>
+                <td colspan="5">
+                    @if (appt.User != null && appt.User.ContactInformations != null && appt.User.ContactInformations.Count > 0)
+                    {
+                        <div>
+                            <strong>Customer Contact Information:</strong>
+                            <ul>
+                                @foreach (var c in appt.User.ContactInformations)
+                                {
+                                    <li><strong>@c.Type:</strong> @c.Data</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                    @if (appt.Room != null && appt.Room.Building != null && appt.Room.Building.Host != null && appt.Room.Building.Host.ContactInformations != null && appt.Room.Building.Host.ContactInformations.Count > 0)
+                    {
+                        <div>
+                            <strong>Host Contact Information:</strong>
+                            <ul>
+                                @foreach (var c in appt.Room.Building.Host.ContactInformations)
+                                {
+                                    <li><strong>@c.Type:</strong> @c.Data</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </td>
+            </tr>
         }
     </tbody>
 </table>

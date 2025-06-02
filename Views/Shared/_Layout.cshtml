@@ -101,9 +101,9 @@
                     <ul class="navbar-nav nav nav-pills">
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
-                            var role = User.FindFirst("role")?.Value ?? "User";
+                            var role = (User.FindFirst("role")?.Value ?? "user").ToLower();
                             <li class="nav-item">
-                                <span class="nav-link disabled"><i class="fa-solid fa-user"></i> @User.Identity.Name (@role)</span>
+                                <a class="nav-link" asp-controller="Profile" asp-action="Index"><i class="fa-solid fa-user"></i> @User.Identity.Name (@role)</a>
                             </li>
                             <li class="nav-item">
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">

@@ -12,7 +12,7 @@ using RentalService.Data;
 namespace RentalService.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250531055101_InitialMySqlMigration")]
+    [Migration("20250602030246_InitialMySqlMigration")]
     partial class InitialMySqlMigration
     {
         /// <inheritdoc />
@@ -299,6 +299,33 @@ namespace RentalService.Migrations
                     b.HasIndex("User2Id");
 
                     b.ToTable("ChatRooms");
+                });
+
+            modelBuilder.Entity("RentalService.Models.ContactInformation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ContactInformations");
                 });
 
             modelBuilder.Entity("RentalService.Models.Contract", b =>
@@ -797,6 +824,17 @@ namespace RentalService.Migrations
                     b.Navigation("User2");
                 });
 
+            modelBuilder.Entity("RentalService.Models.ContactInformation", b =>
+                {
+                    b.HasOne("RentalService.Models.User", "User")
+                        .WithMany("ContactInformations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("RentalService.Models.Contract", b =>
                 {
                     b.HasOne("RentalService.Models.BookingRequest", "BookingRequest")
@@ -967,6 +1005,8 @@ namespace RentalService.Migrations
             modelBuilder.Entity("RentalService.Models.User", b =>
                 {
                     b.Navigation("BookingRequests");
+
+                    b.Navigation("ContactInformations");
 
                     b.Navigation("Favorites");
 

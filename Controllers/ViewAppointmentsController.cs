@@ -75,7 +75,21 @@ namespace RentalService.Controllers
                 query = query.Where(a => a.RoomId == roomId);
             if (!string.IsNullOrEmpty(status) && Enum.TryParse<ViewAppointmentStatus>(status, out var st))
                 query = query.Where(a => a.Status == st);
-            var appointments = await query.ToListAsync();
+            var appointments = await query
+                .Include(a => a.User)
+                .Include(a => a.Room)
+                .ToListAsync();
+            foreach (var appt in appointments)
+            {
+                if (appt.User?.ContactInformations != null)
+                {
+                    // Already loaded
+                }
+                if (appt.Room?.Building?.Host?.ContactInformations != null)
+                {
+                    // Already loaded
+                }
+            }
             ViewBag.Rooms = await _context.Rooms.Where(r => r.Building != null && r.Building.HostId.ToString() == userId).ToListAsync();
             ViewBag.SelectedRoomId = roomId;
             ViewBag.Status = status;

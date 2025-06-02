@@ -79,7 +79,38 @@ namespace RentalService.Controllers
         // GET: /BookingRequests/Details/{id}
         public async Task<IActionResult> Details(Guid id)
         {
-            var request = await _context.BookingRequests.Include(b => b.Room).FirstOrDefaultAsync(b => b.Id == id);
+            var request = await _context.BookingRequests
+                .Include(b => b.Room)
+                .Include(b => b.User)
+                .FirstOrDefaultAsync(b => b.Id == id);
+            if (request?.Room != null)
+            {
+                await _context.Entry(request.Room)
+                    .Reference(r => r.Building).LoadAsync();
+                if (request.Room.Building != null)
+                {
+                    await _context.Entry(request.Room.Building)
+                        .Reference(b => b.Host).LoadAsync();
+                    if (request.Room.Building.Host != null)
+                    {
+                        await _context.Entry(request.Room.Building.Host)
+                            .Collection(h => h.ContactInformations).LoadAsync();
+                    }
+                }
+            }
+            if (request?.User != null)
+            {
+                await _context.Entry(request.User)
+                    .Collection(u => u.ContactInformations).LoadAsync();
+            }
+            if (request?.Room?.Building?.Host?.ContactInformations != null)
+            {
+                // Already loaded
+            }
+            if (request?.User?.ContactInformations != null)
+            {
+                // Already loaded
+            }
             if (request == null) return NotFound();
             return View(request);
         }

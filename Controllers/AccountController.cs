@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using RentalService.Models;
+using RentalService.Data;
 using System.Threading.Tasks;
 using System;
 using System.Net.Mail;
@@ -15,12 +16,14 @@ namespace RentalService.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly AppDbContext _context;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<Guid>> roleManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole<Guid>> roleManager, AppDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _context = context;
         }
 
         [HttpGet]
@@ -68,6 +71,21 @@ namespace RentalService.Controllers
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
+                // Add initial contact info (email)
+                var dbUser = await _userManager.FindByEmailAsync(user.Email);
+                if (dbUser != null)
+                {
+                    var contact = new ContactInformation
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = dbUser.Id,
+                        Type = ContactType.Email,
+                        Data = dbUser.Email ?? string.Empty,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _context.ContactInformations.Add(contact);
+                    await _context.SaveChangesAsync();
+                }
                 var identityRole = UserRoleHelper.ToIdentityRoleString(userRoleEnum);
                 await _userManager.AddToRoleAsync(user, identityRole);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

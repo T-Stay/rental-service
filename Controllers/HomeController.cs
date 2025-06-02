@@ -63,9 +63,12 @@ public class HomeController : Controller
             .Where(a => a.UserId.ToString() == userId)
             .OrderByDescending(a => a.AppointmentTime)
             .ToListAsync();
+        // Get total active rooms
+        int totalActiveRooms = await _context.Rooms.CountAsync(r => r.Status == RoomStatus.Active);
         ViewBag.Favorites = favorites;
         ViewBag.BookingRequests = bookings;
         ViewBag.Appointments = appointments;
+        ViewBag.TotalActiveRooms = totalActiveRooms;
         return View("~/Views/CustomerDashboard/Index.cshtml");
     }
 

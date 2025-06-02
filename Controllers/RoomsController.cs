@@ -42,6 +42,9 @@ namespace RentalService.Controllers
                 .Include(r => r.Building)
                 .Include(r => r.Reviews)
                     .ThenInclude(review => review.User)
+                .Include(r => r.Building)
+                    .ThenInclude(b => b.Host)
+                        .ThenInclude(h => h.ContactInformations)
                 .FirstOrDefaultAsync(r => r.Id == id);
             if (room == null) return NotFound();
             // Check if current user has favorited this room

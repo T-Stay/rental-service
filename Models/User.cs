@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
+using RentalService.Models;
 
 namespace RentalService.Models
 {
@@ -18,6 +19,7 @@ namespace RentalService.Models
         public List<Notification>? Notifications { get; set; }
         public List<Report>? ReportsFiled { get; set; }
         public List<Report>? ReportsAgainst { get; set; }
+        public List<ContactInformation>? ContactInformations { get; set; }
     }
 
     public enum UserRole

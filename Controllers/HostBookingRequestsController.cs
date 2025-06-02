@@ -36,9 +36,28 @@ namespace RentalService.Controllers
         {
             var request = await _context.BookingRequests
                 .Include(b => b.Room)
-                    .ThenInclude(r => r.Building)
                 .Include(b => b.User)
                 .FirstOrDefaultAsync(b => b.Id == id);
+            if (request?.Room != null)
+            {
+                await _context.Entry(request.Room)
+                    .Reference(r => r.Building).LoadAsync();
+                if (request.Room.Building != null)
+                {
+                    await _context.Entry(request.Room.Building)
+                        .Reference(b => b.Host).LoadAsync();
+                    if (request.Room.Building.Host != null)
+                    {
+                        await _context.Entry(request.Room.Building.Host)
+                            .Collection(h => h.ContactInformations).LoadAsync();
+                    }
+                }
+            }
+            if (request?.User != null)
+            {
+                await _context.Entry(request.User)
+                    .Collection(u => u.ContactInformations).LoadAsync();
+            }
             if (request == null || request.Room == null || request.Room.Building == null)
                 return NotFound();
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
