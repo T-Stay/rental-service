@@ -40,7 +40,22 @@
                 <ul>
                     @foreach (var c in Model.Room.Building.Host.ContactInformations)
                     {
-                        <li><strong>@c.Type:</strong> @c.Data</li>
+                        if (c.Type.ToString() == "FacebookLink")
+                        {
+                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                        }
+                        else if (c.Type.ToString() == "Email")
+                        {
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                        }
+                        else if (c.Type.ToString() == "PhoneNumber")
+                        {
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                        }
+                        else
+                        {
+                            <li><strong>@c.Type:</strong> @c.Data</li>
+                        }
                     }
                 </ul>
             </div>
@@ -52,7 +67,22 @@
                 <ul>
                     @foreach (var c in Model.User.ContactInformations)
                     {
-                        <li><strong>@c.Type:</strong> @c.Data</li>
+                        if (c.Type.ToString() == "FacebookLink")
+                        {
+                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                        }
+                        else if (c.Type.ToString() == "Email")
+                        {
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                        }
+                        else if (c.Type.ToString() == "PhoneNumber")
+                        {
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                        }
+                        else
+                        {
+                            <li><strong>@c.Type:</strong> @c.Data</li>
+                        }
                     }
                 </ul>
             </div>
@@ -63,3 +93,41 @@
     <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
     <a href="@Url.Action("Index")" class="btn btn-outline-info"><i class="fa-solid fa-list"></i> Back to Requests</a>
 </div>
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+        if (!document.getElementById('copyToast')) {
+            var toast = document.createElement('div');
+            toast.id = 'copyToast';
+            toast.innerText = 'Copied!';
+            toast.style.position = 'fixed';
+            toast.style.left = '50%';
+            toast.style.bottom = '30px';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.background = '#333';
+            toast.style.color = '#fff';
+            toast.style.padding = '8px 16px';
+            toast.style.borderRadius = '4px';
+            toast.style.zIndex = 9999;
+            toast.style.opacity = 0;
+            toast.style.transition = 'opacity 0.3s';
+            document.body.appendChild(toast);
+        }
+        var toast = document.getElementById('copyToast');
+        toast.style.opacity = 1;
+        toast.style.visibility = 'visible';
+        setTimeout(function () {
+            toast.style.opacity = 0;
+            toast.style.visibility = 'hidden';
+        }, 1500);
+    }
+</script>
+<style>
+    .copy-btn {
+        border: none;
+        background: none;
+        color: #007bff;
+        cursor: pointer;
+        margin-left: 0.5rem;
+    }
+</style>

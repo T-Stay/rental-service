@@ -149,6 +149,11 @@ namespace RentalService.Controllers
                 var principal = new System.Security.Claims.ClaimsPrincipal(identity);
                 await _signInManager.SignOutAsync();
                 await HttpContext.SignInAsync("Identity.Application", principal);
+                // if host then redirect to host dashboard
+                if (roles.Contains("host"))
+                {
+                    return RedirectToAction("Index", "HostDashboard");
+                }
                 return RedirectToAction("Index", "Home");
             }
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
