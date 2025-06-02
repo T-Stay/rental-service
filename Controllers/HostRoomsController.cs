@@ -379,6 +379,7 @@ namespace RentalService.Controllers
                     .Include(r => r.Images)
                     .Include(r => r.RoomImages)
                     .Include(r => r.Amenities)
+                    .Include(r => r.Building)
                     .FirstOrDefaultAsync(r => r.Id == id);
                 if (room == null) return NotFound();
                 return View(room);
