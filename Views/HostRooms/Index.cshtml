@@ -39,7 +39,11 @@
     {
         <div class="col-12 col-md-6 col-lg-4">
             <div class="room-card h-100">
-                @if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
+                @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
+                {
+                    <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                }
+                else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
                 {
                     <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
                 }

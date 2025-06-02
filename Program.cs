@@ -4,6 +4,7 @@ using RentalService.Data;
 using RentalService.Models;
 using dotenv.net;
 using Pomelo.EntityFrameworkCore.MySql;
+using RentalService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
+// Register S3Service for dependency injection
+builder.Services.AddSingleton<S3Service>();
 
 var app = builder.Build();
 

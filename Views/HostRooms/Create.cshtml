@@ -6,47 +6,61 @@
     var error = ViewBag.Error as string;
 }
 <div class="container mt-4">
-    <h2>Post New Room</h2>
+    <h2 class="mb-4">Post New Room</h2>
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
     }
-    <form asp-action="Create" method="post" enctype="multipart/form-data" class="mb-3">
-        <div class="mb-3">
-            <label>Building</label>
-            <select asp-for="BuildingId" class="form-select">
-                <option value="">Select Building</option>
-                @if (buildings != null)
-                {
-                    foreach (var b in buildings)
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4">
+        <div class="col-md-7 col-lg-6 mx-auto">
+            <div class="mb-3">
+                <label class="form-label">Building</label>
+                <select asp-for="BuildingId" class="form-select">
+                    <option value="">Select Building</option>
+                    @if (buildings != null)
                     {
-                        if (selectedBuildingId == b.Id)
+                        foreach (var b in buildings)
                         {
-                            <option value="@b.Id" selected>@b.Name</option>
-                        }
-                        else
-                        {
-                            <option value="@b.Id">@b.Name</option>
+                            <option value="@b.Id" selected="@(selectedBuildingId == b.Id ? "selected" : null)">@b.Name</option>
                         }
                     }
-                }
-            </select>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Room Name</label>
+                <input asp-for="Name" class="form-control" placeholder="Enter room name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the room"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Price" class="form-label">Price</label>
+                <input asp-for="Price" type="number" class="form-control" placeholder="0.00" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            @await Html.PartialAsync("_AmenitiesPartial", ViewBag.AllAmenities as List<RentalService.Models.Amenity>)
+            @await Html.PartialAsync("_RoomImagesPartial", (Model.Images ?? new List<RentalService.Models.RoomImage>()))
+            <div class="d-flex align-items-center mt-4">
+                <button type="submit" class="btn btn-success me-2">Create</button>
+                <a href="@Url.Action("Index", new { buildingId = selectedBuildingId })" class="btn btn-outline-secondary">Back to list</a>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Name</label>
-            <input asp-for="Name" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label>Description</label>
-            <input asp-for="Description" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label>Price</label>
-            <input asp-for="Price" type="number" class="form-control" />
-        </div>
-        @await Html.PartialAsync("_AmenitiesPartial", ViewBag.AllAmenities as List<RentalService.Models.Amenity>)
-        @await Html.PartialAsync("_RoomImagesPartial", (Model.Images ?? new List<RentalService.Models.RoomImage>()))
-        <button type="submit" class="btn btn-success">Create</button>
-        <a href="@Url.Action("Index", new { buildingId = selectedBuildingId })" class="btn btn-outline-secondary ms-2">Back to list</a>
     </form>
 </div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+<style>
+    .container form {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px #e9ecef;
+        padding: 2.5rem 2rem 2rem 2rem;
+    }
+    .form-label {
+        font-weight: 500;
+    }
+</style>

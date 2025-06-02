@@ -1,0 +1,42 @@
+@model RentalService.Models.Room
+@{
+    ViewData["Title"] = "Create Room";
+}
+<h2>Create Room</h2>
+<form asp-action="Create" enctype="multipart/form-data" method="post" class="mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="form-label">Room Name</label>
+                <input asp-for="Name" class="form-control" placeholder="Enter room name" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the room"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Price" class="form-label">Price per night</label>
+                <input asp-for="Price" class="form-control" placeholder="0.00" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label>Status</label>
+                <select asp-for="Status" class="form-select">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                    <option value="Hidden">Hidden</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label>Upload Room Image</label>
+                <input type="file" name="imageFile" class="form-control" accept="image/*" />
+            </div>
+            <button type="submit" class="btn btn-primary">Create Room</button>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

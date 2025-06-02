@@ -8,6 +8,8 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using RentalService.Services;
 
 namespace RentalService.Controllers
 {
@@ -16,10 +18,12 @@ namespace RentalService.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<HostRoomsController> _logger;
-        public HostRoomsController(AppDbContext context, ILogger<HostRoomsController> logger)
+        private readonly S3Service _s3Service;
+        public HostRoomsController(AppDbContext context, ILogger<HostRoomsController> logger, S3Service s3Service)
         {
             _context = context;
             _logger = logger;
+            _s3Service = s3Service;
         }
 
         // GET: /HostRooms?buildingId={buildingId}
@@ -32,7 +36,9 @@ namespace RentalService.Controllers
                     .Where(r => r.Building != null && r.Building.HostId.ToString() == userId);
                 if (buildingId.HasValue)
                     query = query.Where(r => r.BuildingId == buildingId);
-                var rooms = await query.ToListAsync();
+                var rooms = await query
+                    .Include(r => r.RoomImages)
+                    .ToListAsync();
                 ViewBag.Buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
                 ViewBag.SelectedBuildingId = buildingId;
                 return View(rooms);
@@ -74,7 +80,7 @@ namespace RentalService.Controllers
         // POST: /HostRooms/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Room room)
+        public async Task<IActionResult> Create(Room room, List<IFormFile> RoomImages)
         {
             try
             {
@@ -84,13 +90,33 @@ namespace RentalService.Controllers
                 {
                     room.Amenities = await _context.Amenities.Where(a => amenityIds.Contains(a.Id.ToString())).ToListAsync();
                 }
-                // TODO: Handle image upload and save RoomImages
                 if (ModelState.IsValid)
                 {
                     room.Id = Guid.NewGuid();
                     room.CreatedAt = room.UpdatedAt = DateTime.UtcNow;
                     _context.Rooms.Add(room);
-                    await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync(); // Save room first to get valid RoomId
+
+                    // Handle image upload and save RoomImages
+                    var uploadedImages = new List<RoomImage>();
+                    if (RoomImages != null && RoomImages.Count > 0)
+                    {
+                        foreach (var image in RoomImages)
+                        {
+                            if (image.Length > 0)
+                            {
+                                using var stream = image.OpenReadStream();
+                                var fileName = $"rooms/{Guid.NewGuid()}_{image.FileName}";
+                                var imageUrl = await _s3Service.UploadFileAsync(stream, fileName, image.ContentType);
+                                uploadedImages.Add(new RoomImage { Id = Guid.NewGuid(), RoomId = room.Id, ImageUrl = imageUrl });
+                            }
+                        }
+                        if (uploadedImages.Count > 0)
+                        {
+                            _context.RoomImages.AddRange(uploadedImages);
+                            await _context.SaveChangesAsync();
+                        }
+                    }
                     return RedirectToAction(nameof(Index), new { buildingId = room.BuildingId });
                 }
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -133,31 +159,115 @@ namespace RentalService.Controllers
         // POST: /HostRooms/Edit/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, Room room)
+        public async Task<IActionResult> Edit(Guid id, Room room, List<IFormFile> RoomImages, List<Guid> RemoveImageIds)
         {
             if (id != room.Id) return NotFound();
             try
             {
                 // Handle amenities
                 var amenityIds = Request.Form["AmenityIds"].ToList();
+                var selectedAmenities = new List<Amenity>();
                 if (amenityIds.Any())
                 {
-                    room.Amenities = await _context.Amenities.Where(a => amenityIds.Contains(a.Id.ToString())).ToListAsync();
+                    var amenityGuids = amenityIds.Where(x => !string.IsNullOrEmpty(x)).Select(x => Guid.Parse(x!)).ToList();
+                    selectedAmenities = await _context.Amenities.Where(a => amenityGuids.Contains(a.Id)).ToListAsync();
                 }
-                // TODO: Handle image upload and save RoomImages
+                var dbRoom = await _context.Rooms.Include(r => r.RoomImages).Include(r => r.Amenities).FirstOrDefaultAsync(r => r.Id == id);
+                if (dbRoom == null) return NotFound();
+                // Only update the tracked dbRoom instance
+                dbRoom.Name = room.Name;
+                dbRoom.Description = room.Description;
+                dbRoom.Price = room.Price;
+                dbRoom.Status = room.Status;
+                dbRoom.BuildingId = room.BuildingId;
+                dbRoom.UpdatedAt = DateTime.UtcNow;
+                // If you have a concurrency token (e.g., RowVersion), set it here
+#if HAS_ROWVERSION
+                dbRoom.RowVersion = room.RowVersion;
+#endif
+
+                // Only add new amenities and remove missing ones to avoid duplicates
+                if (dbRoom.Amenities == null)
+                {
+                    dbRoom.Amenities = new List<Amenity>();
+                }
+                var currentAmenityIds = dbRoom.Amenities.Select(a => a.Id).ToHashSet();
+                var newAmenityIds = selectedAmenities.Select(a => a.Id).ToHashSet();
+                // Remove amenities that are no longer selected
+                foreach (var a in dbRoom.Amenities.Where(a => !newAmenityIds.Contains(a.Id)).ToList())
+                {
+                    dbRoom.Amenities.Remove(a);
+                }
+                // Add new amenities that are not already present
+                foreach (var a in selectedAmenities)
+                {
+                    if (!currentAmenityIds.Contains(a.Id))
+                    {
+                        dbRoom.Amenities.Add(a);
+                    }
+                }
+
+                // Remove selected images (from DB and S3)
+                if (RemoveImageIds != null && RemoveImageIds.Count > 0)
+                {
+                    if (dbRoom.RoomImages == null)
+                        dbRoom.RoomImages = new List<RoomImage>();
+                    var imagesToRemove = dbRoom.RoomImages.Where(img => RemoveImageIds.Contains(img.Id)).ToList();
+                    foreach (var img in imagesToRemove)
+                    {
+                        if (!string.IsNullOrEmpty(img.ImageUrl))
+                        {
+                            // Remove from S3
+                            var key = img.ImageUrl.Split(new[] { ".amazonaws.com/" }, StringSplitOptions.None).LastOrDefault();
+                            if (!string.IsNullOrEmpty(key))
+                            {
+                                await _s3Service.DeleteFileAsync(key);
+                            }
+                        }
+                        dbRoom.RoomImages.Remove(img); // Remove from tracked collection
+                        _context.RoomImages.Remove(img); // Remove from DbSet
+                    }
+                }
+
+                // Add new images
+                if (RoomImages != null && RoomImages.Count > 0)
+                {
+                    if (dbRoom.RoomImages == null)
+                        dbRoom.RoomImages = new List<RoomImage>();
+                    foreach (var image in RoomImages)
+                    {
+                        if (image.Length > 0)
+                        {
+                            using var stream = image.OpenReadStream();
+                            var fileName = $"rooms/{Guid.NewGuid()}_{image.FileName}";
+                            var imageUrl = await _s3Service.UploadFileAsync(stream, fileName, image.ContentType);
+                            var newRoomImage = new RoomImage { Id = Guid.NewGuid(), RoomId = dbRoom.Id, ImageUrl = imageUrl };
+                            dbRoom.RoomImages.Add(newRoomImage); // Add to tracked collection
+                            _context.RoomImages.Add(newRoomImage); // Add to DbSet
+                        }
+                    }
+                }
+
                 if (ModelState.IsValid)
                 {
-                    room.UpdatedAt = DateTime.UtcNow;
-                    _context.Update(room);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index), new { buildingId = room.BuildingId });
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index), new { buildingId = dbRoom.BuildingId });
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        _logger.LogError("Concurrency error editing room {RoomId}", id);
+                        ModelState.AddModelError(string.Empty, "The room was modified by another user. Please reload and try again.");
+                        // Optionally, reload dbRoom from the database here
+                    }
                 }
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 ViewBag.Buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
-                ViewBag.SelectedBuildingId = room.BuildingId;
+                ViewBag.SelectedBuildingId = dbRoom.BuildingId;
                 ViewBag.AllAmenities = await _context.Amenities.ToListAsync();
                 ViewBag.SelectedAmenities = amenityIds.Where(x => !string.IsNullOrEmpty(x)).Select(x => Guid.Parse(x!)).ToList();
-                return View(room);
+                return View(dbRoom);
             }
             catch (Exception ex)
             {
@@ -238,6 +348,7 @@ namespace RentalService.Controllers
             {
                 var room = await _context.Rooms
                     .Include(r => r.Images)
+                    .Include(r => r.RoomImages)
                     .Include(r => r.Amenities)
                     .FirstOrDefaultAsync(r => r.Id == id);
                 if (room == null) return NotFound();

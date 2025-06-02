@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "9+xeEIr/jmQ=",
+  "dgSpecHash": "x7BC5JARXPE=",
   "success": true,
   "projectFilePath": "E:\\EXE\\rental-service\\RentalService.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\asus\\.nuget\\packages\\awssdk.core\\4.0.0.5\\awssdk.core.4.0.0.5.nupkg.sha512",
+    "C:\\Users\\asus\\.nuget\\packages\\awssdk.s3\\4.0.1.1\\awssdk.s3.4.0.1.1.nupkg.sha512",
     "C:\\Users\\asus\\.nuget\\packages\\dotenv.net\\3.2.1\\dotenv.net.3.2.1.nupkg.sha512",
     "C:\\Users\\asus\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\asus\\.nuget\\packages\\microsoft.aspnetcore.authentication\\2.3.0\\microsoft.aspnetcore.authentication.2.3.0.nupkg.sha512",

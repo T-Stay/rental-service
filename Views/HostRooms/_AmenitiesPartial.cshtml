@@ -1,16 +1,27 @@
 @model List<RentalService.Models.Amenity>
 @{
     var selectedAmenities = ViewBag.SelectedAmenities as List<Guid> ?? new List<Guid>();
+    var amenities = Model ?? new List<RentalService.Models.Amenity>();
+    int columns = 4; // Number of columns per row
 }
-<div>
-    <label>Amenities</label>
-    <div>
-        @foreach (var amenity in Model)
+<div class="mb-3">
+    <label class="form-label">Amenities</label>
+    <div class="row g-2">
+        @for (int i = 0; i < amenities.Count; i++)
         {
-            <label class="form-check-label me-2">
-                <input type="checkbox" name="AmenityIds" value="@amenity.Id" class="form-check-input" @(selectedAmenities.Contains(amenity.Id) ? "checked" : "") />
-                @amenity.Name
-            </label>
+            <div class="col-6 col-md-3">
+                <div class="form-check">
+                    <input type="checkbox" name="AmenityIds" value="@amenities[i].Id" class="form-check-input" id="amenity_@amenities[i].Id" @(selectedAmenities.Contains(amenities[i].Id) ? "checked" : "") />
+                    <label class="form-check-label" for="amenity_@amenities[i].Id">@amenities[i].Name</label>
+                </div>
+            </div>
         }
     </div>
 </div>
+<style>
+    /* Make amenities grid look clean and straight */
+    .form-check {
+        padding-left: 1.8em;
+        min-height: 2.2em;
+    }
+</style>

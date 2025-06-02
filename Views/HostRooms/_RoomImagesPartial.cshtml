@@ -1,14 +1,103 @@
 @model List<RentalService.Models.RoomImage>
-<div>
+<div class="mb-3">
     <label>Room Images</label>
-    <div>
+    <div id="image-preview-list" class="mb-2 d-flex flex-wrap align-items-center">
         @if (Model != null && Model.Count > 0)
         {
-            foreach (var img in Model)
+            for (int i = 0; i < Model.Count; i++)
             {
-                <img src="@img.ImageUrl" alt="Room Image" style="max-width:100px; margin:5px;" />
+                <div class="image-preview-box position-relative m-2" data-image-id="@Model[i].Id">
+                    <img src="@Model[i].ImageUrl" alt="Room Image" class="room-image-preview" />
+                    <button type="button" class="btn btn-sm btn-danger image-remove-btn position-absolute top-0 end-0 m-1" title="Remove this image" onclick="removeExistingImage('@Model[i].Id')">&times;</button>
+                </div>
             }
         }
-        <input type="file" name="RoomImages" multiple />
     </div>
+    <input type="file" name="RoomImages" id="room-image-input" multiple class="form-control mt-2" accept="image/*" />
+    <small class="form-text text-muted">You can upload new images. Click the X to remove images from this room.</small>
 </div>
+
+<!-- Hidden container for RemoveImageIds -->
+<div id="remove-image-ids"></div>
+
+<style>
+.room-image-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px #ccc;
+}
+.image-preview-box {
+    display: inline-block;
+    position: relative;
+}
+.image-remove-btn {
+    background: rgba(220,53,69,0.85);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1.2rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+.image-remove-btn:hover {
+    background: #dc3545;
+}
+</style>
+
+<script>
+// Remove existing image (mark for removal, hide preview)
+function removeExistingImage(imageId) {
+    var box = document.querySelector('.image-preview-box[data-image-id="' + imageId + '"]');
+    if (box) box.style.display = 'none';
+    // Add hidden input for RemoveImageIds
+    var removeContainer = document.getElementById('remove-image-ids');
+    if (!removeContainer.querySelector('[value="' + imageId + '"]')) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'RemoveImageIds';
+        input.value = imageId;
+        removeContainer.appendChild(input);
+    }
+}
+// Preview new images and allow removal before upload
+const imageInput = document.getElementById('room-image-input');
+if (imageInput) {
+    imageInput.addEventListener('change', function (e) {
+        const previewList = document.getElementById('image-preview-list');
+        // Remove any previous previews for new images
+        document.querySelectorAll('.image-preview-box[data-new-image]').forEach(el => el.remove());
+        Array.from(this.files).forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                const box = document.createElement('div');
+                box.className = 'image-preview-box position-relative m-2';
+                box.setAttribute('data-new-image', idx);
+                const img = document.createElement('img');
+                img.src = ev.target.result;
+                img.className = 'room-image-preview';
+                img.alt = 'New Room Image';
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-danger image-remove-btn position-absolute top-0 end-0 m-1';
+                btn.title = 'Remove this image';
+                btn.innerHTML = '&times;';
+                btn.onclick = function () {
+                    box.remove();
+                    // Remove file from input (reset input to clear all new images)
+                    imageInput.value = '';
+                };
+                box.appendChild(img);
+                box.appendChild(btn);
+                previewList.appendChild(box);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+}
+</script>
