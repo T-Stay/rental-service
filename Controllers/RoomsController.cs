@@ -29,7 +29,9 @@ namespace RentalService.Controllers
                 .Include(r => r.Amenities)
                 .Include(r => r.Reviews)
                     .ThenInclude(review => review.User)
-                .Include(r => r.Building).AsQueryable();
+                .Include(r => r.Building)
+                .AsQueryable()
+                .Where(r => r.Status == RoomStatus.Active);
             if (buildingId.HasValue)
                 rooms = rooms.Where(r => r.BuildingId == buildingId);
             if (!string.IsNullOrEmpty(location))
@@ -51,6 +53,8 @@ namespace RentalService.Controllers
                 .Include(r => r.RoomImages)
                 .Include(r => r.Amenities)
                 .Include(r => r.Building)
+                    .ThenInclude(b => b.Host)
+                        .ThenInclude(h => h.ContactInformations)
                 .Include(r => r.Reviews)
                     .ThenInclude(review => review.User)
                 .FirstOrDefaultAsync(r => r.Id == id);

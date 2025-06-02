@@ -26,14 +26,6 @@
                 <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger"><i
                         class="fa-solid fa-trash"></i>Delete</a>
             </div>
-            @if (TempData["ToastError"] != null)
-            {
-                <div class="alert alert-danger mt-3">@TempData["ToastError"]</div>
-            }
-            @if (TempData["ToastSuccess"] != null)
-            {
-                <div class="alert alert-success mt-3">@TempData["ToastSuccess"]</div>
-            }
             <hr class="my-4" />
             @* Optionally, add reviews or other host-specific info here *@
         </div>

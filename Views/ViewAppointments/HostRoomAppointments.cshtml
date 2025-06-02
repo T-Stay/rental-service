@@ -106,3 +106,9 @@
     </tbody>
 </table>
 <a href="@Url.Action("Index", "HostRooms")">Back to My Rooms</a>
+<script>
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text);
+        toastr.success('Copied to clipboard!');
+    }
+</script>
