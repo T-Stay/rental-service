@@ -1,7 +1,7 @@
 @model RentalService.Models.Room
 @using System.Linq;
 @{
-    ViewData["Title"] = "Room Details";
+    ViewData["Title"] = "Chi tiết phòng";
     var avgRating = Model.Reviews != null && Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
     var reviewCount = Model.Reviews?.Count ?? 0;
 }
@@ -18,30 +18,30 @@
                 }
             </div>
             <div class="mb-2 text-muted"><i class="fa-solid fa-location-dot"></i> @Model.Building?.Location</div>
-            <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("N0") ₫</div>
+            <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("N0") </div>
             <div class="mb-3">@Model.Description</div>
             @if (Model.Amenities != null && Model.Amenities.Count > 0)
             {
-                <div class="mb-3"><strong>Amenities:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
+                <div class="mb-3"><strong>Tiện nghi:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
             }
             @if (Model.Building?.Host?.ContactInformations != null && Model.Building.Host.ContactInformations.Count > 0)
             {
                 <div class="mt-3">
-                    <h5>Host Contact Information</h5>
+                    <h5>Thông tin liên hệ chủ nhà</h5>
                     <ul>
                         @foreach (var c in Model.Building.Host.ContactInformations)
                         {
                             if (c.Type.ToString() == "FacebookLink")
                             {
-                                <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                                <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem Facebook</a></li>
                             }
                             else if (c.Type.ToString() == "Email")
                             {
-                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
                             }
                             else if (c.Type.ToString() == "PhoneNumber")
                             {
-                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
                             }
                             else
                             {
@@ -52,23 +52,23 @@
                 </div>
             }
             <div class="d-flex flex-wrap gap-2 mb-3 mt-3">
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Back to list</a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách</a>
                 @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
                 {
                     <form method="get" action="@Url.Action("Create", "ViewAppointments")" class="d-inline">
                         <input type="hidden" name="roomId" value="@Model.Id" />
-                        <button type="submit" class="btn btn-primary">Book a Viewing Appointment</button>
+                        <button type="submit" class="btn btn-primary">Đặt lịch xem phòng</button>
                     </form>
                     <form method="get" action="@Url.Action("Create", "BookingRequests")" class="d-inline">
                         <input type="hidden" name="roomId" value="@Model.Id" />
-                        <button type="submit" class="btn btn-success">Request Booking</button>
+                        <button type="submit" class="btn btn-success">Yêu cầu đặt phòng</button>
                     </form>
                 }
             </div>
             <hr class="my-4" />
             <div class="mt-4">
-                <span class="fs-5 fw-bold">Reviews</span>
-                <span class="ms-2">@Html.Raw(RenderStars(avgRating)) <span class="text-muted">(@avgRating.ToString("0.0"))/5 from @reviewCount reviews</span></span>
+                <span class="fs-5 fw-bold">Đánh giá</span>
+                <span class="ms-2">@Html.Raw(RenderStars(avgRating)) <span class="text-muted">(@avgRating.ToString("0.0"))/5 từ @reviewCount đánh giá</span></span>
             </div>
             @await Html.PartialAsync("_ReviewsPartial", Model.Reviews)
             @await Html.PartialAsync("_ReviewForm", Model)

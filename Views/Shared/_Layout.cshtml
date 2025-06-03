@@ -64,10 +64,10 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav nav nav-pills me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")" asp-controller="Rooms" asp-action="Index">Rooms</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")" asp-controller="Rooms" asp-action="Index">Phòng</a>
                         </li>
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
@@ -75,53 +75,36 @@
                             if (role == "customer")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "BookingRequests" ? "active" : "")" asp-controller="BookingRequests" asp-action="Index">Bookings</a>
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "BookingRequests" ? "active" : "")" asp-controller="BookingRequests" asp-action="Index">Đặt phòng</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-controller="ViewAppointments" asp-action="Index">Appointments</a>
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-controller="ViewAppointments" asp-action="Index">Lịch hẹn</a>
                                 </li>
                             }
                             else if (role == "host")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" ? "active" : "")" asp-controller="HostBuildings" asp-action="Index">My Buildings</a>
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" ? "active" : "")" asp-controller="HostBuildings" asp-action="Index">Tòa nhà của tôi</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")" asp-controller="HostRooms" asp-action="Index">My Rooms</a>
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")" asp-controller="HostRooms" asp-action="Index">Phòng của tôi</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")" asp-controller="ViewAppointments" asp-action="HostRoomAppointments">Room Appointments</a>
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")" asp-controller="ViewAppointments" asp-action="HostRoomAppointments">Lịch xem phòng</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" asp-controller="HostDashboard" asp-action="Index">Dashboard</a>
+                                    <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" asp-controller="HostDashboard" asp-action="Index">Bảng điều khiển</a>
                                 </li>
                             }
                             else if (role == "admin")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-danger @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">Admin</a>
+                                    <a class="nav-link text-danger @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">Quản trị</a>
                                 </li>
                             }
                         }
                     </ul>
                     <ul class="navbar-nav nav nav-pills ms-auto">
-                        <li class="nav-item dropdown me-2">
-        <a class="nav-link d-flex align-items-center" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="/images/@(System.Threading.Thread.CurrentThread.CurrentUICulture.Name.StartsWith("vi") ? "vi.svg" : "en.svg")" alt="Lang" width="32" height="24" class="me-1" style="object-fit:cover;" />
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="langDropdown">
-            <li>
-                <a class="dropdown-item d-flex align-items-center" href="#" onclick="setLang('en')">
-                    <img src="/images/en.svg" alt="English" width="20" height="20" class="me-2" style="object-fit:cover;" /> English
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-item d-flex align-items-center" href="#" onclick="setLang('vi')">
-                    <img src="/images/vi.svg" alt="Tiếng Việt" width="20" height="20" class="me-2" style="object-fit:cover;" /> Tiếng Việt
-                </a>
-            </li>
-        </ul>
-    </li>
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
                             var role = (User.FindFirst("role")?.Value ?? "user").ToLower();
@@ -135,7 +118,7 @@
                                         <div class="text-center p-3 text-muted">Loading...</div>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-center" href="@Url.Action("CustomerDashboard", "Home")">View all notifications</a></li>
+                                    <li><a class="dropdown-item text-center" href="@Url.Action("CustomerDashboard", "Home")">Xem tất cả thông báo</a></li>
                                 </ul>
                             </li>
                             <li class="nav-item dropdown">
@@ -144,11 +127,11 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                     <li class="dropdown-header"><i class="fa-solid fa-user me-2"></i>@User.Identity.Name</li>
-                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Profile")"><i class="fa-solid fa-id-badge me-2"></i>Profile</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Profile")"><i class="fa-solid fa-id-badge me-2"></i>Hồ sơ</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                            <button type="submit" class="dropdown-item"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</button>
+                                            <button type="submit" class="dropdown-item"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -157,10 +140,10 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Login" ? "active" : "")" asp-controller="Account" asp-action="Login">Login</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Login" ? "active" : "")" asp-controller="Account" asp-action="Login">Đăng nhập</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Register" ? "active" : "")" asp-controller="Account" asp-action="Register">Register</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Register" ? "active" : "")" asp-controller="Account" asp-action="Register">Đăng ký</a>
                             </li>
                         }
                     </ul>
@@ -178,7 +161,7 @@
     </div>
     <footer class="footer mt-4">
         <div class="container">
-            &copy; 2025 - T-Stay - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - T-Stay - <a asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

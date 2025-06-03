@@ -1,23 +1,23 @@
 @model IEnumerable<RentalService.Models.Building>
 @{
-    ViewData["Title"] = "My Buildings";
+    ViewData["Title"] = "Tòa nhà của tôi";
     var error = ViewBag.Error as string;
 }
 <div class="container mt-4">
-    <h2>My Buildings</h2>
+    <h2>Tòa nhà của tôi</h2>
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
     }
-    <a href="@Url.Action("Create")" class="btn btn-success mb-3">Add New Building</a>
+    <a href="@Url.Action("Create")" class="btn btn-success mb-3">Thêm tòa nhà mới</a>
     <table class="table table-hover table-bordered">
         <thead class="table-light">
             <tr>
-                <th>Name</th>
-                <th>Address</th>
-                <th>Description</th>
-                <th>Rooms</th>
-                <th>Actions</th>
+                <th>Tên</th>
+                <th>Địa chỉ</th>
+                <th>Mô tả</th>
+                <th>Số phòng</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -29,13 +29,13 @@
                 <td>@building.Description</td>
                 <td>@(building.Rooms?.Count ?? 0)</td>
                 <td>
-                    <a href="@Url.Action("Edit", new { id = building.Id })" class="btn btn-primary btn-sm">Edit</a>
-                    <a href="@Url.Action("Delete", new { id = building.Id })" class="btn btn-danger btn-sm">Delete</a>
-                    <a href="@Url.Action("Index", "HostRooms", new { buildingId = building.Id })" class="btn btn-secondary btn-sm">View Rooms</a>
+                    <a href="@Url.Action("Edit", new { id = building.Id })" class="btn btn-primary btn-sm">Sửa</a>
+                    <a href="@Url.Action("Delete", new { id = building.Id })" class="btn btn-danger btn-sm">Xóa</a>
+                    <a href="@Url.Action("Index", "HostRooms", new { buildingId = building.Id })" class="btn btn-secondary btn-sm">Xem phòng</a>
                 </td>
             </tr>
         }
         </tbody>
     </table>
-    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Back to Dashboard</a>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Quay lại bảng điều khiển</a>
 </div>

@@ -1,12 +1,12 @@
 @model IEnumerable<RentalService.Models.BookingRequest>
 @{
-    ViewData["Title"] = "My Booking Requests";
+    ViewData["Title"] = "Yêu cầu đặt phòng của tôi";
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="fw-bold text-info mb-0"><i class="fa-solid fa-envelope-open-text me-2"></i>My Booking Requests</h2>
+    <h2 class="fw-bold text-info mb-0"><i class="fa-solid fa-envelope-open-text me-2"></i>Yêu cầu đặt phòng của tôi</h2>
     <div>
-        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-        <a href="@Url.Action("Create")" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Request</a>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
+        <a href="@Url.Action("Create")" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Tạo yêu cầu mới</a>
     </div>
 </div>
 <div class="card shadow-sm">
@@ -14,10 +14,10 @@
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
-                    <th>Room</th>
-                    <th>Message</th>
-                    <th>Status</th>
-                    <th>Created</th>
+                    <th>Phòng</th>
+                    <th>Tin nhắn</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
                     <th></th>
                 </tr>
             </thead>
@@ -32,30 +32,32 @@
                         }
                         else
                         {
-                            <span class="text-muted">Unknown</span>
+                            <span class="text-muted">Không xác định</span>
                         }
                     </td>
                     <td>@req.Message</td>
                     <td>
                         @if (req.Status.ToString() == "Pending")
                         {
-                            <span class="badge bg-warning">Pending</span>
+                            <span class="badge bg-warning">Đang chờ</span>
                         }
                         else if (req.Status.ToString() == "Approved")
                         {
-                            <span class="badge bg-success">Approved</span>
+                            <span class="badge bg-success">Đã duyệt</span>
                         }
                         else if (req.Status.ToString() == "Rejected")
                         {
-                            <span class="badge bg-danger">Rejected</span>
+                            <span class="badge bg-danger">Từ chối</span>
                         }
                         else
                         {
                             <span class="badge bg-secondary">@req.Status</span>
                         }
                     </td>
-                    <td>@req.CreatedAt.ToShortDateString()</td>
-                    <td><a href="@Url.Action("Details", new { id = req.Id })" class="btn btn-outline-info btn-sm">Details</a></td>
+                    <td>@req.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>
+                        <a href="@Url.Action("Details", new { id = req.Id })" class="btn btn-sm btn-outline-info">Chi tiết</a>
+                    </td>
                 </tr>
             }
             </tbody>

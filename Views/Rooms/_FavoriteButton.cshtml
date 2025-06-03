@@ -6,7 +6,7 @@
 {
     <form asp-controller="Favorites" asp-action="@(isFavorite ? "Remove" : "Add")" method="post" style="display:inline">
         <input type="hidden" name="roomId" value="@Model.Id" />
-        <button type="submit" class="btn p-0 border-0 bg-transparent" title="@(isFavorite ? "Remove from favorites" : "Add to favorites")">
+        <button type="submit" class="btn p-0 border-0 bg-transparent" title="@(isFavorite ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích")">
             <i class="fa@(isFavorite ? "s" : "r") fa-heart" style="color:@(isFavorite ? "var(--accent-red)" : "#bbb"); font-size:1.7rem;"></i>
         </button>
     </form>

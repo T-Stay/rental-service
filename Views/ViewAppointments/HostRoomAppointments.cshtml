@@ -1,21 +1,21 @@
 @model IEnumerable<RentalService.Models.ViewAppointment>
 @{
-    ViewData["Title"] = "Room View Appointments";
+    ViewData["Title"] = "Lịch hẹn xem phòng (chủ nhà)";
     var rooms = ViewBag.Rooms as List<RentalService.Models.Room>;
     var selectedRoomId = ViewBag.SelectedRoomId as Guid?;
     var status = ViewBag.Status as string;
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="fw-bold text-success mb-0"><i class="fa-solid fa-calendar-day me-2"></i>Room View Appointments</h2>
-    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    <h2 class="fw-bold text-success mb-0"><i class="fa-solid fa-calendar-day me-2"></i>Lịch hẹn xem phòng (chủ nhà)</h2>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
 </div>
 <form method="get" class="mb-3 row g-2 align-items-end">
     <div class="col-auto">
-        <label class="form-label mb-0">Room:</label>
+        <label class="form-label mb-0">Phòng:</label>
     </div>
     <div class="col-auto">
         <select name="roomId" class="form-select">
-            <option value="">All</option>
+            <option value="">Tất cả</option>
             @if (rooms != null)
             {
                 foreach (var r in rooms)
@@ -33,11 +33,11 @@
         </select>
     </div>
     <div class="col-auto">
-        <label class="form-label mb-0">Status:</label>
+        <label class="form-label mb-0">Trạng thái:</label>
     </div>
     <div class="col-auto">
         <select name="status" class="form-select">
-            <option value="">All</option>
+            <option value="">Tất cả</option>
             @foreach (var st in Enum.GetNames(typeof(RentalService.Models.ViewAppointmentStatus)))
             {
                 if (status == st)
@@ -52,7 +52,7 @@
         </select>
     </div>
     <div class="col-auto">
-        <button type="submit" class="btn btn-outline-info">Filter</button>
+        <button type="submit" class="btn btn-outline-info">Lọc</button>
     </div>
 </form>
 <div class="card shadow-sm">
@@ -60,11 +60,11 @@
         <table class="table table-hover mb-0">
             <thead class="table-light">
                 <tr>
-                    <th>Room</th>
-                    <th>Customer</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Phòng</th>
+                    <th>Khách hàng</th>
+                    <th>Thời gian</th>
+                    <th>Trạng thái</th>
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,7 +80,7 @@
                             }
                             else
                             {
-                                <span class="text-muted">Unknown</span>
+                                <span class="text-muted">Không xác định</span>
                             }
                         </td>
                         <td>@appt.User?.Name</td>
@@ -88,15 +88,15 @@
                         <td>
                             @if (appt.Status == RentalService.Models.ViewAppointmentStatus.Pending)
                             {
-                                <span class="badge bg-warning">Pending</span>
+                                <span class="badge bg-warning">Đang chờ</span>
                             }
                             else if (appt.Status == RentalService.Models.ViewAppointmentStatus.Confirmed)
                             {
-                                <span class="badge bg-success">Confirmed</span>
+                                <span class="badge bg-success">Đã xác nhận</span>
                             }
                             else if (appt.Status == RentalService.Models.ViewAppointmentStatus.Cancelled)
                             {
-                                <span class="badge bg-danger">Cancelled</span>
+                                <span class="badge bg-danger">Đã hủy</span>
                             }
                             else
                             {
@@ -109,11 +109,11 @@
                                 <form asp-action="UpdateAppointmentStatus" method="post" class="d-inline">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@appt.Id" />
-                                    <button type="submit" name="action" value="accept" class="btn btn-success btn-sm me-1">Accept</button>
-                                    <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm me-1">Decline</button>
+                                    <button type="submit" name="action" value="accept" class="btn btn-success btn-sm me-1">Chấp nhận</button>
+                                    <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm me-1">Từ chối</button>
                                 </form>
                             }
-                            <a href="@Url.Action("HostDetails", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm">Details</a>
+                            <a href="@Url.Action("HostDetails", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm">Chi tiết</a>
                         </td>
                     </tr>
                     <tr>
@@ -121,21 +121,21 @@
                             @if (appt.User != null && appt.User.ContactInformations != null && appt.User.ContactInformations.Count > 0)
                             {
                                 <div>
-                                    <strong>Customer Contact Information:</strong>
+                                    <strong>Thông tin liên hệ khách hàng:</strong>
                                     <ul>
                                         @foreach (var c in appt.User.ContactInformations)
                                         {
                                             if (c.Type.ToString() == "FacebookLink")
                                             {
-                                                <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                                                <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem hồ sơ</a></li>
                                             }
                                             else if (c.Type.ToString() == "Email")
                                             {
-                                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
                                             }
                                             else if (c.Type.ToString() == "PhoneNumber")
                                             {
-                                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
                                             }
                                             else
                                             {
@@ -151,7 +151,7 @@
             }
             else
             {
-                <tr><td colspan="5" class="text-center text-muted">No appointments found.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted">Không tìm thấy lịch hẹn nào.</td></tr>
             }
             </tbody>
         </table>
@@ -163,7 +163,7 @@
         if (!document.getElementById('copyToast')) {
             var toast = document.createElement('div');
             toast.id = 'copyToast';
-            toast.innerText = 'Copied!';
+            toast.innerText = 'Đã sao chép!';
             toast.style.position = 'fixed';
             toast.style.left = '50%';
             toast.style.bottom = '30px';

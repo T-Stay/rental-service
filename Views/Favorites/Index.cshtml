@@ -1,19 +1,19 @@
 @model IEnumerable<RentalService.Models.Favorite>
 @{
-    ViewData["Title"] = "My Favorites";
+    ViewData["Title"] = "Phòng yêu thích của tôi";
 }
 <link rel="stylesheet" href="~/css/room-cards.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="fw-bold text-danger mb-0"><i class="fa-solid fa-heart me-2"></i>My Favorite Rooms</h2>
+    <h2 class="fw-bold text-danger mb-0"><i class="fa-solid fa-heart me-2"></i>Phòng yêu thích</h2>
     <div>
-        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-        <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Find Rooms</a>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary me-2"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
+        <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Tìm phòng</a>
     </div>
 </div>
 @if (!Model.Any())
 {
-    <div class="alert alert-info">You have no favorite rooms yet.</div>
+    <div class="alert alert-info">Bạn chưa có phòng yêu thích nào.</div>
 }
 <div class="row g-4">
 @foreach (var fav in Model)
@@ -22,11 +22,11 @@
         <div class="room-card h-100">
             @if (fav.Room?.Images != null && fav.Room.Images.Count > 0 && !string.IsNullOrEmpty(fav.Room.Images[0].ImageUrl))
             {
-                <img src="@fav.Room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                <img src="@fav.Room.Images[0].ImageUrl" alt="Ảnh phòng" class="room-card-img" />
             }
             else
             {
-                <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
+                <img src="/images/no-image.png" alt="Không có ảnh" class="room-card-img" />
             }
             <div class="room-card-body">
                 <div class="room-card-title">@fav.Room?.Name</div>
@@ -38,12 +38,12 @@
                         <span><i class="fa-solid fa-list"></i> @string.Join(", ", fav.Room.Amenities.Take(3).Select(a => a.Name))</span>
                         @if (fav.Room.Amenities.Count > 3)
                         {
-                            <span> +@((fav.Room.Amenities.Count - 3)) more</span>
+                            <span> +@((fav.Room.Amenities.Count - 3)) tiện nghi nữa</span>
                         }
                     }
                 </div>
                 <div class="room-card-link">
-                    <a href="@Url.Action("Details", "Rooms", new { id = fav.RoomId })" class="btn btn-outline-info btn-sm mt-2">View Room</a>
+                    <a href="@Url.Action("Details", "Rooms", new { id = fav.RoomId })" class="btn btn-outline-info btn-sm mt-2">Xem phòng</a>
                 </div>
             </div>
         </div>

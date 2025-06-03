@@ -1,8 +1,8 @@
 @model IEnumerable<RentalService.Models.Room>
 @{
-    ViewData["Title"] = "Rooms Pending Approval";
+    ViewData["Title"] = "Phòng chờ duyệt";
 }
-<h2>Rooms Pending Approval</h2>
+<h2>Phòng chờ duyệt</h2>
 <div class="row g-4">
 @foreach (var room in Model)
 {
@@ -10,11 +10,11 @@
         <div class="room-card h-100">
             @if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
             {
-                <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" />
+                <img src="@room.Images[0].ImageUrl" alt="Ảnh phòng" class="room-card-img" />
             }
             else
             {
-                <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
+                <img src="/images/no-image.png" alt="Không có ảnh" class="room-card-img" />
             }
             <div class="room-card-body">
                 <div class="room-card-title">@room.Name</div>
@@ -25,11 +25,11 @@
                 <div class="room-card-link d-flex gap-1 flex-wrap">
                     <form asp-action="ApproveRoom" method="post" style="display:inline">
                         <input type="hidden" name="id" value="@room.Id" />
-                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        <button type="submit" class="btn btn-success btn-sm">Duyệt</button>
                     </form>
                     <form asp-action="RejectRoom" method="post" style="display:inline">
                         <input type="hidden" name="id" value="@room.Id" />
-                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                        <button type="submit" class="btn btn-danger btn-sm">Từ chối</button>
                     </form>
                 </div>
             </div>
@@ -37,4 +37,4 @@
     </div>
 }
 </div>
-<a href="@Url.Action("Index")">Back to Admin Home</a>
+<a href="@Url.Action("Index")">Quay lại trang quản trị</a>

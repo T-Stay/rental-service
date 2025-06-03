@@ -1,39 +1,39 @@
 @model RentalService.Models.Room
 @{
-    ViewData["Title"] = "Create Room";
+    ViewData["Title"] = "Tạo phòng";
 }
-<h2>Create Room</h2>
+<h2>Tạo phòng</h2>
 <form asp-action="Create" enctype="multipart/form-data" method="post" class="mt-4">
     <div class="row">
         <div class="col-md-6">
             <div class="form-group mb-3">
-                <label asp-for="Name" class="form-label">Room Name</label>
-                <input asp-for="Name" class="form-control" placeholder="Enter room name" />
+                <label asp-for="Name" class="form-label">Tên phòng</label>
+                <input asp-for="Name" class="form-control" placeholder="Nhập tên phòng" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="Description" class="form-label">Description</label>
-                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the room"></textarea>
+                <label asp-for="Description" class="form-label">Mô tả</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mô tả phòng"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label asp-for="Price" class="form-label">Price per night (VND)</label>
+                <label asp-for="Price" class="form-label">Giá mỗi đêm (VND)</label>
                 <input asp-for="Price" class="form-control" placeholder="0" step="1" min="0" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             <div class="form-group mb-3">
-                <label>Status</label>
+                <label>Trạng thái</label>
                 <select asp-for="Status" class="form-select">
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                    <option value="Hidden">Hidden</option>
+                    <option value="Active">Đang hoạt động</option>
+                    <option value="Inactive">Không hoạt động</option>
+                    <option value="Hidden">Ẩn</option>
                 </select>
             </div>
             <div class="form-group mb-3">
-                <label>Upload Room Image</label>
+                <label>Ảnh phòng</label>
                 <input type="file" name="imageFile" class="form-control" accept="image/*" />
             </div>
-            <button type="submit" class="btn btn-primary">Create Room</button>
+            <button type="submit" class="btn btn-primary">Tạo phòng</button>
         </div>
     </div>
 </form>

@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Customer Dashboard";
+    ViewData["Title"] = "Bảng điều khiển khách thuê";
     var favorites = ViewBag.Favorites as List<RentalService.Models.Favorite>;
     var bookings = ViewBag.BookingRequests as List<RentalService.Models.BookingRequest>;
     var appointments = ViewBag.Appointments as List<RentalService.Models.ViewAppointment>;
@@ -10,13 +10,13 @@
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="container mt-4">
-    <h2 class="mb-4 fw-bold text-primary"><i class="fa-solid fa-gauge-high me-2"></i>Customer Dashboard</h2>
+    <h2 class="mb-4 fw-bold text-primary"><i class="fa-solid fa-gauge-high me-2"></i>Bảng điều khiển khách thuê</h2>
     @if (unreadNotifications.Count > 0)
     {
         <div class="alert alert-info d-flex align-items-center justify-content-between">
             <div>
                 <i class="fa fa-bell me-2"></i>
-                <b>You have @unreadNotifications.Count unread notification(s):</b>
+                <b>Bạn có @unreadNotifications.Count thông báo chưa đọc:</b>
                 <ul class="mb-0">
                     @foreach (var n in unreadNotifications.Take(3))
                     {
@@ -25,7 +25,7 @@
                 </ul>
             </div>
             <form method="post" asp-action="MarkNotificationsRead" asp-controller="Home">
-                <button type="submit" class="btn btn-sm btn-outline-primary">Mark all as read</button>
+                <button type="submit" class="btn btn-sm btn-outline-primary">Đánh dấu tất cả đã đọc</button>
             </form>
         </div>
     }
@@ -34,9 +34,9 @@
             <div class="card shadow-sm border-0 h-100 bg-light">
                 <div class="card-body text-center">
                     <i class="fa-solid fa-heart fa-2x text-danger mb-2"></i>
-                    <h5 class="card-title">Favorites</h5>
+                    <h5 class="card-title">Yêu thích</h5>
                     <p class="display-6 fw-semibold">@(favorites?.Count ?? 0)</p>
-                    <a href="@Url.Action("Index", "Favorites")" class="btn btn-outline-danger btn-sm w-100">View Favorites</a>
+                    <a href="@Url.Action("Index", "Favorites")" class="btn btn-outline-danger btn-sm w-100">Xem yêu thích</a>
                 </div>
             </div>
         </div>
@@ -44,9 +44,9 @@
             <div class="card shadow-sm border-0 h-100 bg-light">
                 <div class="card-body text-center">
                     <i class="fa-solid fa-envelope-open-text fa-2x text-info mb-2"></i>
-                    <h5 class="card-title">Booking Requests</h5>
+                    <h5 class="card-title">Yêu cầu đặt phòng</h5>
                     <p class="display-6 fw-semibold">@(bookings?.Count ?? 0)</p>
-                    <a href="@Url.Action("Index", "BookingRequests")" class="btn btn-outline-info btn-sm w-100">View Bookings</a>
+                    <a href="@Url.Action("Index", "BookingRequests")" class="btn btn-outline-info btn-sm w-100">Xem yêu cầu</a>
                 </div>
             </div>
         </div>
@@ -54,9 +54,9 @@
             <div class="card shadow-sm border-0 h-100 bg-light">
                 <div class="card-body text-center">
                     <i class="fa-solid fa-calendar-check fa-2x text-success mb-2"></i>
-                    <h5 class="card-title">Appointments</h5>
+                    <h5 class="card-title">Cuộc hẹn</h5>
                     <p class="display-6 fw-semibold">@(appointments?.Count ?? 0)</p>
-                    <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success btn-sm w-100">View Appointments</a>
+                    <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success btn-sm w-100">Xem cuộc hẹn</a>
                 </div>
             </div>
         </div>
@@ -64,9 +64,9 @@
             <div class="card shadow-sm border-0 h-100 bg-light">
                 <div class="card-body text-center">
                     <i class="fa-solid fa-magnifying-glass fa-2x text-primary mb-2"></i>
-                    <h5 class="card-title">Find Rooms</h5>
+                    <h5 class="card-title">Tìm phòng</h5>
                     <p class="display-6 fw-semibold">@totalActiveRooms</p>
-                    <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary btn-sm w-100">Search Rooms</a>
+                    <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary btn-sm w-100">Tìm kiếm phòng</a>
                 </div>
             </div>
         </div>
@@ -75,16 +75,16 @@
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-info text-white fw-bold">
-                    <i class="fa-solid fa-envelope me-2"></i>Recent Booking Requests
+                    <i class="fa-solid fa-envelope me-2"></i>Yêu cầu đặt phòng gần đây
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Room</th>
-                                <th>Message</th>
-                                <th>Status</th>
-                                <th>Created</th>
+                                <th>Phòng</th>
+                                <th>Thông điệp</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -98,15 +98,15 @@
                                     <td>
                                         @if (req.Status.ToString() == "Pending")
                                         {
-                                            <span class="badge bg-warning">Pending</span>
+                                            <span class="badge bg-warning">Đang chờ</span>
                                         }
                                         else if (req.Status.ToString() == "Approved")
                                         {
-                                            <span class="badge bg-success">Approved</span>
+                                            <span class="badge bg-success">Đã duyệt</span>
                                         }
                                         else if (req.Status.ToString() == "Rejected")
                                         {
-                                            <span class="badge bg-danger">Rejected</span>
+                                            <span class="badge bg-danger">Bị từ chối</span>
                                         }
                                         else
                                         {
@@ -119,7 +119,7 @@
                         }
                         else
                         {
-                            <tr><td colspan="4" class="text-center text-muted">No recent booking requests.</td></tr>
+                            <tr><td colspan="4" class="text-center text-muted">Không có yêu cầu đặt phòng gần đây.</td></tr>
                         }
                         </tbody>
                     </table>
@@ -129,15 +129,15 @@
         <div class="col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-success text-white fw-bold">
-                    <i class="fa-solid fa-calendar-day me-2"></i>Recent Appointments
+                    <i class="fa-solid fa-calendar-day me-2"></i>Cuộc hẹn gần đây
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Room</th>
-                                <th>Time</th>
-                                <th>Status</th>
+                                <th>Phòng</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -151,23 +151,23 @@
                                     <td>
                                         @if (appt.Status.ToString() == "Pending")
                                         {
-                                            <span class="badge bg-warning">Pending</span>
-                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
+                                            <span class="badge bg-warning">Đang chờ</span>
+                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Chi tiết</a>
                                         }
                                         else if (appt.Status.ToString() == "Confirmed")
                                         {
-                                            <span class="badge bg-success">Confirmed</span>
-                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
+                                            <span class="badge bg-success">Đã xác nhận</span>
+                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Chi tiết</a>
                                         }
                                         else if (appt.Status.ToString() == "Cancelled")
                                         {
-                                            <span class="badge bg-danger">Cancelled</span>
-                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
+                                            <span class="badge bg-danger">Đã hủy</span>
+                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Chi tiết</a>
                                         }
                                         else
                                         {
                                             <span class="badge bg-secondary">@appt.Status</span>
-                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
+                                            <a href="@Url.Action("Details", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Chi tiết</a>
                                         }
                                     </td>
                                 </tr>
@@ -175,7 +175,7 @@
                         }
                         else
                         {
-                            <tr><td colspan="3" class="text-center text-muted">No recent appointments.</td></tr>
+                            <tr><td colspan="3" class="text-center text-muted">Không có cuộc hẹn gần đây.</td></tr>
                         }
                         </tbody>
                     </table>

@@ -1,6 +1,6 @@
 @model RentalService.Models.User
 @{
-    ViewData["Title"] = "My Profile";
+    ViewData["Title"] = "Hồ sơ của tôi";
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
@@ -8,7 +8,7 @@
 <script>
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text);
-        toastr.success('Copied to clipboard!');
+        toastr.success('Đã sao chép vào clipboard!');
     }
 </script>
 <style>
@@ -34,11 +34,11 @@
     }
 </style>
 <div class="container mt-4">
-    <h2>My Profile</h2>
+    <h2>Hồ sơ của tôi</h2>
     <div class="card mb-4">
         <div class="card-body">
             <div class="d-flex align-items-center mb-3">
-                <div class="profile-img-placeholder me-3" style="cursor:pointer;" title="Change profile image">
+                <div class="profile-img-placeholder me-3" style="cursor:pointer;" title="Đổi ảnh đại diện">
                     <i class="fa fa-user"></i>
                 </div>
                 <div>
@@ -46,8 +46,8 @@
                     <div class="text-muted">@Model.Role</div>
                 </div>
             </div>
-            <p><strong>Email (login):</strong> @Model.Email</p>
-            <p><strong>Contact Information:</strong></p>
+            <p><strong>Email (đăng nhập):</strong> @Model.Email</p>
+            <p><strong>Thông tin liên hệ:</strong></p>
             <ul class="list-group mb-3">
                 @if (Model.ContactInformations != null && Model.ContactInformations.Count > 0)
                 {
@@ -67,13 +67,13 @@
                         else if (c.Type.ToString() == "Email")
                         {
                             @:<span>@c.Data
-                            @:    <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button>
+                            @:    <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button>
                             @:</span>
                         }
                         else if (c.Type.ToString() == "PhoneNumber")
                         {
                             @:<span>@c.Data
-                            @:    <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button>
+                            @:    <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button>
                             @:</span>
                         }
                         else
@@ -83,33 +83,33 @@
                         @:    </span>
                         @:    <form asp-action="DeleteContact" method="post" style="display:inline">
                         @:        <input type="hidden" name="id" value="@c.Id" />
-                        @:        <button type="submit" class="btn btn-sm btn-danger ms-2">Delete</button>
+                        @:        <button type="submit" class="btn btn-sm btn-danger ms-2">Xóa</button>
                         @:    </form>
                         @:</li>
                     }
                 }
                 else
                 {
-                    <li class="list-group-item">No contact information added.</li>
+                    <li class="list-group-item">Chưa có thông tin liên hệ nào.</li>
                 }
             </ul>
-            <button class="btn btn-outline-primary mb-2" type="button" onclick="document.getElementById('addContactForm').style.display='flex'">Add Contact</button>
+            <button class="btn btn-outline-primary mb-2" type="button" onclick="document.getElementById('addContactForm').style.display='flex'">Thêm liên hệ</button>
             <form id="addContactForm" asp-action="AddContact" method="post" class="mt-3 row g-2 align-items-end" style="display:none;">
                 <div class="col-auto">
-                    <label class="form-label mb-0">Type:</label>
+                    <label class="form-label mb-0">Loại:</label>
                     <select name="type" class="form-select">
                         <option value="Email">Email</option>
-                        <option value="PhoneNumber">Phone Number</option>
-                        <option value="FacebookLink">Facebook Link</option>
+                        <option value="PhoneNumber">Số điện thoại</option>
+                        <option value="FacebookLink">Liên kết Facebook</option>
                     </select>
                 </div>
                 <div class="col-auto">
-                    <label class="form-label mb-0">Data:</label>
+                    <label class="form-label mb-0">Dữ liệu:</label>
                     <input name="data" class="form-control" required />
                 </div>
                 <div class="col-auto">
-                    <button type="submit" class="btn btn-success">Add</button>
-                    <button type="button" class="btn btn-secondary ms-2" onclick="document.getElementById('addContactForm').style.display='none'">Cancel</button>
+                    <button type="submit" class="btn btn-success">Thêm</button>
+                    <button type="button" class="btn btn-secondary ms-2" onclick="document.getElementById('addContactForm').style.display='none'">Hủy</button>
                 </div>
             </form>
         </div>

@@ -1,31 +1,31 @@
 @model RentalService.Models.BookingRequest
 @{
-    ViewData["Title"] = "Booking Request Details";
+    ViewData["Title"] = "Chi tiết yêu cầu đặt phòng";
 }
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-info text-white fw-bold">
-        <i class="fa-solid fa-envelope"></i> Booking Request Details
+        <i class="fa-solid fa-envelope"></i> Chi tiết yêu cầu đặt phòng
     </div>
     <div class="card-body">
-        <p><strong>Room:</strong> <a href="@Url.Action("Details", "Rooms", new { id = Model.RoomId })" target="_blank">@Model.Room?.Name</a></p>
-        <p><strong>Customer:</strong> @Model.User?.Name</p>
-        <p><strong>Message:</strong> @Model.Message</p>
-        <p><strong>Status:</strong> 
+        <p><strong>Phòng:</strong> <a href="@Url.Action("Details", "Rooms", new { id = Model.RoomId })" target="_blank">@Model.Room?.Name</a></p>
+        <p><strong>Khách thuê:</strong> @Model.User?.Name</p>
+        <p><strong>Tin nhắn:</strong> @Model.Message</p>
+        <p><strong>Trạng thái:</strong> 
             @if (Model.Status.ToString() == "Pending")
             {
-                <span class="badge bg-warning">Pending</span>
+                <span class="badge bg-warning">Đang chờ</span>
             }
             else if (Model.Status.ToString() == "Approved")
             {
-                <span class="badge bg-success">Approved</span>
+                <span class="badge bg-success">Đã duyệt</span>
             }
             else if (Model.Status.ToString() == "Rejected")
             {
-                <span class="badge bg-danger">Rejected</span>
+                <span class="badge bg-danger">Từ chối</span>
             }
             else if (Model.Status.ToString() == "Cancelled")
             {
-                <span class="badge bg-secondary">Cancelled</span>
+                <span class="badge bg-secondary">Đã hủy</span>
             }
             else
             {
@@ -35,61 +35,61 @@
         @if (Model.Status.ToString() == "Pending")
         {
             <div class="alert alert-info mb-2">
-                <strong>Guidance:</strong> Approving this request will notify the customer and allow them to proceed with booking confirmation. Rejecting will notify the customer and close this request.
+                <strong>Hướng dẫn:</strong> Duyệt yêu cầu này sẽ thông báo cho khách thuê và cho phép họ xác nhận đặt phòng. Từ chối sẽ thông báo cho khách thuê và đóng yêu cầu này.
             </div>
             <div class="mb-3 d-flex gap-2">
                 <form id="approveForm" method="post" action="@Url.Action("Approve", "HostBookingRequests")" style="display:inline;">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-success me-2">Approve</button>
+                    <button type="submit" class="btn btn-success me-2">Duyệt</button>
                 </form>
                 <form id="rejectForm" method="post" action="@Url.Action("Reject", "HostBookingRequests")" style="display:inline;">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" class="btn btn-danger">Reject</button>
+                    <button type="submit" class="btn btn-danger">Từ chối</button>
                 </form>
             </div>
         }
         else if (Model.Status.ToString() == "Approved")
         {
             <div class="alert alert-success mb-2">
-                <strong>Request Approved.</strong> The customer has been notified and can now confirm the booking. Please wait for their confirmation or contact them if needed.
+                <strong>Yêu cầu đã được duyệt.</strong> Khách hàng đã được thông báo và có thể xác nhận đặt phòng. Vui lòng chờ đợi xác nhận của họ hoặc liên hệ với họ nếu cần.
             </div>
         }
         else if (Model.Status.ToString() == "Rejected")
         {
             <div class="alert alert-danger mb-2">
-                <strong>Request Rejected.</strong> The customer has been notified. No further action is required.
+                <strong>Yêu cầu đã bị từ chối.</strong> Khách hàng đã được thông báo. Không cần hành động gì thêm.
             </div>
         }
         else if (Model.Status.ToString() == "Cancelled")
         {
             <div class="alert alert-secondary mb-2">
-                <strong>Request Cancelled.</strong> This booking request has been cancelled. No further action is required.
+                <strong>Yêu cầu đã bị hủy.</strong> Yêu cầu đặt phòng này đã bị hủy. Không cần hành động gì thêm.
             </div>
         }
-        <p><strong>Created:</strong> @Model.CreatedAt</p>
+        <p><strong>Ngày tạo:</strong> @Model.CreatedAt</p>
         @if (Model.Room != null) {
-            <p><strong>Price:</strong> @Model.Room.Price.ToString("N0") ₫</p>
+            <p><strong>Giá:</strong> @Model.Room.Price.ToString("N0") ₫</p>
         }
         @if (Model.Room != null && Model.Room.Building != null && Model.Room.Building.Host != null && Model.Room.Building.Host.ContactInformations != null && Model.Room.Building.Host.ContactInformations.Count > 0)
         {
             <div class="mt-3">
-                <h5>Host Contact Information</h5>
+                <h5>Thông tin liên hệ của chủ nhà</h5>
                 <ul>
                     @foreach (var c in Model.Room.Building.Host.ContactInformations)
                     {
                         if (c.Type.ToString() == "FacebookLink")
                         {
-                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem hồ sơ</a></li>
                         }
                         else if (c.Type.ToString() == "Email")
                         {
-                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
                         }
                         else if (c.Type.ToString() == "PhoneNumber")
                         {
-                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
                         }
                         else
                         {
@@ -102,21 +102,21 @@
         @if (Model.User != null && Model.User.ContactInformations != null && Model.User.ContactInformations.Count > 0)
         {
             <div class="mt-3">
-                <h5>Customer Contact Information</h5>
+                <h5>Thông tin liên hệ của khách hàng</h5>
                 <ul>
                     @foreach (var c in Model.User.ContactInformations)
                     {
                         if (c.Type.ToString() == "FacebookLink")
                         {
-                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem hồ sơ</a></li>
                         }
                         else if (c.Type.ToString() == "Email")
                         {
-                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
                         }
                         else if (c.Type.ToString() == "PhoneNumber")
                         {
-                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
                         }
                         else
                         {
@@ -129,13 +129,13 @@
     </div>
 </div>
 <div class="d-flex gap-2">
-    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-    <a href="@Url.Action("Index")" class="btn btn-outline-info"><i class="fa-solid fa-list"></i> Back to Requests</a>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
+    <a href="@Url.Action("Index")" class="btn btn-outline-info"><i class="fa-solid fa-list"></i> Quay lại yêu cầu</a>
 </div>
 <script>
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text);
-        toastr.success('Copied to clipboard!');
+        toastr.success('Đã sao chép vào clipboard!');
     }
     $(function () {
         $('#approveForm, #rejectForm').submit(function (e) {
@@ -157,7 +157,7 @@
                     }
                 },
                 error: function () {
-                    toastr.error('An error occurred.');
+                    toastr.error('Đã xảy ra lỗi.');
                     btn.prop('disabled', false);
                 }
             });

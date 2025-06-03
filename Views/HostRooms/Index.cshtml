@@ -1,6 +1,6 @@
 @model IEnumerable<RentalService.Models.Room>
 @{
-    ViewData["Title"] = "My Rooms";
+    ViewData["Title"] = "Phòng của tôi";
     var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
     var error = ViewBag.Error as string;
@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="~/css/room-cards.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="container mt-4">
-    <h2>My Rooms</h2>
+    <h2>Phòng của tôi</h2>
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
@@ -22,9 +22,9 @@
         <div class="alert alert-success">@TempData["ToastSuccess"]</div>
     }
     <form method="get" class="mb-3">
-        <label>Building:</label>
+        <label>Tòa nhà:</label>
         <select name="buildingId" onchange="this.form.submit()" class="form-select d-inline w-auto ms-2">
-            <option value="">All</option>
+            <option value="">Tất cả</option>
             @if (buildings != null)
             {
                 foreach (var b in buildings)
@@ -40,7 +40,7 @@
                 }
             }
         </select>
-        <a href="@Url.Action("Create", new { buildingId = selectedBuildingId })" class="btn btn-success ms-3">Post New Room</a>
+        <a href="@Url.Action("Create", new { buildingId = selectedBuildingId })" class="btn btn-success ms-3">Đăng phòng mới</a>
     </form>
     <div class="row g-4">
     @foreach (var room in Model)
@@ -65,15 +65,15 @@
                     <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
                     <div class="room-card-status mb-2"><span class="badge bg-secondary">@room.Status</span></div>
                     <div class="room-card-link d-flex gap-1 flex-wrap">
-                        <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm">Details</a>
-                        <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Edit</a>
-                        <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Delete</a>
+                        <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm">Chi tiết</a>
+                        <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Chỉnh sửa</a>
+                        <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Xóa</a>
                         @if (room.Status == RentalService.Models.RoomStatus.Active)
                         {
                             <form asp-action="SetStatus" method="post" style="display:inline">
                                 <input type="hidden" name="id" value="@room.Id" />
                                 <input type="hidden" name="status" value="Inactive" />
-                                <button type="submit" class="btn btn-warning btn-sm">Hide</button>
+                                <button type="submit" class="btn btn-warning btn-sm">Ẩn</button>
                             </form>
                         }
                         else
@@ -81,7 +81,7 @@
                             <form asp-action="SetStatus" method="post" style="display:inline">
                                 <input type="hidden" name="id" value="@room.Id" />
                                 <input type="hidden" name="status" value="Active" />
-                                <button type="submit" class="btn btn-success btn-sm">Show</button>
+                                <button type="submit" class="btn btn-success btn-sm">Hiện</button>
                             </form>
                         }
                     </div>
@@ -90,5 +90,5 @@
         </div>
     }
     </div>
-    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Back to Dashboard</a>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Quay lại bảng điều khiển</a>
 </div>

@@ -1,35 +1,35 @@
 @model IEnumerable<RentalService.Models.Room>
 @{
-    ViewData["Title"] = "Room Search";
+    ViewData["Title"] = "Tìm phòng";
     var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
 }
 <link rel="stylesheet" href="~/css/room-cards.css" />
 <div class="d-flex flex-wrap gap-2 mb-3">
-    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
-    <a href="@Url.Action("Index", "Favorites")" class="btn btn-outline-danger"><i class="fa-solid fa-heart"></i> Favorites</a>
-    <a href="@Url.Action("Index", "BookingRequests")" class="btn btn-outline-info"><i class="fa-solid fa-envelope-open-text"></i> Bookings</a>
-    <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success"><i class="fa-solid fa-calendar-check"></i> Appointments</a>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
+    <a href="@Url.Action("Index", "Favorites")" class="btn btn-outline-danger"><i class="fa-solid fa-heart"></i> Yêu thích</a>
+    <a href="@Url.Action("Index", "BookingRequests")" class="btn btn-outline-info"><i class="fa-solid fa-envelope-open-text"></i> Đặt phòng</a>
+    <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success"><i class="fa-solid fa-calendar-check"></i> Lịch hẹn</a>
 </div>
-<h2>Room Search</h2>
+<h2>Tìm phòng</h2>
 <form method="get" class="mb-4 p-3 rounded shadow-sm bg-light">
     <div class="row g-2 align-items-end">
         <div class="col-md-3">
-            <label class="form-label mb-1">Location</label>
-            <input type="text" name="location" class="form-control" placeholder="Location" value="@Context.Request.Query["location"]" />
+            <label class="form-label mb-1">Khu vực</label>
+            <input type="text" name="location" class="form-control" placeholder="Khu vực" value="@Context.Request.Query["location"]" />
         </div>
         <div class="col-md-2">
-            <label class="form-label mb-1">Min Price (VND)</label>
-            <input type="number" name="minPrice" class="form-control" placeholder="Min Price (VND)" value="@Context.Request.Query["minPrice"]" step="1" min="0" />
+            <label class="form-label mb-1">Giá tối thiểu (VND)</label>
+            <input type="number" name="minPrice" class="form-control" placeholder="Giá tối thiểu (VND)" value="@Context.Request.Query["minPrice"]" step="1" min="0" />
         </div>
         <div class="col-md-2">
-            <label class="form-label mb-1">Max Price (VND)</label>
-            <input type="number" name="maxPrice" class="form-control" placeholder="Max Price (VND)" value="@Context.Request.Query["maxPrice"]" step="1" min="0" />
+            <label class="form-label mb-1">Giá tối đa (VND)</label>
+            <input type="number" name="maxPrice" class="form-control" placeholder="Giá tối đa (VND)" value="@Context.Request.Query["maxPrice"]" step="1" min="0" />
         </div>
         <div class="col-md-3">
-            <label class="form-label mb-1">Building</label>
+            <label class="form-label mb-1">Tòa nhà</label>
             <select name="buildingId" class="form-select">
-                <option value="">All</option>
+                <option value="">Tất cả</option>
                 @if (buildings != null)
                 {
                     foreach (var b in buildings)
@@ -47,8 +47,8 @@
             </select>
         </div>
         <div class="col-md-2 d-grid">
-            <label class="form-label mb-1" style="visibility:hidden">Search</label>
-            <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
+            <label class="form-label mb-1" style="visibility:hidden">Tìm kiếm</label>
+            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
         </div>
     </div>
 </form>

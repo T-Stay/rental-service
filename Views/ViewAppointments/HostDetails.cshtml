@@ -1,36 +1,36 @@
 @model RentalService.Models.ViewAppointment
 @{
-    ViewData["Title"] = "Appointment Details (Host)";
+    ViewData["Title"] = "Chi tiết lịch hẹn (chủ nhà)";
 }
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-primary text-white fw-bold">
-        <i class="fa-solid fa-calendar-day"></i> Appointment Details (Host)
+        <i class="fa-solid fa-calendar-day"></i> Chi tiết lịch hẹn (chủ nhà)
     </div>
     <div class="card-body">
-        <p><strong>Room:</strong> 
+        <p><strong>Phòng:</strong> 
             @if (Model.Room != null)
             {
                 <a href="@Url.Action("Details", "Rooms", new { id = Model.Room.Id })" target="_blank">@Model.Room.Name</a>
             }
             else
             {
-                <span class="text-muted">Unknown</span>
+                <span class="text-muted">Không xác định</span>
             }
         </p>
-        <p><strong>Customer:</strong> @Model.User?.Name</p>
-        <p><strong>Time:</strong> @Model.AppointmentTime.ToString("g")</p>
-        <p><strong>Status:</strong> 
+        <p><strong>Khách thuê:</strong> @Model.User?.Name</p>
+        <p><strong>Thời gian:</strong> @Model.AppointmentTime.ToString("g")</p>
+        <p><strong>Trạng thái:</strong> 
             @if (Model.Status.ToString() == "Pending")
             {
-                <span class="badge bg-warning">Pending</span>
+                <span class="badge bg-warning">Đang chờ</span>
             }
             else if (Model.Status.ToString() == "Confirmed")
             {
-                <span class="badge bg-success">Confirmed</span>
+                <span class="badge bg-success">Đã xác nhận</span>
             }
             else if (Model.Status.ToString() == "Cancelled")
             {
-                <span class="badge bg-danger">Cancelled</span>
+                <span class="badge bg-danger">Đã hủy</span>
             }
             else
             {
@@ -40,48 +40,48 @@
         @if (Model.Status.ToString() == "Pending")
         {
             <div class="alert alert-info mb-2">
-                <strong>Guidance:</strong> Accepting this appointment will notify the customer and confirm the viewing. Declining will notify the customer and cancel the appointment.
+                <strong>Hướng dẫn:</strong> Chấp nhận lịch hẹn này sẽ thông báo cho khách thuê và xác nhận lịch xem phòng. Từ chối sẽ thông báo cho khách thuê và hủy lịch hẹn.
             </div>
             <div class="mb-3 d-flex gap-2">
                 <form method="post" action="@Url.Action("UpdateAppointmentStatus", "ViewAppointments")" style="display:inline;">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.Id" />
-                    <button type="submit" name="action" value="accept" class="btn btn-success me-2">Accept</button>
-                    <button type="submit" name="action" value="decline" class="btn btn-danger">Decline</button>
+                    <button type="submit" name="action" value="accept" class="btn btn-success me-2">Chấp nhận</button>
+                    <button type="submit" name="action" value="decline" class="btn btn-danger">Từ chối</button>
                 </form>
             </div>
         }
         else if (Model.Status.ToString() == "Confirmed")
         {
             <div class="alert alert-success mb-2">
-                <strong>Appointment Confirmed.</strong> The customer has been notified. Please prepare for the viewing.
+                <strong>Đã xác nhận lịch hẹn.</strong> Khách thuê đã được thông báo. Vui lòng chuẩn bị cho buổi xem phòng.
             </div>
         }
         else if (Model.Status.ToString() == "Cancelled")
         {
             <div class="alert alert-danger mb-2">
-                <strong>Appointment Cancelled.</strong> The customer has been notified. No further action is required.
+                <strong>Đã hủy lịch hẹn.</strong> Khách thuê đã được thông báo. Không cần hành động gì thêm.
             </div>
         }
-        <p><strong>Created:</strong> @Model.CreatedAt</p>
+        <p><strong>Ngày tạo:</strong> @Model.CreatedAt</p>
         @if (Model.User != null && Model.User.ContactInformations != null && Model.User.ContactInformations.Count > 0)
         {
             <div class="mt-3">
-                <h5>Customer Contact Information</h5>
+                <h5>Thông tin liên hệ khách thuê</h5>
                 <ul>
                     @foreach (var c in Model.User.ContactInformations)
                     {
                         if (c.Type.ToString() == "FacebookLink")
                         {
-                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                            <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem hồ sơ</a></li>
                         }
                         else if (c.Type.ToString() == "Email")
                         {
-                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
                         }
                         else if (c.Type.ToString() == "PhoneNumber")
                         {
-                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                            <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
                         }
                         else
                         {
@@ -94,7 +94,7 @@
     </div>
 </div>
 <div class="d-flex gap-2">
-    <a href="@Url.Action("HostRoomAppointments", "ViewAppointments")" class="btn btn-outline-secondary"><i class="fa-solid fa-list"></i> Back to Appointments</a>
+    <a href="@Url.Action("HostRoomAppointments", "ViewAppointments")" class="btn btn-outline-secondary"><i class="fa-solid fa-list"></i> Quay lại lịch hẹn</a>
 </div>
 <script>
     function copyToClipboard(text) {
@@ -102,7 +102,7 @@
         if (!document.getElementById('copyToast')) {
             var toast = document.createElement('div');
             toast.id = 'copyToast';
-            toast.innerText = 'Copied!';
+            toast.innerText = 'Đã sao chép!';
             toast.style.position = 'fixed';
             toast.style.left = '50%';
             toast.style.bottom = '30px';

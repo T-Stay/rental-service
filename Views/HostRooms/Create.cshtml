@@ -1,12 +1,12 @@
 @model RentalService.Models.Room
 @{
-    ViewData["Title"] = "Post New Room";
+    ViewData["Title"] = "Đăng phòng mới";
     var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
     var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
     var error = ViewBag.Error as string;
 }
 <div class="container mt-4">
-    <h2 class="mb-4">Post New Room</h2>
+    <h2 class="mb-4">Đăng phòng mới</h2>
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
@@ -14,9 +14,9 @@
     <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4">
         <div class="col-md-7 col-lg-6 mx-auto">
             <div class="mb-3">
-                <label class="form-label">Building</label>
+                <label class="form-label">Tòa nhà</label>
                 <select asp-for="BuildingId" class="form-select">
-                    <option value="">Select Building</option>
+                    <option value="">Chọn tòa nhà</option>
                     @if (buildings != null)
                     {
                         foreach (var b in buildings)
@@ -27,25 +27,25 @@
                 </select>
             </div>
             <div class="mb-3">
-                <label asp-for="Name" class="form-label">Room Name</label>
-                <input asp-for="Name" class="form-control" placeholder="Enter room name" />
+                <label asp-for="Name" class="form-label">Tên phòng</label>
+                <input asp-for="Name" class="form-control" placeholder="Nhập tên phòng" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Description" class="form-label">Description</label>
-                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the room"></textarea>
+                <label asp-for="Description" class="form-label">Mô tả</label>
+                <textarea asp-for="Description" class="form-control" rows="3" placeholder="Mô tả phòng"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
             <div class="mb-3">
-                <label asp-for="Price" class="form-label">Price (VND)</label>
+                <label asp-for="Price" class="form-label">Giá (VND)</label>
                 <input asp-for="Price" type="number" class="form-control" placeholder="0" step="1" min="0" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             @await Html.PartialAsync("_AmenitiesPartial", ViewBag.AllAmenities as List<RentalService.Models.Amenity>)
             @await Html.PartialAsync("_RoomImagesPartial", (Model.Images ?? new List<RentalService.Models.RoomImage>()))
             <div class="d-flex align-items-center mt-4">
-                <button type="submit" class="btn btn-success me-2">Create</button>
-                <a href="@Url.Action("Index", new { buildingId = selectedBuildingId })" class="btn btn-outline-secondary">Back to list</a>
+                <button type="submit" class="btn btn-success me-2">Tạo</button>
+                <a href="@Url.Action("Index", new { buildingId = selectedBuildingId })" class="btn btn-outline-secondary">Quay lại danh sách</a>
             </div>
         </div>
     </form>

@@ -1,7 +1,7 @@
 @model RentalService.Models.Room
 @using System.Linq;
 @{
-    ViewData["Title"] = "Room Details";
+    ViewData["Title"] = "Chi tiết phòng";
     var avgRating = Model.Reviews != null && Model.Reviews.Any() ? Model.Reviews.Average(r => r.Rating) : 0;
     var reviewCount = Model.Reviews?.Count ?? 0;
 }
@@ -12,19 +12,19 @@
                 <h2 class="fw-bold mb-0 me-2">@Model.Name</h2>
             </div>
             <div class="mb-2 text-muted"><i class="fa-solid fa-location-dot"></i> @Model.Building?.Location</div>
-            <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("N0") ₫</div>
+            <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("N0") </div>
             <div class="mb-3">@Model.Description</div>
             @if (Model.Amenities != null && Model.Amenities.Count > 0)
             {
-                <div class="mb-3"><strong>Amenities:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
+                <div class="mb-3"><strong>Tiện nghi:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
             }
             <div class="d-flex flex-wrap gap-2 mb-3 mt-3">
                 <a href="@Url.Action("Index", "HostRooms", new { buildingId = Model.BuildingId })"
-                    class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Back to list</a>
+                    class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách</a>
                 <a href="@Url.Action("Edit", "HostRooms", new { id = Model.Id })" class="btn btn-warning"><i
-                        class="fa-solid fa-pen-to-square"></i> Edit</a>
+                        class="fa-solid fa-pen-to-square"></i> Chỉnh sửa</a>
                 <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger"><i
-                        class="fa-solid fa-trash"></i>Delete</a>
+                        class="fa-solid fa-trash"></i>Xóa</a>
             </div>
             <hr class="my-4" />
             @* Optionally, add reviews or other host-specific info here *@
