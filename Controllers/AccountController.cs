@@ -27,10 +27,14 @@ namespace RentalService.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register() => View();
+        public IActionResult Register(string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Register(string email, string password, string name, string role)
+        public async Task<IActionResult> Register(string email, string password, string name, string role, string? returnUrl = null)
         {
             User user;
             var userRoleEnum = UserRoleHelper.FromIdentityRoleString(role);
@@ -114,6 +118,10 @@ namespace RentalService.Controllers
                     SendEmail(user.Email, "Confirm your email - Rental Service", emailBody);
                 }
                 ViewBag.Message = "Registration successful! Please check your email to confirm your account.";
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
                 return View();
             }
             foreach (var error in result.Errors)
@@ -132,10 +140,14 @@ namespace RentalService.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login(string? returnUrl = null)
+        {
+            ViewBag.ReturnUrl = returnUrl;
+            return View();
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
@@ -158,6 +170,10 @@ namespace RentalService.Controllers
                 var principal = new System.Security.Claims.ClaimsPrincipal(identity);
                 await _signInManager.SignOutAsync();
                 await HttpContext.SignInAsync("Identity.Application", principal);
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
                 // if host then redirect to host dashboard
                 if (roles.Contains("host"))
                 {
