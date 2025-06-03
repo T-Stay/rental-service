@@ -53,23 +53,27 @@ namespace RentalService.Controllers
                 .Include(r => r.RoomImages)
                 .Include(r => r.Amenities)
                 .Include(r => r.Building)
-                    .ThenInclude(b => b.Host)
-                        .ThenInclude(h => h.ContactInformations)
+                .ThenInclude(b => b.Host)
+                .ThenInclude(h => h.ContactInformations)
                 .Include(r => r.Reviews)
-                    .ThenInclude(review => review.User)
+                .ThenInclude(review => review.User)
+                .Include(r => r.BookingRequests)
                 .FirstOrDefaultAsync(r => r.Id == id);
             if (room == null) return NotFound();
             // Check if current user has favorited this room
             bool isFavorite = false;
+            bool canReview = false;
             if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
             {
                 var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
                 if (!string.IsNullOrEmpty(userId))
                 {
                     isFavorite = await _context.Favorites.AnyAsync(f => f.UserId.ToString() == userId && f.RoomId == id);
+                    canReview = await _context.BookingRequests.AnyAsync(b => b.UserId.ToString() == userId && b.RoomId == id && b.Status == BookingRequestStatus.Approved);
                 }
             }
             ViewBag.IsFavorite = isFavorite;
+            ViewBag.CanReview = canReview;
             return View(room);
         }
 

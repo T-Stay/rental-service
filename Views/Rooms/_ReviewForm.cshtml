@@ -1,43 +1,128 @@
 @model RentalService.Models.Room
-@using System.Linq;
-@inject RentalService.Data.AppDbContext _context;
-@{
-    var userId = User?.Identity != null && User.Identity.IsAuthenticated ? User.FindFirst("sub")?.Value : null;
-    var canReview = false;
-    if (userId != null)
-    {
-        var confirmed = Model.BookingRequests?.Any(b => b.UserId.ToString() == userId && b.Status == RentalService.Models.BookingRequestStatus.Approved) ?? false;
-        canReview = confirmed;
-    }
-}
+@using System.Linq
+@inject RentalService.Data.AppDbContext _context
+
+<hr class="my-4" />
+
 @if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
 {
-    if (canReview)
-    {
-        <form asp-controller="Reviews" asp-action="Create" method="post" class="mb-3">
-            <input type="hidden" name="roomId" value="@Model.Id" />
-            <div class="mb-2">
-                <label>Rating</label>
-                <div>
-                    @for (int i = 1; i <= 5; i++)
-                    {
-                        <input type="radio" class="btn-check" name="rating" id="star@i" value="@i" autocomplete="off" @(i==5?"checked":"") />
-                        <label class="btn btn-sm btn-outline-warning" for="star@i"><i class="fa fa-star"></i></label>
-                    }
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            @if (ViewBag.CanReview == true)
+            {
+                <!-- Warning: Only one review per user per room. Submitting a new review will override your previous review. -->
+                <div class="alert alert-warning mb-3">
+                    <i class="fa fa-exclamation-triangle"></i> Submitting a new review will <b>override your previous review</b> for this room.
                 </div>
-            </div>
-            <div class="mb-2">
-                <label>Comment</label>
-                <textarea name="comment" class="form-control" required maxlength="500" placeholder="Share your experience..."></textarea>
-            </div>
-            <button type="submit" class="btn btn-success">Submit Review</button>
-        </form>
-    }
-    else
-    {
-        <div class="alert alert-info mb-3" data-bs-toggle="tooltip" title="You need a confirmed booking to leave a review.">
-            <i class="fa fa-info-circle"></i> Only users with a <b>confirmed booking</b> for this room can leave a review. <br />
-            <span class="small">Book and complete your stay to share your experience!</span>
+                <form asp-controller="Reviews" asp-action="Create" method="post" class="mb-0" id="review-form">
+                    <input type="hidden" name="roomId" value="@Model.Id" />
+                    
+                    <div class="mb-2">
+                        <label class="form-label">Rating</label>
+                        <div class="star-rating" data-selected="0">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fa fa-star star-icon" data-value="@i" title="@i star@((i > 1 ? "s" : ""))"></i>
+                            }
+                            <input type="hidden" name="rating" id="rating-value" value="0" />
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Comment</label>
+                        <textarea name="comment" class="form-control" required maxlength="500" placeholder="Share your experience..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success" id="submit-review-btn" disabled>Submit Review</button>
+                </form>
+            }
+            else
+            {
+                <div class="alert alert-info mb-0" data-bs-toggle="tooltip" title="You need a confirmed booking to leave a review.">
+                    <i class="fa fa-info-circle"></i> Only users with a <b>confirmed booking</b> for this room can leave a review. <br />
+                    <span class="small">Book and complete your stay to share your experience!</span>
+                </div>
+            }
         </div>
-    }
+    </div>
+
+    <style>
+        .star-rating {
+            display: flex;
+            flex-direction: row;
+            gap: 0.2rem;
+        }
+
+        .star-icon {
+            font-size: 1.6rem;
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .star-icon.filled {
+            color: #ffc107;
+        }
+
+        .star-icon:active {
+            transform: scale(0.95);
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const stars = document.querySelectorAll(".star-icon");
+            const ratingInput = document.getElementById("rating-value");
+            const commentInput = document.querySelector("textarea[name='comment']");
+            const submitBtn = document.getElementById("submit-review-btn");
+
+            function validateForm() {
+                const rating = parseInt(ratingInput.value);
+                const comment = commentInput.value.trim();
+                submitBtn.disabled = !(rating > 0 && comment.length > 0);
+            }
+
+            stars.forEach(star => {
+                star.addEventListener("mouseover", () => {
+                    const val = parseInt(star.getAttribute("data-value"));
+                    fillStars(val);
+                });
+
+                star.addEventListener("click", () => {
+                    const val = parseInt(star.getAttribute("data-value"));
+                    ratingInput.value = val;
+                    fillStars(val);
+                    validateForm();
+                });
+
+                star.addEventListener("mouseout", () => {
+                    const val = parseInt(ratingInput.value) || 0;
+                    fillStars(val);
+                });
+            });
+
+            commentInput.addEventListener("input", validateForm);
+            ratingInput.addEventListener("change", validateForm);
+
+            function fillStars(count) {
+                stars.forEach(star => {
+                    const val = parseInt(star.getAttribute("data-value"));
+                    star.classList.toggle("filled", val <= count);
+                });
+            }
+
+            // Initial validation
+            validateForm();
+        });
+    </script>
+    <!--
+        BACKEND REMINDER:
+        In ReviewsController.Create, before saving a new review, delete all existing reviews for this user and room.
+        Example (pseudo-code):
+        var userId = ...; var roomId = ...;
+        var oldReviews = db.Reviews.Where(r => r.UserId == userId && r.RoomId == roomId);
+        db.Reviews.RemoveRange(oldReviews);
+        db.Reviews.Add(newReview);
+        db.SaveChanges();
+    -->
 }

@@ -24,11 +24,25 @@ namespace RentalService.Controllers
         public async Task<IActionResult> Create(Guid roomId, int rating, string comment)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            var userGuid = Guid.Parse(userId);
+            // Delete all previous reviews by this user for this room
+            var oldReviews = await _context.Reviews
+                .Where(r => r.UserId == userGuid && r.RoomId == roomId)
+                .ToListAsync();
+            if (oldReviews.Any())
+            {
+                _context.Reviews.RemoveRange(oldReviews);
+            }
+            // Add the new review
             var review = new Review
             {
                 Id = Guid.NewGuid(),
                 RoomId = roomId,
-                UserId = Guid.Parse(userId),
+                UserId = userGuid,
                 Rating = rating,
                 Comment = comment,
                 CreatedAt = DateTime.UtcNow
