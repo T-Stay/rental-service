@@ -84,6 +84,68 @@ namespace RentalService.Controllers
         {
             try
             {
+                // Xử lý thêm phòng nhanh
+                var quickAdd = Request.Form["QuickAdd"].FirstOrDefault() == "on";
+                if (quickAdd)
+                {
+                    int count = 0;
+                    int.TryParse(Request.Form["QuickAddCount"], out count);
+                    var nameFormat = Request.Form["QuickAddNameFormat"].FirstOrDefault() ?? "Phòng A{0}";
+                    int start = 1;
+                    int.TryParse(Request.Form["QuickAddStart"], out start);
+                    if (count > 1)
+                    {
+                        var quickAmenityIds = Request.Form["AmenityIds"].ToList();
+                        var amenities = quickAmenityIds.Any() ? await _context.Amenities.Where(a => quickAmenityIds.Contains(a.Id.ToString())).ToListAsync() : new List<Amenity>();
+                        // Upload ảnh 1 lần, dùng chung URL cho các phòng
+                        var uploadedImages = new List<RoomImage>();
+                        if (RoomImages != null && RoomImages.Count > 0)
+                        {
+                            foreach (var image in RoomImages)
+                            {
+                                if (image.Length > 0)
+                                {
+                                    using var stream = image.OpenReadStream();
+                                    var fileName = $"rooms/{Guid.NewGuid()}_{image.FileName}";
+                                    var imageUrl = await _s3Service.UploadFileAsync(stream, fileName, image.ContentType);
+                                    uploadedImages.Add(new RoomImage { Id = Guid.NewGuid(), ImageUrl = imageUrl });
+                                }
+                            }
+                        }
+                        for (int i = 0; i < count; i++)
+                        {
+                            var newRoom = new Room
+                            {
+                                Id = Guid.NewGuid(),
+                                BuildingId = room.BuildingId,
+                                Name = string.Format(nameFormat, start + i),
+                                Description = room.Description,
+                                Price = room.Price,
+                                Status = room.Status,
+                                CreatedAt = DateTime.UtcNow,
+                                UpdatedAt = DateTime.UtcNow,
+                                Amenities = new List<Amenity>(amenities)
+                            };
+                            _context.Rooms.Add(newRoom);
+                            // Tạo RoomImages riêng cho từng phòng, nhưng dùng chung URL
+                            if (uploadedImages.Count > 0)
+                            {
+                                foreach (var img in uploadedImages)
+                                {
+                                    var roomImg = new RoomImage
+                                    {
+                                        Id = Guid.NewGuid(),
+                                        RoomId = newRoom.Id,
+                                        ImageUrl = img.ImageUrl
+                                    };
+                                    _context.RoomImages.Add(roomImg);
+                                }
+                            }
+                        }
+                        await _context.SaveChangesAsync();
+                        return RedirectToAction(nameof(Index), new { buildingId = room.BuildingId });
+                    }
+                }
                 // Handle amenities
                 var amenityIds = Request.Form["AmenityIds"].ToList();
                 if (amenityIds.Any())
@@ -141,6 +203,8 @@ namespace RentalService.Controllers
             {
                 var room = await _context.Rooms.Include(r => r.Amenities).Include(r => r.RoomImages).FirstOrDefaultAsync(r => r.Id == id);
                 if (room == null) return NotFound();
+                // make the price integer
+                room.Price = (int)room.Price; // Assuming Price is a decimal, convert to int for displa
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 ViewBag.Buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
                 ViewBag.SelectedBuildingId = room.BuildingId;

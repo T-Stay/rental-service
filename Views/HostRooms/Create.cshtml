@@ -13,6 +13,33 @@
     }
     <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4">
         <div class="col-md-7 col-lg-6 mx-auto">
+            <!-- Toggle thêm phòng nhanh -->
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="quickAddToggle" name="QuickAdd" onchange="toggleQuickAddFields()">
+                <label class="form-check-label" for="quickAddToggle">Thêm phòng nhanh</label>
+            </div>
+            <!-- Các trường cho thêm phòng nhanh -->
+            <div id="quickAddFields" style="display:none;">
+                <div class="mb-3">
+                    <label class="form-label">Số lượng phòng</label>
+                    <input type="number" class="form-control" name="QuickAddCount" min="2" max="50" value="2" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Định dạng tên phòng</label>
+                    <input type="text" class="form-control" name="QuickAddNameFormat" value="Phòng A{0}" placeholder="Ví dụ: Phòng A{0}" />
+                    <div class="form-text">Dùng <b>{0}</b> để đánh số tự động, ví dụ: Phòng A1, Phòng A2...</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Số bắt đầu</label>
+                    <input type="number" class="form-control" name="QuickAddStart" value="1" min="1" />
+                </div>
+            </div>
+            <script>
+                function toggleQuickAddFields() {
+                    var checked = document.getElementById('quickAddToggle').checked;
+                    document.getElementById('quickAddFields').style.display = checked ? '' : 'none';
+                }
+            </script>
             <div class="mb-3">
                 <label class="form-label">Tòa nhà</label>
                 <select asp-for="BuildingId" class="form-select">
@@ -26,7 +53,7 @@
                     }
                 </select>
             </div>
-            <div class="mb-3">
+            <div class="mb-3" id="roomNameField">
                 <label asp-for="Name" class="form-label">Tên phòng</label>
                 <input asp-for="Name" class="form-control" placeholder="Nhập tên phòng" />
                 <span asp-validation-for="Name" class="text-danger"></span>
@@ -38,7 +65,7 @@
             </div>
             <div class="mb-3">
                 <label asp-for="Price" class="form-label">Giá (VND)</label>
-                <input asp-for="Price" type="number" class="form-control" placeholder="0" step="1" min="0" />
+                <input asp-for="Price" type="number" class="form-control" placeholder="0" step="0.01" min="0" />
                 <span asp-validation-for="Price" class="text-danger"></span>
             </div>
             @await Html.PartialAsync("_AmenitiesPartial", ViewBag.AllAmenities as List<RentalService.Models.Amenity>)
@@ -64,3 +91,13 @@
         font-weight: 500;
     }
 </style>
+<script>
+    // Ẩn trường tên phòng khi bật thêm phòng nhanh
+    document.getElementById('quickAddToggle').addEventListener('change', function() {
+        document.getElementById('roomNameField').style.display = this.checked ? 'none' : '';
+    });
+    // Nếu reload lại form với toggle đã bật thì cũng ẩn luôn
+    if (document.getElementById('quickAddToggle').checked) {
+        document.getElementById('roomNameField').style.display = 'none';
+    }
+</script>

@@ -85,15 +85,25 @@ using (var scope = app.Services.CreateScope())
         var amenities = new[]
         {
             new Amenity { Id = Guid.NewGuid(), Name = "WiFi" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Air Conditioning" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Heating" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Kitchen" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Washer" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Dryer" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Free Parking" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Pool" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Gym" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Pet Friendly" }
+            new Amenity { Id = Guid.NewGuid(), Name = "Máy lạnh" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Hệ thống sưởi" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Bếp" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Máy giặt" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Máy sấy" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Đậu xe miễn phí" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Hồ bơi" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Phòng gym" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Cho phép thú cưng" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Ban công riêng" },
+            new Amenity { Id = Guid.NewGuid(), Name = "TV màn hình phẳng" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Bồn tắm" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Camera an ninh" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Bảo vệ 24/7" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Bàn làm việc" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Thang máy" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Két sắt" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Máy nước nóng" },
+            new Amenity { Id = Guid.NewGuid(), Name = "Sân vườn" }
         };
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Amenities.AddRange(amenities);

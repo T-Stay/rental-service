@@ -2,10 +2,9 @@
 @{
     var selectedAmenities = ViewBag.SelectedAmenities as List<Guid> ?? new List<Guid>();
     var amenities = Model ?? new List<RentalService.Models.Amenity>();
-    int columns = 4; // Number of columns per row
 }
 <div class="mb-3">
-    <label class="form-label">Amenities</label>
+    <label class="form-label">Tiện nghi</label>
     <div class="row g-2">
         @for (int i = 0; i < amenities.Count; i++)
         {
