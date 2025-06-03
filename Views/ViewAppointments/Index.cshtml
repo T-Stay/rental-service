@@ -67,18 +67,22 @@
                         @if (appt.Status.ToString() == "Pending")
                         {
                             <span class="badge bg-warning">Pending</span>
+                            <a href="@Url.Action("Details", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
                         }
                         else if (appt.Status.ToString() == "Confirmed")
                         {
                             <span class="badge bg-success">Confirmed</span>
+                            <a href="@Url.Action("Details", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
                         }
                         else if (appt.Status.ToString() == "Cancelled")
                         {
                             <span class="badge bg-danger">Cancelled</span>
+                            <a href="@Url.Action("Details", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
                         }
                         else
                         {
                             <span class="badge bg-secondary">@appt.Status</span>
+                            <a href="@Url.Action("Details", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
                         }
                     </td>
                 </tr>

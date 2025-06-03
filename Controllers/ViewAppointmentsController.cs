@@ -63,6 +63,144 @@ namespace RentalService.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: /ViewAppointments/Details/{id}
+        public async Task<IActionResult> Details(Guid id)
+        {
+            var appt = await _context.ViewAppointments
+                .Include(a => a.Room)
+                .ThenInclude(r => r.Building)
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (appt == null) return NotFound();
+            if (appt.UserId.ToString() != User.FindFirstValue(ClaimTypes.NameIdentifier))
+                return Forbid();
+            // Eager load host and contact info if possible
+            if (appt.Room?.Building != null)
+            {
+                await _context.Entry(appt.Room.Building)
+                    .Reference(b => b.Host).LoadAsync();
+                if (appt.Room.Building.Host != null)
+                {
+                    await _context.Entry(appt.Room.Building.Host)
+                        .Collection(h => h.ContactInformations).LoadAsync();
+                }
+            }
+            return View(appt);
+        }
+
+        // POST: /ViewAppointments/Cancel
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+            var appt = await _context.ViewAppointments
+                .Include(a => a.Room)
+                .ThenInclude(r => r.Building)
+                .FirstOrDefaultAsync(a => a.Id == id && a.UserId.ToString() == userId);
+            if (appt == null)
+            {
+                TempData["ToastError"] = "Appointment not found.";
+                return RedirectToAction("Index");
+            }
+            if (appt.Status != ViewAppointmentStatus.Pending)
+            {
+                TempData["ToastError"] = "Only pending appointments can be cancelled.";
+                return RedirectToAction("Details", new { id });
+            }
+            appt.Status = ViewAppointmentStatus.Cancelled;
+            // Notify host
+            if (appt.Room?.Building != null)
+            {
+                await _context.Entry(appt.Room.Building).Reference(b => b.Host).LoadAsync();
+                if (appt.Room.Building.Host != null)
+                {
+                    _context.Notifications.Add(new Notification {
+                        Id = Guid.NewGuid(),
+                        UserId = appt.Room.Building.Host.Id,
+                        Title = "Appointment Cancelled",
+                        Message = $"A viewing appointment for '{appt.Room?.Name}' has been cancelled by the customer.",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+            await _context.SaveChangesAsync();
+            TempData["ToastSuccess"] = "Appointment cancelled.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        [Authorize(Roles = "host")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAppointmentStatus(Guid id, string action)
+        {
+            var appt = await _context.ViewAppointments.Include(a => a.Room).ThenInclude(r => r.Building).FirstOrDefaultAsync(a => a.Id == id);
+            if (appt == null || appt.Room == null || appt.Room.Building == null) return NotFound();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (appt.Room?.Building?.HostId.ToString() != userId) return Forbid();
+            // Eager load customer for notification
+            await _context.Entry(appt).Reference(a => a.User).LoadAsync();
+            if (action == "accept")
+            {
+                appt.Status = ViewAppointmentStatus.Confirmed;
+                // Notify customer
+                if (appt.User != null)
+                {
+                    _context.Notifications.Add(new Notification {
+                        Id = Guid.NewGuid(),
+                        UserId = appt.UserId,
+                        Title = "Appointment Confirmed",
+                        Message = $"Your viewing appointment for '{appt.Room?.Name}' has been confirmed by the host.",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+            else if (action == "decline")
+            {
+                appt.Status = ViewAppointmentStatus.Cancelled;
+                // Notify customer
+                if (appt.User != null)
+                {
+                    _context.Notifications.Add(new Notification {
+                        Id = Guid.NewGuid(),
+                        UserId = appt.UserId,
+                        Title = "Appointment Cancelled",
+                        Message = $"Your viewing appointment for '{appt.Room?.Name}' has been cancelled by the host.",
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow
+                    });
+                }
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction("HostRoomAppointments");
+        }
+
+        // GET: /ViewAppointments/HostDetails/{id}
+        [Authorize(Roles = "host")]
+        public async Task<IActionResult> HostDetails(Guid id)
+        {
+            var appt = await _context.ViewAppointments
+                .Include(a => a.Room)
+                .ThenInclude(r => r.Building)
+                .ThenInclude(b => b.Host)
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (appt == null) return NotFound();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (appt.Room?.Building?.HostId.ToString() != userId)
+                return Forbid();
+            // Eager load contact info
+            if (appt.User != null)
+                await _context.Entry(appt.User).Collection(u => u.ContactInformations).LoadAsync();
+            if (appt.Room?.Building?.Host != null)
+                await _context.Entry(appt.Room.Building.Host).Collection(h => h.ContactInformations).LoadAsync();
+            return View("HostDetails", appt);
+        }
+
+        // GET: /ViewAppointments/HostRoomAppointments
         [Authorize(Roles = "host")]
         public async Task<IActionResult> HostRoomAppointments(Guid? roomId, string status)
         {
@@ -94,23 +232,6 @@ namespace RentalService.Controllers
             ViewBag.SelectedRoomId = roomId;
             ViewBag.Status = status;
             return View("HostRoomAppointments", appointments);
-        }
-
-        [Authorize(Roles = "host")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateAppointmentStatus(Guid id, string action)
-        {
-            var appt = await _context.ViewAppointments.Include(a => a.Room).ThenInclude(r => r.Building).FirstOrDefaultAsync(a => a.Id == id);
-            if (appt == null || appt.Room == null || appt.Room.Building == null) return NotFound();
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (appt.Room?.Building?.HostId.ToString() != userId) return Forbid();
-            if (action == "accept")
-                appt.Status = ViewAppointmentStatus.Confirmed;
-            else if (action == "decline")
-                appt.Status = ViewAppointmentStatus.Cancelled;
-            await _context.SaveChangesAsync();
-            return RedirectToAction("HostRoomAppointments");
         }
     }
 }

@@ -115,14 +115,17 @@
                                         @if (appt.Status == RentalService.Models.ViewAppointmentStatus.Pending)
                                         {
                                             <span class="badge bg-warning">Pending</span>
+                                            <a href="@Url.Action("HostDetails", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
                                         }
                                         else if (appt.Status == RentalService.Models.ViewAppointmentStatus.Confirmed)
                                         {
                                             <span class="badge bg-success">Confirmed</span>
+                                            <a href="@Url.Action("HostDetails", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
                                         }
                                         else
                                         {
                                             <span class="badge bg-secondary">@appt.Status.ToString()</span>
+                                            <a href="@Url.Action("HostDetails", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm ms-2">Details</a>
                                         }
                                     </td>
                                 </tr>

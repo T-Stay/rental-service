@@ -5,110 +5,193 @@
     var selectedRoomId = ViewBag.SelectedRoomId as Guid?;
     var status = ViewBag.Status as string;
 }
-<h2>Room View Appointments</h2>
-<form method="get">
-    <label>Room:</label>
-    <select name="roomId">
-        <option value="">All</option>
-        @if (rooms != null)
-        {
-            foreach (var r in rooms)
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="fw-bold text-success mb-0"><i class="fa-solid fa-calendar-day me-2"></i>Room View Appointments</h2>
+    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+</div>
+<form method="get" class="mb-3 row g-2 align-items-end">
+    <div class="col-auto">
+        <label class="form-label mb-0">Room:</label>
+    </div>
+    <div class="col-auto">
+        <select name="roomId" class="form-select">
+            <option value="">All</option>
+            @if (rooms != null)
             {
-                if (selectedRoomId == r.Id)
+                foreach (var r in rooms)
                 {
-                    @:<option value="@r.Id" selected>@r.Name</option>
+                    if (selectedRoomId == r.Id)
+                    {
+                        <option value="@r.Id" selected>@r.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@r.Id">@r.Name</option>
+                    }
+                }
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label mb-0">Status:</label>
+    </div>
+    <div class="col-auto">
+        <select name="status" class="form-select">
+            <option value="">All</option>
+            @foreach (var st in Enum.GetNames(typeof(RentalService.Models.ViewAppointmentStatus)))
+            {
+                if (status == st)
+                {
+                    <option value="@st" selected>@st</option>
                 }
                 else
                 {
-                    @:<option value="@r.Id">@r.Name</option>
+                    <option value="@st">@st</option>
                 }
             }
-        }
-    </select>
-    <label>Status:</label>
-    <select name="status">
-        <option value="">All</option>
-        @foreach (var st in Enum.GetNames(typeof(RentalService.Models.ViewAppointmentStatus)))
-        {
-            if (status == st)
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-info">Filter</button>
+    </div>
+</form>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Room</th>
+                    <th>Customer</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (Model.Any())
             {
-                @:<option value="@st" selected>@st</option>
+                foreach (var appt in Model)
+                {
+                    <tr>
+                        <td>
+                            @if (appt.Room != null)
+                            {
+                                <a href="@Url.Action("Details", "Rooms", new { id = appt.Room.Id })" target="_blank">@appt.Room.Name</a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Unknown</span>
+                            }
+                        </td>
+                        <td>@appt.User?.Name</td>
+                        <td>@appt.AppointmentTime.ToString("g")</td>
+                        <td>
+                            @if (appt.Status == RentalService.Models.ViewAppointmentStatus.Pending)
+                            {
+                                <span class="badge bg-warning">Pending</span>
+                            }
+                            else if (appt.Status == RentalService.Models.ViewAppointmentStatus.Confirmed)
+                            {
+                                <span class="badge bg-success">Confirmed</span>
+                            }
+                            else if (appt.Status == RentalService.Models.ViewAppointmentStatus.Cancelled)
+                            {
+                                <span class="badge bg-danger">Cancelled</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">@appt.Status</span>
+                            }
+                        </td>
+                        <td>
+                            @if (appt.Status == RentalService.Models.ViewAppointmentStatus.Pending)
+                            {
+                                <form asp-action="UpdateAppointmentStatus" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@appt.Id" />
+                                    <button type="submit" name="action" value="accept" class="btn btn-success btn-sm me-1">Accept</button>
+                                    <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm me-1">Decline</button>
+                                </form>
+                            }
+                            <a href="@Url.Action("HostDetails", "ViewAppointments", new { id = appt.Id })" class="btn btn-outline-info btn-sm">Details</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="5">
+                            @if (appt.User != null && appt.User.ContactInformations != null && appt.User.ContactInformations.Count > 0)
+                            {
+                                <div>
+                                    <strong>Customer Contact Information:</strong>
+                                    <ul>
+                                        @foreach (var c in appt.User.ContactInformations)
+                                        {
+                                            if (c.Type.ToString() == "FacebookLink")
+                                            {
+                                                <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>View Profile</a></li>
+                                            }
+                                            else if (c.Type.ToString() == "Email")
+                                            {
+                                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy email"><i class="fa fa-copy"></i></button></li>
+                                            }
+                                            else if (c.Type.ToString() == "PhoneNumber")
+                                            {
+                                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Copy phone"><i class="fa fa-copy"></i></button></li>
+                                            }
+                                            else
+                                            {
+                                                <li><strong>@c.Type:</strong> @c.Data</li>
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
             }
             else
             {
-                @:<option value="@st">@st</option>
+                <tr><td colspan="5" class="text-center text-muted">No appointments found.</td></tr>
             }
-        }
-    </select>
-    <button type="submit">Filter</button>
-</form>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Room</th>
-            <th>Customer</th>
-            <th>Time</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var appt in Model)
-        {
-            <tr>
-                @* <td>@appt.Room?.Name</td> *@
-                <td>
-                    <a href="@Url.Action("Details", "Rooms", new { id = appt.Room.Id })" target="_blank">@appt.Room.Name</a>
-                </td>
-                <td>@appt.User?.Name</td>
-                <td>@appt.AppointmentTime</td>
-                <td>@appt.Status</td>
-                <td>
-                    @if (appt.Status == RentalService.Models.ViewAppointmentStatus.Pending)
-                    {
-                        <form asp-action="UpdateAppointmentStatus" method="post" style="display:inline">
-                            <input type="hidden" name="id" value="@appt.Id" />
-                            <button type="submit" name="action" value="accept" class="btn btn-success btn-sm">Accept</button>
-                            <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm">Decline</button>
-                        </form>
-                    }
-                </td>
-            </tr>
-            <tr>
-                <td colspan="5">
-                    @if (appt.User != null && appt.User.ContactInformations != null && appt.User.ContactInformations.Count > 0)
-                    {
-                        <div>
-                            <strong>Customer Contact Information:</strong>
-                            <ul>
-                                @foreach (var c in appt.User.ContactInformations)
-                                {
-                                    <li><strong>@c.Type:</strong> @c.Data</li>
-                                }
-                            </ul>
-                        </div>
-                    }
-                    @if (appt.Room != null && appt.Room.Building != null && appt.Room.Building.Host != null && appt.Room.Building.Host.ContactInformations != null && appt.Room.Building.Host.ContactInformations.Count > 0)
-                    {
-                        <div>
-                            <strong>Host Contact Information:</strong>
-                            <ul>
-                                @foreach (var c in appt.Room.Building.Host.ContactInformations)
-                                {
-                                    <li><strong>@c.Type:</strong> @c.Data</li>
-                                }
-                            </ul>
-                        </div>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-<a href="@Url.Action("Index", "HostRooms")">Back to My Rooms</a>
+            </tbody>
+        </table>
+    </div>
+</div>
 <script>
     function copyToClipboard(text) {
         navigator.clipboard.writeText(text);
-        toastr.success('Copied to clipboard!');
+        if (!document.getElementById('copyToast')) {
+            var toast = document.createElement('div');
+            toast.id = 'copyToast';
+            toast.innerText = 'Copied!';
+            toast.style.position = 'fixed';
+            toast.style.left = '50%';
+            toast.style.bottom = '30px';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.background = '#333';
+            toast.style.color = '#fff';
+            toast.style.padding = '8px 16px';
+            toast.style.borderRadius = '4px';
+            toast.style.zIndex = 9999;
+            toast.style.opacity = 0;
+            toast.style.transition = 'opacity 0.3s';
+            document.body.appendChild(toast);
+        }
+        var toast = document.getElementById('copyToast');
+        toast.style.opacity = 1;
+        toast.style.visibility = 'visible';
+        setTimeout(function () {
+            toast.style.opacity = 0;
+            toast.style.visibility = 'hidden';
+        }, 1500);
     }
 </script>
+<style>
+    .copy-btn {
+        border: none;
+        background: none;
+        color: #007bff;
+        cursor: pointer;
+        margin-left: 0.5rem;
+    }
+</style>
