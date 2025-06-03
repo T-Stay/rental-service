@@ -46,7 +46,7 @@
     @foreach (var room in Model)
     {
         <div class="col-12 col-md-6 col-lg-4">
-            <div class="room-card h-100">
+            <div class="room-card clickable-card h-100" tabindex="0" onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON'){ window.location='@Url.Action("Details", "HostRooms", new { id = room.Id })'; }" onkeydown="if(event.key==='Enter' && event.target===this){ window.location='@Url.Action("Details", "HostRooms", new { id = room.Id })'; }">
                 @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
                 {
                     <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />

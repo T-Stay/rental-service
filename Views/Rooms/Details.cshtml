@@ -83,7 +83,7 @@
                     <div class="d-flex flex-row flex-wrap gap-2">
                         @for (int i = 0; i < Model.RoomImages.Count; i++)
                         {
-                            <img src="@Model.RoomImages[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.RoomImages[i].ImageUrl', this)" alt="Room Thumbnail" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                            <img src="@Model.RoomImages[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid var(--main-blue);":"")" onclick="showRoomImage('@Model.RoomImages[i].ImageUrl', this)" alt="Room Thumbnail" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         }
                     </div>
                 }
@@ -95,7 +95,7 @@
                     <div class="d-flex flex-row flex-wrap gap-2">
                         @for (int i = 0; i < Model.Images.Count; i++)
                         {
-                            <img src="@Model.Images[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid #007bff;":"")" onclick="showRoomImage('@Model.Images[i].ImageUrl', this)" alt="Room Thumbnail" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                            <img src="@Model.Images[i].ImageUrl" class="img-thumbnail room-thumb" style="width:70px;height:70px;object-fit:cover;cursor:pointer;@(i==0?"border:2px solid var(--main-blue);":"")" onclick="showRoomImage('@Model.Images[i].ImageUrl', this)" alt="Room Thumbnail" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         }
                     </div>
                 }
