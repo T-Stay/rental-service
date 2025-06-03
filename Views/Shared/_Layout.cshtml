@@ -46,6 +46,11 @@
             bottom: 0;
             width: 100%;
         }
+        /* Ensure notification text wraps and breaks long words */
+        .notification-text {
+            word-break: break-word;
+            white-space: normal;
+        }
     </style>
 </head>
 <body>
@@ -121,12 +126,12 @@
                                     <i class="fa-solid fa-user fa-lg"></i>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li class="dropdown-header">@User.Identity.Name</li>
-                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Profile")">Profile</a></li>
+                                    <li class="dropdown-header"><i class="fa-solid fa-user me-2"></i>@User.Identity.Name</li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Profile")"><i class="fa-solid fa-id-badge me-2"></i>Profile</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                            <button type="submit" class="dropdown-item">Logout</button>
+                                            <button type="submit" class="dropdown-item"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -188,8 +193,8 @@ $(function () {
                     list.empty();
                     unread.slice(0, 3).forEach(function (n) {
                         var item = `<div class="dropdown-item fw-bold">
-                            <div>${n.title}</div>
-                            <div class='small text-muted'>${n.message}</div>
+                            <div class='notification-text text-wrap text-break'>${n.title}</div>
+                            <div class='notification-text small text-muted text-wrap text-break'>${n.message}</div>
                             <div class='small text-muted'>${n.createdAt}</div>
                         </div>`;
                         list.append(item);

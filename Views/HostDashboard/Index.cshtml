@@ -39,10 +39,10 @@
         <div class="col-md-3 col-6">
             <div class="card shadow-sm border-0 h-100 bg-light">
                 <div class="card-body text-center">
-                    <i class="fa-solid fa-calendar-check fa-2x text-warning mb-2"></i>
+                    <i class="fa-solid fa-calendar-check fa-2x mb-2" style="color: var(--main-blue);" ></i>
                     <h5 class="card-title">Appointments</h5>
                     <p class="display-6 fw-semibold">@(appointments?.Count ?? 0)</p>
-                    <a href="@Url.Action("HostRoomAppointments", "ViewAppointments")" class="btn btn-outline-warning btn-sm w-100">View Appointments</a>
+                    <a href="@Url.Action("HostRoomAppointments", "ViewAppointments")" class="btn btn-outline-info btn-sm w-100">View Appointments</a>
                 </div>
             </div>
         </div>
@@ -59,27 +59,20 @@
     </div>
     @if (notifications != null && notifications.Count > 0)
     {
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-warning text-dark fw-bold">
-                <i class="fa fa-bell me-2"></i>Notifications
-                @if (unreadNotifications.Count > 0)
-                {
-                    <span class="badge bg-danger ms-2">@unreadNotifications.Count unread</span>
-                }
-                <form method="post" asp-action="MarkNotificationsRead" asp-controller="HostDashboard" class="d-inline float-end">
-                    <button type="submit" class="btn btn-sm btn-outline-primary">Mark all as read</button>
-                </form>
+        <div class="alert alert-info d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fa fa-bell me-2"></i>
+                <b>You have @unreadNotifications.Count unread notification(s):</b>
+                <ul class="mb-0">
+                    @foreach (var n in unreadNotifications.Take(3))
+                    {
+                        <li><b>@n.Title:</b> @n.Message <span class="text-muted small">(@n.CreatedAt.ToString("g"))</span></li>
+                    }
+                </ul>
             </div>
-            <ul class="list-group list-group-flush">
-                @foreach (var n in notifications.Take(10))
-                {
-                    <li class="list-group-item @(n.IsRead ? "" : "fw-bold bg-light")">
-                        <div>@n.Title</div>
-                        <div class="small text-muted">@n.Message</div>
-                        <div class="small text-muted">@n.CreatedAt.ToString("g")</div>
-                    </li>
-                }
-            </ul>
+            <form method="post" asp-action="MarkNotificationsRead" asp-controller="HostDashboard">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Mark all as read</button>
+            </form>
         </div>
     }
     <div class="mt-4 mb-4 d-flex flex-wrap gap-2">

@@ -2,6 +2,53 @@
     ViewData["Title"] = "Home Page";
     var isCustomer = User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer");
 }
+<div class="hero-section position-relative text-white" style="background: linear-gradient(rgba(27,110,194,0.7), rgba(0,119,204,0.7)), url('/images/hero-bg.jpg') center/cover no-repeat; min-height: 60vh; display: flex; align-items: center;">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="display-3 fw-bold mb-3">Find Your Perfect Stay with <span class="text-warning">T-Stay</span></h1>
+                <p class="lead mb-4">Book, manage, and explore unique rooms and apartments with ease. Experience comfort, security, and convenience—all in one place.</p>
+                <a href="@Url.Action("Index", "Rooms")" class="btn btn-warning btn-lg me-2 shadow"><i class="fa-solid fa-magnifying-glass"></i> Explore Rooms</a>
+                <a href="@Url.Action("Register", "Account")" class="btn btn-outline-light btn-lg shadow"><i class="fa-solid fa-user-plus"></i> Join Now</a>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block text-end">
+                <img src="/images/hero-rooms.png" alt="Rooms" class="img-fluid rounded shadow-lg" style="max-height: 320px;">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container my-5">
+    <div class="row text-center g-4">
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-bolt fa-2x text-primary mb-3"></i>
+                <h5 class="fw-bold mb-2">Book Instantly</h5>
+                <p class="text-muted">Reserve your favorite rooms in just a few clicks—fast and hassle-free.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-user-shield fa-2x text-success mb-3"></i>
+                <h5 class="fw-bold mb-2">Verified Hosts</h5>
+                <p class="text-muted">Stay with confidence—our hosts are verified for your safety and peace of mind.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-wand-magic-sparkles fa-2x text-warning mb-3"></i>
+                <h5 class="fw-bold mb-2">Smart Recommendations</h5>
+                <p class="text-muted">Get personalized suggestions based on your preferences and history.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-lock fa-2x text-danger mb-3"></i>
+                <h5 class="fw-bold mb-2">Secure Payments</h5>
+                <p class="text-muted">Your transactions are protected with industry-leading security.</p>
+            </div>
+        </div>
+    </div>
+</div>
 @if (isCustomer)
 {
     <div class="container mt-4">
@@ -9,8 +56,8 @@
             <div class="col-md-8">
                 <div class="card shadow-sm mb-4">
                     <div class="card-body text-center">
-                        <h1 class="display-5 fw-bold text-primary mb-3"><i class="fa-solid fa-house-user me-2"></i>Welcome to T-Stay!</h1>
-                        <p class="lead mb-4">Your one-stop platform for booking, managing, and exploring your favorite rooms.</p>
+                        <h2 class="fw-bold text-primary mb-3"><i class="fa-solid fa-house-user me-2"></i>Welcome back to T-Stay!</h2>
+                        <p class="lead mb-4">Access your dashboard, manage bookings, and more:</p>
                         <div class="d-flex flex-wrap gap-3 justify-content-center mb-3">
                             <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-lg"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
                             <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-success btn-lg"><i class="fa-solid fa-magnifying-glass"></i> Find Rooms</a>
@@ -23,12 +70,5 @@
                 </div>
             </div>
         </div>
-    </div>
-}
-else
-{
-    <div class="text-center">
-        <h1 class="display-4">Welcome</h1>
-        <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
     </div>
 }
