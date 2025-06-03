@@ -105,6 +105,23 @@
                         }
                     </ul>
                     <ul class="navbar-nav nav nav-pills ms-auto">
+                        <li class="nav-item dropdown me-2">
+        <a class="nav-link d-flex align-items-center" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="/images/@(System.Threading.Thread.CurrentThread.CurrentUICulture.Name.StartsWith("vi") ? "vi.svg" : "en.svg")" alt="Lang" width="32" height="24" class="me-1" style="object-fit:cover;" />
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="langDropdown">
+            <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" onclick="setLang('en')">
+                    <img src="/images/en.svg" alt="English" width="20" height="20" class="me-2" style="object-fit:cover;" /> English
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item d-flex align-items-center" href="#" onclick="setLang('vi')">
+                    <img src="/images/vi.svg" alt="Tiếng Việt" width="20" height="20" class="me-2" style="object-fit:cover;" /> Tiếng Việt
+                </a>
+            </li>
+        </ul>
+    </li>
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
                             var role = (User.FindFirst("role")?.Value ?? "user").ToLower();
