@@ -127,5 +127,46 @@ namespace RentalService.Controllers
             if (request == null) return NotFound();
             return View(request);
         }
+
+        // POST: /BookingRequests/Cancel
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(Guid id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+            var request = await _context.BookingRequests
+                .Include(b => b.Room)
+                .ThenInclude(r => r.Building)
+                .FirstOrDefaultAsync(b => b.Id == id && b.UserId.ToString() == userId);
+            if (request == null)
+            {
+                TempData["ToastError"] = "Booking request not found.";
+                return RedirectToAction("Index");
+            }
+            if (request.Status != BookingRequestStatus.Pending && request.Status != BookingRequestStatus.Approved)
+            {
+                TempData["ToastError"] = "Only pending or approved requests can be cancelled.";
+                return RedirectToAction("Details", new { id });
+            }
+            request.Status = BookingRequestStatus.Cancelled;
+            request.UpdatedAt = DateTime.UtcNow;
+            // Notify host
+            if (request.Room?.Building != null)
+            {
+                _context.Notifications.Add(new Notification {
+                    Id = Guid.NewGuid(),
+                    UserId = request.Room.Building.HostId,
+                    Title = "Booking Cancelled",
+                    Message = $"A booking request for '{request.Room?.Name}' has been cancelled by the customer.",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+            await _context.SaveChangesAsync();
+            TempData["ToastSuccess"] = "Booking request cancelled.";
+            return RedirectToAction("Details", new { id });
+        }
     }
 }

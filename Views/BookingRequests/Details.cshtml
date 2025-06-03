@@ -7,7 +7,16 @@
         <i class="fa-solid fa-envelope"></i> Booking Request Details
     </div>
     <div class="card-body">
-        <p><strong>Room:</strong> @Model.RoomId</p>
+        <p><strong>Room:</strong> 
+            @if (Model.Room != null)
+            {
+                <a href="@Url.Action("Details", "Rooms", new { id = Model.Room.Id })" target="_blank">@Model.Room.Name</a>
+            }
+            else
+            {
+                <span class="text-muted">Unknown</span>
+            }
+        </p>
         <p><strong>Message:</strong> @Model.Message</p>
         <p><strong>Status:</strong> 
             @if (Model.Status.ToString() == "Pending")
@@ -27,6 +36,34 @@
                 <span class="badge bg-secondary">@Model.Status</span>
             }
         </p>
+        @if (Model.Status.ToString() == "Pending")
+        {
+            <div class="alert alert-info mt-3">
+                <strong>Next Steps:</strong><br />
+                Your booking request is pending.<br />
+                Please wait for the host to approve or reject your request. You will be notified here and by notification bell when the status changes.
+            </div>
+        }
+        @if (Model.Status.ToString() == "Approved")
+        {
+            <div class="alert alert-success mt-3">
+                <strong>Next Steps:</strong><br />
+                Your booking has been approved!<br />
+                Please contact the host to finalize your booking and arrange payment if required.<br />
+                <span class="text-muted">(Check host contact info below.)</span>
+            </div>
+            <form method="post" action="#" class="mt-2">
+                <button type="button" class="btn btn-primary" disabled>Confirm Booking (Coming Soon)</button>
+            </form>
+        }
+        @if (Model.Status.ToString() == "Rejected")
+        {
+            <div class="alert alert-danger mt-3">
+                <strong>Next Steps:</strong><br />
+                Unfortunately, your booking request was rejected by the host.<br />
+                You may contact the host for more information or try booking another room.
+            </div>
+        }
         <p><strong>Created:</strong> @Model.CreatedAt</p>
         @if (Model.Room != null) {
             <p><strong>Price:</strong> @Model.Room.Price.ToString("N0") ₫</p>
@@ -84,6 +121,14 @@
                     }
                 </ul>
             </div>
+        }
+        @if (Model.Status.ToString() == "Pending" || Model.Status.ToString() == "Approved")
+        {
+            <form method="post" action="@Url.Action("Cancel", "BookingRequests")" class="mt-2" onsubmit="return confirm('Are you sure you want to cancel this booking request?');">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-outline-danger"><i class="fa fa-times"></i> Cancel Request</button>
+            </form>
         }
     </div>
 </div>

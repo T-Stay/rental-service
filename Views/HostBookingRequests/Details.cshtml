@@ -34,6 +34,9 @@
         </p>
         @if (Model.Status.ToString() == "Pending")
         {
+            <div class="alert alert-info mb-2">
+                <strong>Guidance:</strong> Approving this request will notify the customer and allow them to proceed with booking confirmation. Rejecting will notify the customer and close this request.
+            </div>
             <div class="mb-3 d-flex gap-2">
                 <form id="approveForm" method="post" action="@Url.Action("Approve", "HostBookingRequests")" style="display:inline;">
                     @Html.AntiForgeryToken()
@@ -45,6 +48,24 @@
                     <input type="hidden" name="id" value="@Model.Id" />
                     <button type="submit" class="btn btn-danger">Reject</button>
                 </form>
+            </div>
+        }
+        else if (Model.Status.ToString() == "Approved")
+        {
+            <div class="alert alert-success mb-2">
+                <strong>Request Approved.</strong> The customer has been notified and can now confirm the booking. Please wait for their confirmation or contact them if needed.
+            </div>
+        }
+        else if (Model.Status.ToString() == "Rejected")
+        {
+            <div class="alert alert-danger mb-2">
+                <strong>Request Rejected.</strong> The customer has been notified. No further action is required.
+            </div>
+        }
+        else if (Model.Status.ToString() == "Cancelled")
+        {
+            <div class="alert alert-secondary mb-2">
+                <strong>Request Cancelled.</strong> This booking request has been cancelled. No further action is required.
             </div>
         }
         <p><strong>Created:</strong> @Model.CreatedAt</p>
