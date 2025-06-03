@@ -32,6 +32,21 @@
                 <span class="badge bg-secondary">@Model.Status</span>
             }
         </p>
+        @if (Model.Status.ToString() == "Pending")
+        {
+            <div class="mb-3 d-flex gap-2">
+                <form id="approveForm" method="post" action="@Url.Action("Approve", "HostBookingRequests")" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success me-2">Approve</button>
+                </form>
+                <form id="rejectForm" method="post" action="@Url.Action("Reject", "HostBookingRequests")" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <button type="submit" class="btn btn-danger">Reject</button>
+                </form>
+            </div>
+        }
         <p><strong>Created:</strong> @Model.CreatedAt</p>
         @if (Model.Room != null) {
             <p><strong>Price:</strong> @Model.Room.Price.ToString("N0") ₫</p>
@@ -101,7 +116,36 @@
         navigator.clipboard.writeText(text);
         toastr.success('Copied to clipboard!');
     }
+    $(function () {
+        $('#approveForm, #rejectForm').submit(function (e) {
+            e.preventDefault();
+            var form = $(this);
+            var btn = form.find('button[type="submit"]');
+            btn.prop('disabled', true);
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function (res) {
+                    if (res.success) {
+                        toastr.success(res.message);
+                        setTimeout(function(){ location.reload(); }, 1200);
+                    } else {
+                        toastr.error(res.message);
+                        btn.prop('disabled', false);
+                    }
+                },
+                error: function () {
+                    toastr.error('An error occurred.');
+                    btn.prop('disabled', false);
+                }
+            });
+        });
+    });
 </script>
+<form id="antiForgeryForm" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
 <style>
     .copy-btn {
         border: none;

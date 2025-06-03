@@ -65,5 +65,105 @@ namespace RentalService.Controllers
                 return Forbid();
             return View(request);
         }
+
+        // POST: /HostBookingRequests/Approve/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Approve(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var request = await _context.BookingRequests
+                    .Include(b => b.Room)
+                    .ThenInclude(r => r.Building)
+                    .FirstOrDefaultAsync(b => b.Id == id);
+                if (request == null || request.Room == null || request.Room.Building == null)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Booking request not found." });
+                    TempData["ToastError"] = "Booking request not found.";
+                    return RedirectToAction("Details", new { id });
+                }
+                if (request.Room.Building.HostId.ToString() != userId)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Unauthorized." });
+                    TempData["ToastError"] = "Unauthorized.";
+                    return RedirectToAction("Details", new { id });
+                }
+                if (request.Status != RentalService.Models.BookingRequestStatus.Pending)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Only pending requests can be approved." });
+                    TempData["ToastError"] = "Only pending requests can be approved.";
+                    return RedirectToAction("Details", new { id });
+                }
+                request.Status = RentalService.Models.BookingRequestStatus.Approved;
+                request.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = true, message = "Booking request approved." });
+                TempData["ToastSuccess"] = "Booking request approved.";
+                return RedirectToAction("Details", new { id });
+            }
+            catch (Exception ex)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "An error occurred: " + ex.Message });
+                TempData["ToastError"] = "An error occurred: " + ex.Message;
+                return RedirectToAction("Details", new { id });
+            }
+        }
+
+        // POST: /HostBookingRequests/Reject/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reject(Guid id)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var request = await _context.BookingRequests
+                    .Include(b => b.Room)
+                    .ThenInclude(r => r.Building)
+                    .FirstOrDefaultAsync(b => b.Id == id);
+                if (request == null || request.Room == null || request.Room.Building == null)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Booking request not found." });
+                    TempData["ToastError"] = "Booking request not found.";
+                    return RedirectToAction("Details", new { id });
+                }
+                if (request.Room.Building.HostId.ToString() != userId)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Unauthorized." });
+                    TempData["ToastError"] = "Unauthorized.";
+                    return RedirectToAction("Details", new { id });
+                }
+                if (request.Status != RentalService.Models.BookingRequestStatus.Pending)
+                {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        return Json(new { success = false, message = "Only pending requests can be rejected." });
+                    TempData["ToastError"] = "Only pending requests can be rejected.";
+                    return RedirectToAction("Details", new { id });
+                }
+                request.Status = RentalService.Models.BookingRequestStatus.Rejected;
+                request.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = true, message = "Booking request rejected." });
+                TempData["ToastSuccess"] = "Booking request rejected.";
+                return RedirectToAction("Details", new { id });
+            }
+            catch (Exception ex)
+            {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return Json(new { success = false, message = "An error occurred: " + ex.Message });
+                TempData["ToastError"] = "An error occurred: " + ex.Message;
+                return RedirectToAction("Details", new { id });
+            }
+        }
     }
 }
