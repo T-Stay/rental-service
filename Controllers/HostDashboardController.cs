@@ -48,10 +48,15 @@ namespace RentalService.Controllers
                     .OrderByDescending(br => br.CreatedAt)
                     .Take(5)
                     .ToListAsync();
+                var notifications = await _context.Notifications
+                    .Where(n => n.UserId.ToString() == userId)
+                    .OrderByDescending(n => n.CreatedAt)
+                    .ToListAsync();
                 ViewBag.Buildings = buildings;
                 ViewBag.Rooms = rooms;
                 ViewBag.Appointments = appointments;
                 ViewBag.BookingRequests = bookingRequests;
+                ViewBag.Notifications = notifications;
                 return View();
             }
             catch (Exception ex)
@@ -60,6 +65,22 @@ namespace RentalService.Controllers
                 ViewBag.Error = "An error occurred loading your dashboard. Please try again later.";
                 return View();
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkNotificationsRead()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId.ToString() == userId && !n.IsRead)
+                .ToListAsync();
+            foreach (var n in notifications)
+            {
+                n.IsRead = true;
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
         }
     }
 }

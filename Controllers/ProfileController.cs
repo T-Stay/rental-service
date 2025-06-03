@@ -59,5 +59,24 @@ namespace RentalService.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId.ToString() == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .Take(12)
+                .Select(n => new {
+                    n.Id,
+                    n.Title,
+                    n.Message,
+                    n.IsRead,
+                    CreatedAt = n.CreatedAt.ToString("g")
+                })
+                .ToListAsync();
+            return Json(notifications);
+        }
     }
 }

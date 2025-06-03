@@ -101,6 +101,15 @@ namespace RentalService.Controllers
                 }
                 request.Status = RentalService.Models.BookingRequestStatus.Approved;
                 request.UpdatedAt = DateTime.UtcNow;
+                // Create notification for customer
+                _context.Notifications.Add(new RentalService.Models.Notification {
+                    Id = Guid.NewGuid(),
+                    UserId = request.UserId,
+                    Title = "Booking Approved",
+                    Message = $"Your booking request for '{request.Room?.Name}' has been approved.",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
                 await _context.SaveChangesAsync();
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     return Json(new { success = true, message = "Booking request approved." });
@@ -151,6 +160,15 @@ namespace RentalService.Controllers
                 }
                 request.Status = RentalService.Models.BookingRequestStatus.Rejected;
                 request.UpdatedAt = DateTime.UtcNow;
+                // Create notification for customer
+                _context.Notifications.Add(new RentalService.Models.Notification {
+                    Id = Guid.NewGuid(),
+                    UserId = request.UserId,
+                    Title = "Booking Rejected",
+                    Message = $"Your booking request for '{request.Room?.Name}' has been rejected.",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
                 await _context.SaveChangesAsync();
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     return Json(new { success = true, message = "Booking request rejected." });
@@ -165,5 +183,26 @@ namespace RentalService.Controllers
                 return RedirectToAction("Details", new { id });
             }
         }
+
+        // If you have a Cancel action for host or customer, add notification logic like this:
+        // For host cancelling a booking (notify customer):
+        // request.Status = BookingRequestStatus.Cancelled;
+        // _context.Notifications.Add(new Notification {
+        //     Id = Guid.NewGuid(),
+        //     UserId = request.UserId,
+        //     Title = "Booking Cancelled",
+        //     Message = $"Your booking request for '{request.Room?.Name}' has been cancelled by the host.",
+        //     IsRead = false,
+        //     CreatedAt = DateTime.UtcNow
+        // });
+        // For customer cancelling a booking (notify host):
+        // _context.Notifications.Add(new Notification {
+        //     Id = Guid.NewGuid(),
+        //     UserId = request.Room.Building.HostId,
+        //     Title = "Booking Cancelled",
+        //     Message = $"A booking request for '{request.Room?.Name}' has been cancelled by the customer.",
+        //     IsRead = false,
+        //     CreatedAt = DateTime.UtcNow
+        // });
     }
 }

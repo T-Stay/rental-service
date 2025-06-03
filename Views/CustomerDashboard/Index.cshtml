@@ -5,10 +5,30 @@
     var appointments = ViewBag.Appointments as List<RentalService.Models.ViewAppointment>;
     // Get total active rooms from ViewBag (set in controller)
     int totalActiveRooms = ViewBag.TotalActiveRooms != null ? (int)ViewBag.TotalActiveRooms : 0;
+    var notifications = ViewBag.Notifications as List<RentalService.Models.Notification>;
+    var unreadNotifications = notifications?.Where(n => !n.IsRead).ToList() ?? new List<RentalService.Models.Notification>();
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="container mt-4">
     <h2 class="mb-4 fw-bold text-primary"><i class="fa-solid fa-gauge-high me-2"></i>Customer Dashboard</h2>
+    @if (unreadNotifications.Count > 0)
+    {
+        <div class="alert alert-info d-flex align-items-center justify-content-between">
+            <div>
+                <i class="fa fa-bell me-2"></i>
+                <b>You have @unreadNotifications.Count unread notification(s):</b>
+                <ul class="mb-0">
+                    @foreach (var n in unreadNotifications.Take(3))
+                    {
+                        <li><b>@n.Title:</b> @n.Message <span class="text-muted small">(@n.CreatedAt.ToString("g"))</span></li>
+                    }
+                </ul>
+            </div>
+            <form method="post" asp-action="MarkNotificationsRead" asp-controller="Home">
+                <button type="submit" class="btn btn-sm btn-outline-primary">Mark all as read</button>
+            </form>
+        </div>
+    }
     <div class="row mb-4 g-4">
         <div class="col-md-3 col-6">
             <div class="card shadow-sm border-0 h-100 bg-light">

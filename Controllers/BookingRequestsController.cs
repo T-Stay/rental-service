@@ -72,6 +72,19 @@ namespace RentalService.Controllers
                 UpdatedAt = DateTime.UtcNow
             };
             _context.BookingRequests.Add(request);
+            // Notify host
+            var room = await _context.Rooms.Include(r => r.Building).FirstOrDefaultAsync(r => r.Id == roomId.Value);
+            if (room?.Building != null)
+            {
+                _context.Notifications.Add(new Notification {
+                    Id = Guid.NewGuid(),
+                    UserId = room.Building.HostId,
+                    Title = "New Booking Request",
+                    Message = $"A new booking request for '{room.Name}' has been submitted.",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

@@ -5,6 +5,8 @@
     var appointments = ViewBag.Appointments as List<RentalService.Models.ViewAppointment>;
     var bookingRequests = ViewBag.BookingRequests as List<RentalService.Models.BookingRequest>;
     var error = ViewBag.Error as string;
+    var notifications = ViewBag.Notifications as List<RentalService.Models.Notification>;
+    var unreadNotifications = notifications?.Where(n => !n.IsRead).ToList() ?? new List<RentalService.Models.Notification>();
 }
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="container mt-4">
@@ -55,6 +57,31 @@
             </div>
         </div>
     </div>
+    @if (notifications != null && notifications.Count > 0)
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark fw-bold">
+                <i class="fa fa-bell me-2"></i>Notifications
+                @if (unreadNotifications.Count > 0)
+                {
+                    <span class="badge bg-danger ms-2">@unreadNotifications.Count unread</span>
+                }
+                <form method="post" asp-action="MarkNotificationsRead" asp-controller="HostDashboard" class="d-inline float-end">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Mark all as read</button>
+                </form>
+            </div>
+            <ul class="list-group list-group-flush">
+                @foreach (var n in notifications.Take(10))
+                {
+                    <li class="list-group-item @(n.IsRead ? "" : "fw-bold bg-light")">
+                        <div>@n.Title</div>
+                        <div class="small text-muted">@n.Message</div>
+                        <div class="small text-muted">@n.CreatedAt.ToString("g")</div>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
     <div class="mt-4 mb-4 d-flex flex-wrap gap-2">
         <a href="@Url.Action("Create", "HostBuildings")" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Add New Building</a>
         <a href="@Url.Action("Create", "HostRooms")" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Post New Room</a>

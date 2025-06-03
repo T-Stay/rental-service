@@ -65,10 +65,15 @@ public class HomeController : Controller
             .ToListAsync();
         // Get total active rooms
         int totalActiveRooms = await _context.Rooms.CountAsync(r => r.Status == RoomStatus.Active);
+        var notifications = await _context.Notifications
+            .Where(n => n.UserId.ToString() == userId)
+            .OrderByDescending(n => n.CreatedAt)
+            .ToListAsync();
         ViewBag.Favorites = favorites;
         ViewBag.BookingRequests = bookings;
         ViewBag.Appointments = appointments;
         ViewBag.TotalActiveRooms = totalActiveRooms;
+        ViewBag.Notifications = notifications;
         return View("~/Views/CustomerDashboard/Index.cshtml");
     }
 
@@ -81,5 +86,22 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "customer")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> MarkNotificationsRead()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var notifications = await _context.Notifications
+            .Where(n => n.UserId.ToString() == userId && !n.IsRead)
+            .ToListAsync();
+        foreach (var n in notifications)
+        {
+            n.IsRead = true;
+        }
+        await _context.SaveChangesAsync();
+        return RedirectToAction("CustomerDashboard");
     }
 }
