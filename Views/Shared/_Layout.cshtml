@@ -10,6 +10,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
     <style>
+        html, body {
+            height: 100%;
+            min-height: 100vh;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .container.main-content {
+            flex: 1 0 auto;
+        }
         .main-header-bar {
             background: linear-gradient(90deg, #1b6ec2 0%, #0077cc 100%);
             color: #fff;
@@ -39,12 +51,23 @@
             margin-bottom: 2rem;
         }
         .footer {
-            background: #f8fafc;
+            background: linear-gradient(90deg, #1b6ec2 0%, #0077cc 100%);
+            color: #fff;
             text-align: center;
             padding: 1rem 0;
             position: relative;
             bottom: 0;
             width: 100%;
+        }
+        .footer a, .footer a:visited, .footer a:active {
+            color: #e3e3e3 !important;
+        }
+        .footer a:hover {
+            color: #fff !important;
+            text-decoration: underline;
+        }
+        .footer .fw-bold, .footer h5, .footer h6 {
+            color: #fff;
         }
         /* Ensure notification text wraps and breaks long words */
         .notification-text {
@@ -154,14 +177,50 @@
             <h1 class="fw-bold mb-0">@ViewData["Title"]</h1>
         </div>
     </header>
-    <div class="container">
+    <div class="container main-content">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
-    <footer class="footer mt-4">
-        <div class="container">
-            &copy; 2025 - T-Stay - <a asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách bảo mật</a>
+    <footer class="footer mt-4 position-relative">
+        <div class="container pb-2">
+            <div class="row text-center text-md-start align-items-start justify-content-center">
+                <div class="col-12 col-md-4 mb-3 mb-md-0 d-flex flex-column align-items-center align-items-md-start">
+                    <h5 class="fw-bold mb-2 d-flex align-items-center justify-content-center justify-content-md-start">
+                        <i class="fa-solid fa-house-chimney me-2"></i>T-Stay
+                    </h5>
+                    <div class="mb-1 small"><i class="fa fa-map-marker-alt me-2"></i>Km29 Đại lộ Thăng Long, Thạch Thất, Hà Nội</div>
+                    <div class="mb-1 small"><i class="fa fa-phone me-2"></i>0975 907 414</div>
+                    <div class="mb-1 small"><i class="fa fa-envelope me-2"></i>support@tstay.vn</div>
+                    <div class="mt-2">
+                        <a href="#" class="me-2 text-light"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="me-2 text-light"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="me-2 text-light"><i class="fab fa-twitter fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="col-6 col-md-2 mb-3 mb-md-0">
+                    <h6 class="fw-bold">Tài liệu</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li><a href="#" class="text-decoration-none text-light">Hướng dẫn</a></li>
+                        <li><a href="#" class="text-decoration-none text-light">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-2 mb-3 mb-md-0">
+                    <h6 class="fw-bold">Chính sách</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li><a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-light">Bảo mật</a></li>
+                        <li><a href="#" class="text-decoration-none text-light">Điều khoản</a></li>
+                    </ul>
+                </div>
+                <div class="col-12 col-md-4 d-flex flex-column align-items-center align-items-md-end mt-3 mt-md-0">
+                    <button id="scrollToTopBtn" class="btn btn-outline-light rounded-circle shadow" style="width:44px;height:44px;" title="Lên đầu trang">
+                        <i class="fa fa-arrow-up"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="w-100 text-center mt-2 small" style="opacity:0.85;">
+            &copy; 2025 - T-Stay
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -216,6 +275,23 @@ $(function () {
     // Initial badge load
     loadNotifications(false);
 });
+</script>
+    <script>
+    // Nút lướt lên đầu trang
+    const scrollBtn = document.getElementById('scrollToTopBtn');
+    if(scrollBtn){
+        scrollBtn.onclick = function() {
+            window.scrollTo({top:0, behavior:'smooth'});
+        };
+        window.addEventListener('scroll', function(){
+            if(window.scrollY > 200){
+                scrollBtn.style.display = 'block';
+            } else {
+                scrollBtn.style.display = 'none';
+            }
+        });
+        scrollBtn.style.display = 'none';
+    }
 </script>
     @await RenderSectionAsync("Scripts", required: false)
     @await Html.PartialAsync("_floatingChatbotScript")
