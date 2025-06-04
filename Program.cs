@@ -36,6 +36,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 // Register S3Service for dependency injection
 builder.Services.AddSingleton<S3Service>();
+// Đăng ký IHttpClientFactory để dùng DI cho HttpClient
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
