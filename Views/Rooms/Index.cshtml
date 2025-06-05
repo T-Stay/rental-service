@@ -85,6 +85,10 @@
                 </div>
             }
         </div>
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info mt-4">Không có phòng nào phù hợp với bộ lọc của bạn. Hãy thử lại.</div>
+        }
         <div class="d-flex justify-content-center mt-4">
             @Html.PagedListPager(Model, page => Url.Action("Index", new {
                 page,
@@ -100,10 +104,6 @@
                 PageClasses = new[] { "page-link" }
             })
         </div>
-        @if (!Model.Any())
-        {
-            <div class="alert alert-info mt-4">No rooms found.</div>
-        }
     </div>
 </div>
 @section Scripts {

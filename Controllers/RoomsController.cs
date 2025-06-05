@@ -22,10 +22,48 @@ namespace RentalService.Controllers
         }
 
         // GET: /Rooms
-        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice, Guid? buildingId, string[] amenities, string sort, int? page)
+        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice, Guid? buildingId, string[] amenities, string sort, double? centerLat, double? centerLng, double? radius, int? page, string advanceAddress)
         {
             int pageSize = 9;
             int pageNumber = page ?? 1;
+            // Lọc building theo bán kính nếu có
+            List<Guid> buildingIdsInRadius = new List<Guid>();
+            if (centerLat.HasValue && centerLng.HasValue && radius.HasValue && radius > 0)
+            {
+                var allBuildings = await _context.Buildings.ToListAsync();
+                double toRad(double deg) => deg * Math.PI / 180.0;
+                double haversine(double lat1, double lon1, double lat2, double lon2)
+                {
+                    double R = 6371; // Earth radius km
+                    double dLat = toRad(lat2 - lat1);
+                    double dLon = toRad(lon2 - lon1);
+                    double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                        Math.Cos(toRad(lat1)) * Math.Cos(toRad(lat2)) *
+                        Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+                    double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+                    return R * c;
+                }
+                buildingIdsInRadius = allBuildings
+                    .Where(b => {
+                        if (string.IsNullOrEmpty(b.Location) || !b.Location.Contains(",")) return false;
+                        var parts = b.Location.Split(',');
+                        if (parts.Length != 2) return false;
+                        if (!double.TryParse(parts[0], out double lat)) return false;
+                        if (!double.TryParse(parts[1], out double lng)) return false;
+                        return haversine(centerLat.Value, centerLng.Value, lat, lng) <= radius.Value;
+                    })
+                    .Select(b => b.Id)
+                    .ToList();
+                // Nếu là tìm kiếm nâng cao mà không có building nào phù hợp, trả về rỗng
+                if (buildingIdsInRadius.Count == 0)
+                {
+                    ViewBag.Buildings = await _context.Buildings.ToListAsync();
+                    ViewBag.SelectedBuildingId = buildingId;
+                    ViewBag.Amenities = await _context.Amenities.ToListAsync();
+                    ViewBag.AdvanceAddress = advanceAddress;
+                    return View(new PagedList<Room>(new List<Room>(), 1, pageSize));
+                }
+            }
             var rooms = _context.Rooms
                 .Include(r => r.Images)
                 .Include(r => r.RoomImages)
@@ -35,6 +73,8 @@ namespace RentalService.Controllers
                 .Include(r => r.Building)
                 .AsQueryable()
                 .Where(r => r.Status == RoomStatus.Active);
+            if (buildingIdsInRadius.Count > 0)
+                rooms = rooms.Where(r => buildingIdsInRadius.Contains(r.BuildingId));
             if (buildingId.HasValue)
                 rooms = rooms.Where(r => r.BuildingId == buildingId);
             if (!string.IsNullOrEmpty(location))
@@ -86,6 +126,7 @@ namespace RentalService.Controllers
             ViewBag.Buildings = await _context.Buildings.ToListAsync();
             ViewBag.SelectedBuildingId = buildingId;
             ViewBag.Amenities = await _context.Amenities.ToListAsync();
+            ViewBag.AdvanceAddress = advanceAddress;
             var roomList2 = await rooms.ToListAsync();
             return View(roomList2.ToPagedList(pageNumber, pageSize));
         }

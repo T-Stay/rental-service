@@ -5,6 +5,11 @@
     var minPrice = Context.Request.Query["minPrice"];
     var maxPrice = Context.Request.Query["maxPrice"];
     var sort = Context.Request.Query["sort"];
+    var radius = Context.Request.Query["radius"];
+    var centerLat = Context.Request.Query["centerLat"];
+    var centerLng = Context.Request.Query["centerLng"];
+    var advanceAddress = Context.Request.Query["advanceAddress"];
+    var hasAdvance = !string.IsNullOrEmpty(radius) && !string.IsNullOrEmpty(centerLat) && !string.IsNullOrEmpty(centerLng);
 }
 <div class="p-3 bg-light rounded shadow-sm mb-4">
     <h5>Bộ lọc</h5>
@@ -68,7 +73,106 @@
             }
         </select>
     </div>
-    <div class="d-grid">
-        <button type="submit" class="btn btn-primary">Áp dụng</button>
+    
+    <button class="btn btn-link p-0 mb-2" type="button" id="toggleAdvanceBtn">Tìm kiếm nâng cao <i class="fa fa-chevron-down"></i></button>
+    <div id="advanceOptions" style="display:@(hasAdvance ? "block" : "none")">
+        <div class="mb-3">
+            <label class="form-label">Địa điểm cụ thể</label>
+            <input type="text" class="form-control" id="advanceAddress" name="advanceAddress" placeholder="Nhập địa chỉ hoặc chọn trên bản đồ" autocomplete="off" value="@advanceAddress" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Chọn vị trí trên bản đồ</label>
+            <div id="advanceMap" style="height: 250px;"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Bán kính (km)</label>
+            <input type="number" min="0.1" step="0.1" name="radius" class="form-control" placeholder="Nhập bán kính" value="@radius" />
+        </div>
+        <input type="hidden" name="centerLat" id="advanceLat" value="@centerLat" />
+        <input type="hidden" name="centerLng" id="advanceLng" value="@centerLng" />
     </div>
+    <button type="submit" class="btn btn-primary w-100">Áp dụng</button>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script>
+(function() {
+    var map = null;
+    // Prevent form submit on Enter
+    var filterForm = document.getElementById('roomFilterForm');
+    if (filterForm) {
+        filterForm.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                // Allow Enter for textarea, but not for input
+                if (e.target.tagName !== 'TEXTAREA') {
+                    e.preventDefault();
+                    return false;
+                }
+            }
+        });
+    }
+    function bindAdvanceToggle() {
+        var toggleBtn = document.getElementById('toggleAdvanceBtn');
+        if (toggleBtn) {
+            toggleBtn.onclick = function(e) {
+                e.preventDefault();
+                var adv = document.getElementById('advanceOptions');
+                var isHidden = adv.style.display === 'none';
+                adv.style.display = isHidden ? 'block' : 'none';
+                // Nếu vừa mở ra thì invalidateSize cho map
+                if (isHidden && map) {
+                    setTimeout(function() { map.invalidateSize(); }, 200);
+                }
+            };
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindAdvanceToggle);
+    } else {
+        bindAdvanceToggle();
+    }
+    // Map init
+    if (document.getElementById('advanceMap')) {
+        var defaultLat = 21.0285, defaultLng = 105.8542;
+        var lat = document.getElementById('advanceLat').value || defaultLat;
+        var lng = document.getElementById('advanceLng').value || defaultLng;
+        lat = parseFloat(lat); lng = parseFloat(lng);
+        map = L.map('advanceMap').setView([lat, lng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        var marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        function setAdvanceLocation(lat, lng) {
+            marker.setLatLng([lat, lng]);
+            map.setView([lat, lng], 16);
+            document.getElementById('advanceLat').value = lat;
+            document.getElementById('advanceLng').value = lng;
+        }
+        marker.on('dragend', function (e) {
+            let pos = marker.getLatLng();
+            setAdvanceLocation(pos.lat, pos.lng);
+        });
+        var addressInput = document.getElementById('advanceAddress');
+        if (addressInput) {
+            let debounceTimeout = null;
+            addressInput.addEventListener('input', function () {
+                let address = this.value;
+                if (debounceTimeout) clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(function() {
+                    if (!address) return;
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.length > 0) {
+                                setAdvanceLocation(data[0].lat, data[0].lon);
+                            }
+                        });
+                }, 500);
+            });
+        }
+        // Nếu map đang hiển thị (advanceOptions mở sẵn), invalidateSize sau 200ms
+        var adv = document.getElementById('advanceOptions');
+        if (adv && adv.style.display !== 'none') {
+            setTimeout(function() { map.invalidateSize(); }, 200);
+        }
+    }
+})();
+</script>
 </div>
