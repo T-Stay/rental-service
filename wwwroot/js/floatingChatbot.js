@@ -224,6 +224,108 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
         background: #b3d3f6;
         cursor: not-allowed;
     }
+    #floating-chatbot-expand {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        margin-left: 8px;
+        transition: color 0.2s;
+    }
+    #floating-chatbot-expand:hover {
+        color: #b3d3f6;
+    }
+    #floating-chatbot-modal {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 10001;
+        background: rgba(0,0,0,0.25);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        animation: chatbot-fadein 0.3s;
+    }
+    #floating-chatbot-modal-content {
+        background: #fff;
+        border-radius: 18px;
+        width: 90vw;
+        max-width: 700px;
+        height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+        border: 1px solid #e0e0e0;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        overflow: hidden;
+    }
+    #floating-chatbot-modal-header {
+        background: #0078d4;
+        color: #fff;
+        padding: 14px 20px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #0063a1;
+    }
+    #floating-chatbot-modal-close {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
+        margin-left: 8px;
+        transition: color 0.2s;
+    }
+    #floating-chatbot-modal-close:hover {
+        color: #ffb4b4;
+    }
+    #floating-chatbot-modal-messages {
+        flex: 1;
+        padding: 18px 16px 14px 16px;
+        overflow-y: auto;
+        background: #f7fafd;
+        font-size: 16px;
+    }
+    #floating-chatbot-modal-input-row {
+        display: flex;
+        padding: 14px 14px 14px 14px;
+        border-top: 1px solid #e0e0e0;
+        background: #f4f8fb;
+        align-items: center;
+    }
+    #floating-chatbot-modal-input {
+        flex: 1;
+        border: 1.5px solid #b3d3f6;
+        border-radius: 18px;
+        padding: 12px 16px;
+        font-size: 16px;
+        outline: none;
+        background: #fff;
+        transition: border 0.2s;
+    }
+    #floating-chatbot-modal-input:focus {
+        border: 1.5px solid #0078d4;
+        background: #f7fafd;
+    }
+    #floating-chatbot-modal-send {
+        background: #0078d4;
+        color: #fff;
+        border: none;
+        border-radius: 18px;
+        margin-left: 12px;
+        padding: 12px 24px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+        font-weight: 500;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    #floating-chatbot-modal-send:disabled {
+        background: #b3d3f6;
+        cursor: not-allowed;
+    }
     .chatbot-bubble.typing {
         background: #f0f4f8 !important;
         color: #aaa !important;
@@ -246,6 +348,7 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
         <div id="floating-chatbot-header">
             <span class="chatbot-avatar"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#0078d4"/><path d="M7 10.5C7 9.11929 8.11929 8 9.5 8H14.5C15.8807 8 17 9.11929 17 10.5V13.5C17 14.8807 15.8807 16 14.5 16H10.4142C10.149 16 9.89464 16.1054 9.70711 16.2929L8.35355 17.6464C8.15829 17.8417 7.84171 17.8417 7.64645 17.6464C7.45118 17.4512 7.45118 17.1346 7.64645 16.9393L8.29289 16.2929C8.10536 16.1054 8 15.851 8 15.5858V10.5Z" fill="#fff"/></svg></span>
             <span class="chatbot-title">Trợ lý T-Stay</span>
+            <button id="floating-chatbot-expand" title="Mở rộng" aria-label="Mở rộng">⤢</button>
             <button id="floating-chatbot-close">×</button>
         </div>
         <div id="floating-chatbot-messages"></div>
@@ -256,45 +359,64 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
     `;
     document.body.appendChild(chatWindow);
 
+    // Modal chat lớn
+    const modal = document.createElement('div');
+    modal.id = 'floating-chatbot-modal';
+    modal.innerHTML = `
+        <div id="floating-chatbot-modal-content">
+            <div id="floating-chatbot-modal-header">
+                <span class="chatbot-title">Trợ lý T-Stay</span>
+                <button id="floating-chatbot-modal-close" title="Thu nhỏ" aria-label="Thu nhỏ">×</button>
+            </div>
+            <div id="floating-chatbot-modal-messages"></div>
+            <form id="floating-chatbot-modal-input-row">
+                <input id="floating-chatbot-modal-input" type="text" placeholder="Nhập tin nhắn..." autocomplete="off" required />
+                <button id="floating-chatbot-modal-send" type="submit">Gửi</button>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
     // --- JS Logic ---
     const messagesDiv = chatWindow.querySelector('#floating-chatbot-messages');
     const input = chatWindow.querySelector('#floating-chatbot-input');
     const sendBtn = chatWindow.querySelector('#floating-chatbot-send');
+    // Modal elements
+    const modalMessagesDiv = modal.querySelector('#floating-chatbot-modal-messages');
+    const modalInput = modal.querySelector('#floating-chatbot-modal-input');
+    const modalSendBtn = modal.querySelector('#floating-chatbot-modal-send');
     let chatHistory = [];
     let currentBotBubble = null; // Thêm biến này để quản lý bubble bot hiện tại
+    let currentModalBotBubble = null;
 
     // Hiển thị tin nhắn chào mừng khi mở chat lần đầu
-    function showWelcomeMessage() {
-        // Xóa mọi bubble typing trước khi kiểm tra
-        Array.from(messagesDiv.querySelectorAll('.chatbot-typing')).forEach(div => div.remove());
-        // Chỉ hiển thị nếu chưa có tin nhắn thực nào (loại trừ bubble typing)
-        const realMsgCount = Array.from(messagesDiv.children).filter(div => !div.classList.contains('chatbot-typing')).length;
+    function showWelcomeMessage(targetDiv, isModal) {
+        Array.from(targetDiv.querySelectorAll('.chatbot-typing')).forEach(div => div.remove());
+        const realMsgCount = Array.from(targetDiv.children).filter(div => !div.classList.contains('chatbot-typing')).length;
         if (realMsgCount === 0) {
-            console.log('Hiển thị tin nhắn chào mừng vì chưa có tin nhắn thực nào.');
-            console.log('Số tin nhắn thực:', realMsgCount);
             appendMessage('bot',
-                '**Xin chào!** 👋\nTôi là trợ lý AI T-Stay.\nBạn cần hỗ trợ gì?\n\nBạn có thể hỏi về:\n- Tìm phòng, đặt lịch xem phòng\n- Gửi yêu cầu thuê\n- Quản lý phòng, lịch hẹn\n\nHãy nhập câu hỏi bên dưới!', true);
-        }
-        else {
-            console.log('Đã có tin nhắn thực, không hiển thị chào mừng.');
-            console.log('Số tin nhắn thực:', realMsgCount);
+                '**Xin chào!** 👋\nTôi là trợ lý AI T-Stay.\nBạn cần hỗ trợ gì?\n\nBạn có thể hỏi về:\n- Tìm phòng, đặt lịch xem phòng\n- Gửi yêu cầu thuê\n- Quản lý phòng, lịch hẹn\n\nHãy nhập câu hỏi bên dưới!', true, false, isModal);
         }
     }
 
-    async function sendMessage(text) {
-        appendMessage('user', text);
+    function syncMessagesTo(targetDiv, isModal) {
+        targetDiv.innerHTML = '';
+        for (const msg of chatHistory) {
+            appendMessage(msg.role, msg.text, true, false, isModal, targetDiv);
+        }
+    }
+
+    async function sendMessage(text, isModal) {
+        appendMessage('user', text, true, false, isModal);
         chatHistory.push({ role: 'user', text });
-        // Trước khi tạo bubble bot mới, xóa mọi bubble typing
-        Array.from(messagesDiv.querySelectorAll('.chatbot-typing')).forEach(div => div.remove());
-        // setBotTyping(true);
-        sendBtn.disabled = true;
-        input.disabled = true;
-
-        // Khi bắt đầu trả lời mới, tạo bubble bot mới và lưu reference
-        currentBotBubble = appendMessage('bot', '', true);
-
-        // Prepare SSE request
-        // const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${GEMINI_API_KEY}`;
+        Array.from((isModal ? modalMessagesDiv : messagesDiv).querySelectorAll('.chatbot-typing')).forEach(div => div.remove());
+        (isModal ? modalSendBtn : sendBtn).disabled = true;
+        (isModal ? modalInput : input).disabled = true;
+        if (isModal) {
+            currentModalBotBubble = appendMessage('bot', '', true, false, true);
+        } else {
+            currentBotBubble = appendMessage('bot', '', true, false, false);
+        }
         const url = GEMINI_PROXY_ENDPOINT;
         const body = {
             system_instruction: {
@@ -312,7 +434,6 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
                 topK: 10
             }
         };
-
         let botMsg = '';
         try {
             const resp = await fetch(url, {
@@ -329,7 +450,7 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
                 if (done) break;
                 buffer += decoder.decode(value, { stream: true });
                 let lines = buffer.split('\n');
-                buffer = lines.pop(); // last line may be incomplete
+                buffer = lines.pop();
                 for (let line of lines) {
                     if (line.startsWith('data:')) {
                         let data = line.slice(5).trim();
@@ -339,9 +460,15 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
                                 let part = json.candidates?.[0]?.content?.parts?.[0]?.text;
                                 if (part) {
                                     botMsg += part;
-                                    setBotTyping(false);
-                                    // Chỉ update nội dung của currentBotBubble
-                                    if (currentBotBubble) {
+                                    setBotTyping(false, isModal);
+                                    if (isModal && currentModalBotBubble) {
+                                        if (window.marked) {
+                                            currentModalBotBubble.innerHTML = window.marked.parse(botMsg);
+                                        } else {
+                                            currentModalBotBubble.innerHTML = botMsg.replace(/\n/g, '<br>');
+                                        }
+                                        modalMessagesDiv.scrollTop = modalMessagesDiv.scrollHeight;
+                                    } else if (!isModal && currentBotBubble) {
                                         if (window.marked) {
                                             currentBotBubble.innerHTML = window.marked.parse(botMsg);
                                         } else {
@@ -356,25 +483,26 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
                 }
             }
         } catch (e) {
-            setBotTyping(false);
-            if (currentBotBubble) currentBotBubble.innerHTML = 'Xin lỗi, đã xảy ra lỗi.';
+            setBotTyping(false, isModal);
+            if (isModal && currentModalBotBubble) currentModalBotBubble.innerHTML = 'Xin lỗi, đã xảy ra lỗi.';
+            if (!isModal && currentBotBubble) currentBotBubble.innerHTML = 'Xin lỗi, đã xảy ra lỗi.';
         }
-        setBotTyping(false);
+        setBotTyping(false, isModal);
         if (botMsg) chatHistory.push({ role: 'bot', text: botMsg });
-        sendBtn.disabled = false;
-        input.disabled = false;
-        input.value = '';
-        input.focus();
-        currentBotBubble = null; // Reset sau khi xong
+        (isModal ? modalSendBtn : sendBtn).disabled = false;
+        (isModal ? modalInput : input).disabled = false;
+        (isModal ? modalInput : input).value = '';
+        // Chỉ auto focus nếu không phải mobile
+        const isMobile = /android|iphone|ipad|ipod|opera mini|iemobile|mobile/i.test(navigator.userAgent) || window.innerWidth < 600;
+        if (!isMobile) {
+            (isModal ? modalInput : input).focus();
+        }
+        if (isModal) currentModalBotBubble = null;
+        else currentBotBubble = null;
     }
 
-    function appendMessage(role, text, forceNew, isTypingBubble) {
-        // Nếu là bot và forceNew không true, không tạo mới, chỉ update bubble bot cuối cùng (dùng cho stream cũ, nhưng ta không dùng nữa)
-        if (role === 'bot' && !forceNew && !isTypingBubble) {
-            // Không dùng nữa, luôn tạo mới khi forceNew
-            return;
-        }
-        // Thêm mới (luôn thêm vào cuối)
+    function appendMessage(role, text, forceNew, isTypingBubble, isModal, targetDiv) {
+        const div = targetDiv || (isModal ? modalMessagesDiv : messagesDiv);
         const msgDiv = document.createElement('div');
         msgDiv.className = 'chatbot-msg ' + (role === 'user' ? 'user' : 'bot') + (isTypingBubble ? ' chatbot-typing' : '');
         const bubble = document.createElement('div');
@@ -391,23 +519,21 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
             bubble.textContent = text;
         }
         msgDiv.appendChild(bubble);
-        messagesDiv.appendChild(msgDiv);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        return bubble; // Trả về bubble để stream update
+        div.appendChild(msgDiv);
+        div.scrollTop = div.scrollHeight;
+        return bubble;
     }
 
-    function setBotTyping(isTyping) {
-        // Nếu đã có bubble bot đang stream (currentBotBubble chưa null và đang rỗng), không tạo bubble typing nữa
-        if (isTyping && currentBotBubble) return;
-        // Luôn xóa hết mọi bubble typing trước khi tạo mới
-        Array.from(messagesDiv.querySelectorAll('.chatbot-typing')).forEach(div => div.remove());
+    function setBotTyping(isTyping, isModal) {
+        const div = isModal ? modalMessagesDiv : messagesDiv;
+        if (isTyping && ((isModal && currentModalBotBubble) || (!isModal && currentBotBubble))) return;
+        Array.from(div.querySelectorAll('.chatbot-typing')).forEach(d => d.remove());
         if (isTyping) {
-            appendMessage('bot', '', true, true);
+            appendMessage('bot', '', true, true, isModal);
         }
     }
 
     function buildMessages() {
-        // Gemini expects [{role: "user"|"model", parts: [{text: "..."}]}]
         return chatHistory.map(m => ({
             role: m.role === 'user' ? 'user' : 'model',
             parts: [{ text: m.text }]
@@ -447,16 +573,36 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
     btn.onclick = () => {
         chatWindow.style.display = 'flex';
         btn.style.display = 'none';
-        showWelcomeMessage(); // Luôn kiểm tra và hiển thị message chào mừng nếu cần
+        syncMessagesTo(messagesDiv, false);
+        showWelcomeMessage(messagesDiv, false);
         input.focus();
     };
     chatWindow.querySelector('#floating-chatbot-close').onclick = () => {
         chatWindow.style.display = 'none';
         btn.style.display = 'flex';
     };
+    chatWindow.querySelector('#floating-chatbot-expand').onclick = () => {
+        chatWindow.style.display = 'none';
+        modal.style.display = 'flex';
+        syncMessagesTo(modalMessagesDiv, true);
+        showWelcomeMessage(modalMessagesDiv, true);
+        modalInput.focus();
+    };
     chatWindow.querySelector('#floating-chatbot-input-row').onsubmit = (e) => {
         e.preventDefault();
         const text = input.value.trim();
-        if (text) sendMessage(text);
+        if (text) sendMessage(text, false);
+    };
+    modal.querySelector('#floating-chatbot-modal-close').onclick = () => {
+        modal.style.display = 'none';
+        chatWindow.style.display = 'flex';
+        syncMessagesTo(messagesDiv, false);
+        showWelcomeMessage(messagesDiv, false);
+        input.focus();
+    };
+    modal.querySelector('#floating-chatbot-modal-input-row').onsubmit = (e) => {
+        e.preventDefault();
+        const text = modalInput.value.trim();
+        if (text) sendMessage(text, true);
     };
 })();

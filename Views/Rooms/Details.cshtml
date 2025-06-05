@@ -69,9 +69,12 @@
             <div class="mt-4">
                 <span class="fs-5 fw-bold">Đánh giá</span>
                 <span class="ms-2">@Html.Raw(RenderStars(avgRating)) <span class="text-muted">(@avgRating.ToString("0.0"))/5 từ @reviewCount đánh giá</span></span>
+                <button id="showReviewFormBtn" class="btn btn-outline-success btn-sm ms-3">Viết đánh giá</button>
             </div>
             @await Html.PartialAsync("_ReviewsPartial", Model.Reviews)
-            @await Html.PartialAsync("_ReviewForm", Model)
+            <div id="reviewFormContainer" style="display:none;">
+                @await Html.PartialAsync("_ReviewForm", Model)
+            </div>
         </div>
         <div class="col-md-5 order-1 order-md-2">
             <div class="room-gallery">
@@ -127,6 +130,31 @@
         navigator.clipboard.writeText(text);
         toastr.success('Copied to clipboard!');
     }
+    document.addEventListener('DOMContentLoaded', function() {
+        var loc = '@Model.Building?.Location';
+        if (loc) {
+            var parts = loc.split(',');
+            if (parts.length === 2) {
+                var lat = parseFloat(parts[0]);
+                var lng = parseFloat(parts[1]);
+                var map = L.map('buildingMap').setView([lat, lng], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                }).addTo(map);
+                L.marker([lat, lng]).addTo(map);
+            }
+        }
+        var btn = document.getElementById('showReviewFormBtn');
+        var form = document.getElementById('reviewFormContainer');
+        if(btn && form) {
+            btn.onclick = function() {
+                form.style.display = '';
+                btn.style.display = 'none';
+                // Scroll tới form nếu cần
+                form.scrollIntoView({behavior:'smooth', block:'center'});
+            };
+        }
+    });
 </script>
 <style>
     .room-gallery img { transition: border 0.2s; }
