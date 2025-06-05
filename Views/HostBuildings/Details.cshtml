@@ -1,0 +1,92 @@
+@model RentalService.Models.Building
+@{
+    ViewData["Title"] = "Chi tiết tòa nhà";
+    var error = ViewBag.Error as string;
+}
+<div class="container mt-4">
+    <h2>Chi tiết tòa nhà</h2>
+    @if (!string.IsNullOrEmpty(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    <div class="mb-3">
+        <label class="fw-bold">Tên tòa nhà:</label>
+        <div>@Model.Name</div>
+    </div>
+    <div class="mb-3">
+        <label class="fw-bold">Địa chỉ:</label>
+        <div>@Model.Address</div>
+    </div>
+    <div class="mb-3">
+        <label class="fw-bold">Mô tả:</label>
+        <div>@Model.Description</div>
+    </div>
+    <div class="mb-3">
+        <label class="fw-bold">Tọa độ:</label>
+        <div>@Model.Location</div>
+    </div>
+    <div class="mb-3">
+        <label class="fw-bold">Bản đồ vị trí:</label>
+        <div id="map" style="height: 300px;"></div>
+    </div>
+    <div class="mb-3">
+        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">Sửa</a>
+        <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger">Xóa</a>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Quay lại danh sách</a>
+    </div>
+    <hr />
+    <h4>Danh sách phòng</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Tên phòng</th>
+                <th>Giá</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (Model.Rooms != null && Model.Rooms.Count > 0)
+        {
+            foreach (var room in Model.Rooms)
+            {
+                <tr>
+                    <td>@room.Name</td>
+                    <td>@room.Price.ToString("N0") ₫</td>
+                    <td>
+                        @(room.Status == RentalService.Models.RoomStatus.Active ? "Còn trống" : "Đã ngừng cho thuê")
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-info btn-sm">Chi tiết</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-center">Chưa có phòng nào</td></tr>
+        }
+        </tbody>
+    </table>
+</div>
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loc = '@Model.Location';
+            if (loc) {
+                var parts = loc.split(',');
+                if (parts.length === 2) {
+                    var lat = parseFloat(parts[0]);
+                    var lng = parseFloat(parts[1]);
+                    var map = L.map('map').setView([lat, lng], 16);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                    }).addTo(map);
+                    L.marker([lat, lng]).addTo(map);
+                }
+            }
+        });
+    </script>
+}

@@ -4,7 +4,7 @@
     var error = ViewBag.Error as string;
 }
 <div class="container mt-4">
-    <h2>Edit Building</h2>
+    <h2>Chỉnh sửa tòa nhà</h2>
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
@@ -13,29 +13,67 @@
     <form asp-action="Edit" method="post" class="mb-3">
         <input type="hidden" asp-for="Id" />
         <div class="mb-3">
-            <label>Name</label>
+            <label class="fw-bold">Tên tòa nhà</label>
             <input asp-for="Name" class="form-control" />
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
         <div class="mb-3">
-            <label>Address</label>
+            <label class="fw-bold">Địa chỉ</label>
             <input asp-for="Address" class="form-control" />
             <span asp-validation-for="Address" class="text-danger"></span>
         </div>
         <div class="mb-3">
-            <label>Description</label>
+            <label class="fw-bold">Mô tả</label>
             <input asp-for="Description" class="form-control" />
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
+        <input asp-for="Location" type="hidden" id="locationInput" />
         <div class="mb-3">
-            <label>Location</label>
-            <input asp-for="Location" class="form-control" />
-            <span asp-validation-for="Location" class="text-danger"></span>
+            <label class="fw-bold">Bản đồ vị trí</label>
+            <div id="map" style="height: 350px;"></div>
         </div>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Back to list</a>
+        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Quay lại danh sách</a>
     </form>
 </div>
 @section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let map = L.map('map').setView([21.0285, 105.8542], 13); // Default: Hanoi
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+        let marker = L.marker([21.0285, 105.8542], { draggable: true }).addTo(map);
+        function setLocation(lat, lng) {
+            marker.setLatLng([lat, lng]);
+            map.setView([lat, lng], 16);
+            document.getElementById('locationInput').value = lat + ',' + lng;
+        }
+        marker.on('dragend', function (e) {
+            let pos = marker.getLatLng();
+            setLocation(pos.lat, pos.lng);
+        });
+        // Geocode when address changes
+        document.querySelector('input[name="Address"]').addEventListener('change', function () {
+            let address = this.value;
+            if (!address) return;
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        setLocation(data[0].lat, data[0].lon);
+                    }
+                });
+        });
+        // Set initial location if value exists
+        window.onload = function() {
+            let loc = document.getElementById('locationInput').value;
+            if (loc) {
+                let [lat, lng] = loc.split(',');
+                setLocation(lat, lng);
+            }
+        }
+    </script>
     @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
 }

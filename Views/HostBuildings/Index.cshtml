@@ -29,9 +29,7 @@
                 <td>@building.Description</td>
                 <td>@(building.Rooms?.Count ?? 0)</td>
                 <td>
-                    <a href="@Url.Action("Edit", new { id = building.Id })" class="btn btn-primary btn-sm">Sửa</a>
-                    <a href="@Url.Action("Delete", new { id = building.Id })" class="btn btn-danger btn-sm">Xóa</a>
-                    <a href="@Url.Action("Index", "HostRooms", new { buildingId = building.Id })" class="btn btn-secondary btn-sm">Xem phòng</a>
+                    <a href="@Url.Action("Details", new { id = building.Id })" class="btn btn-info btn-sm">Chi tiết</a>
                 </td>
             </tr>
         }

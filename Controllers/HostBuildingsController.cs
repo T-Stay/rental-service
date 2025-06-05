@@ -114,8 +114,13 @@ namespace RentalService.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    var existing = await _context.Buildings.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+                    if (existing == null) return NotFound();
+                    // Giữ nguyên HostId, CreatedAt
+                    building.HostId = existing.HostId;
+                    building.CreatedAt = existing.CreatedAt;
                     building.UpdatedAt = DateTime.UtcNow;
-                    _context.Update(building);
+                    _context.Entry(building).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                     return RedirectToAction(nameof(Index));
                 }
@@ -165,6 +170,25 @@ namespace RentalService.Controllers
             {
                 ViewBag.Error = "An error occurred while deleting the building. Please try again later.";
                 return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // GET: /HostBuildings/Details/{id}
+        public async Task<IActionResult> Details(Guid id)
+        {
+            try
+            {
+                var building = await _context.Buildings
+                    .Include(b => b.Rooms)
+                    .FirstOrDefaultAsync(b => b.Id == id);
+                if (building == null) return NotFound();
+                return View(building);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading building details for building {BuildingId}", id);
+                ViewBag.Error = "An error occurred loading the building details. Please try again later.";
+                return RedirectToAction("Index");
             }
         }
     }

@@ -17,7 +17,7 @@
                     </span>
                 }
             </div>
-            <div class="mb-2 text-muted"><i class="fa-solid fa-location-dot"></i> @Model.Building?.Location</div>
+            <div class="mb-2 text-muted"><i class="fa-solid fa-location-dot"></i> @Model.Building?.Address </div>
             <div class="mb-2 fs-5 fw-bold text-success">@Model.Price.ToString("N0") ₫</div>
             <div class="mb-3">@Model.Description</div>
             @if (Model.Amenities != null && Model.Amenities.Count > 0)
@@ -104,6 +104,16 @@
                     <img src="/images/no-image.png" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="No Image" />
                 }
             </div>
+            @if (!string.IsNullOrEmpty(Model.Building?.Location))
+            {
+                <div class="mt-3">
+                    <label class="fw-bold">Vị trí tòa nhà trên bản đồ:</label>
+                    <a class="btn btn-outline-primary btn-sm ms-2 mb-2" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=@Model.Building.Location">
+                        Mở trên Google Maps
+                    </a>
+                    <div id="buildingMap" style="height: 250px;"></div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -134,4 +144,25 @@
         html += string.Concat(Enumerable.Repeat("<i class='fa fa-star text-secondary'></i>", empty));
         return html;
     }
+}
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var loc = '@Model.Building?.Location';
+            if (loc) {
+                var parts = loc.split(',');
+                if (parts.length === 2) {
+                    var lat = parseFloat(parts[0]);
+                    var lng = parseFloat(parts[1]);
+                    var map = L.map('buildingMap').setView([lat, lng], 16);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                    }).addTo(map);
+                    L.marker([lat, lng]).addTo(map);
+                }
+            }
+        });
+    </script>
 }
