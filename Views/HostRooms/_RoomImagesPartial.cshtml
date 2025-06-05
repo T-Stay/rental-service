@@ -1,6 +1,6 @@
 @model List<RentalService.Models.RoomImage>
 <div class="mb-3">
-    <label>Room Images</label>
+    <label>Ảnh phòng</label>
     <div id="image-preview-list" class="mb-2 d-flex flex-wrap align-items-center">
         @if (Model != null && Model.Count > 0)
         {
@@ -14,7 +14,7 @@
         }
     </div>
     <input type="file" name="RoomImages" id="room-image-input" multiple class="form-control mt-2" accept="image/*" />
-    <small class="form-text text-muted">You can upload new images. Click the X to remove images from this room.</small>
+    <small class="form-text text-muted">Bạn có thể tải lên ảnh mới. Nhấn X để xóa ảnh khỏi phòng này.</small>
 </div>
 
 <!-- Hidden container for RemoveImageIds -->

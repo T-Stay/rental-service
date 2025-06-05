@@ -81,36 +81,20 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    // Seed amenities if empty
-    if (!scope.ServiceProvider.GetRequiredService<AppDbContext>().Amenities.Any())
+    // Seed amenities: auto add if not exist by name
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var amenitiesList = new[]
     {
-        var amenities = new[]
+        "WiFi", "Máy lạnh", "Hệ thống sưởi", "Bếp", "Máy giặt", "Máy sấy", "Đậu xe miễn phí", "Hồ bơi", "Phòng gym", "Cho phép thú cưng", "Ban công riêng", "TV màn hình phẳng", "Bồn tắm", "Camera an ninh", "Bảo vệ 24/7", "Bàn làm việc", "Thang máy", "Két sắt", "Máy nước nóng", "Sân vườn"
+    };
+    foreach (var amenityName in amenitiesList)
+    {
+        if (!db.Amenities.Any(a => a.Name == amenityName))
         {
-            new Amenity { Id = Guid.NewGuid(), Name = "WiFi" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Máy lạnh" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Hệ thống sưởi" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Bếp" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Máy giặt" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Máy sấy" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Đậu xe miễn phí" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Hồ bơi" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Phòng gym" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Cho phép thú cưng" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Ban công riêng" },
-            new Amenity { Id = Guid.NewGuid(), Name = "TV màn hình phẳng" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Bồn tắm" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Camera an ninh" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Bảo vệ 24/7" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Bàn làm việc" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Thang máy" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Két sắt" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Máy nước nóng" },
-            new Amenity { Id = Guid.NewGuid(), Name = "Sân vườn" }
-        };
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Amenities.AddRange(amenities);
-        await db.SaveChangesAsync();
+            db.Amenities.Add(new Amenity { Id = Guid.NewGuid(), Name = amenityName });
+        }
     }
+    await db.SaveChangesAsync();
 }
 
 // Configure the HTTP request pipeline.

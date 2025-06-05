@@ -1,4 +1,7 @@
-@model IEnumerable<RentalService.Models.Room>
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+@using X.PagedList.Web.Common
+@model X.PagedList.IPagedList<RentalService.Models.Room>
 @{
     ViewData["Title"] = "Tìm phòng";
     var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
@@ -12,95 +15,108 @@
     <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-success"><i class="fa-solid fa-calendar-check"></i> Lịch hẹn</a>
 </div>
 <h2>Tìm phòng</h2>
-<form method="get" class="mb-4 p-3 rounded shadow-sm bg-light">
-    <div class="row g-2 align-items-end">
-        <div class="col-md-3">
-            <label class="form-label mb-1">Khu vực</label>
-            <input type="text" name="location" class="form-control" placeholder="Khu vực" value="@Context.Request.Query["location"]" />
-        </div>
-        <div class="col-md-2">
-            <label class="form-label mb-1">Giá tối thiểu (VND)</label>
-            <input type="number" name="minPrice" class="form-control" placeholder="Giá tối thiểu (VND)" value="@Context.Request.Query["minPrice"]" step="1" min="0" />
-        </div>
-        <div class="col-md-2">
-            <label class="form-label mb-1">Giá tối đa (VND)</label>
-            <input type="number" name="maxPrice" class="form-control" placeholder="Giá tối đa (VND)" value="@Context.Request.Query["maxPrice"]" step="1" min="0" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label mb-1">Tòa nhà</label>
-            <select name="buildingId" class="form-select">
-                <option value="">Tất cả</option>
-                @if (buildings != null)
+<div class="row">
+    <div class="col-md-3">
+        <form method="get" id="roomFilterForm">
+            @Html.Partial("_RoomFilterSidebar")
+        </form>
+    </div>
+    <div class="col-md-9">
+        <div class="d-flex justify-content-center mt-4">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new
                 {
-                    foreach (var b in buildings)
-                    {
-                        if (selectedBuildingId == b.Id)
+                    page,
+                    location = Context.Request.Query["location"],
+                    minPrice = Context.Request.Query["minPrice"],
+                    maxPrice = Context.Request.Query["maxPrice"],
+                    buildingId = Context.Request.Query["buildingId"],
+                    sort = Context.Request.Query["sort"],
+                    amenities = Context.Request.Query["amenities"]
+                }), new PagedListRenderOptions
+       {
+           UlElementClasses = new[] { "pagination" },
+           LiElementClasses = new[] { "page-item" },
+           PageClasses = new[] { "page-link" }
+       })
+        </div>
+        <div class="row g-4">
+            @foreach (var room in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="room-card clickable-card" tabindex="0" onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON'){ window.location='@Url.Action("Details", new { id = room.Id })'; }" onkeydown="if(event.key==='Enter' && event.target===this){ window.location='@Url.Action("Details", new { id = room.Id })'; }">
+                        @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
                         {
-                            <option value="@b.Id" selected>@b.Name</option>
+                            <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                        }
+                        else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
+                        {
+                            <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         }
                         else
                         {
-                            <option value="@b.Id">@b.Name</option>
+                            <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
                         }
-                    }
-                }
-            </select>
+                        <div class="room-card-body">
+                            <div class="room-card-title d-flex align-items-center justify-content-between">
+                                <span>@room.Name</span>
+                                @if (room.Reviews != null && room.Reviews.Count > 0)
+                                {
+                                    var avg = room.Reviews.Average(r => r.Rating);
+                                    <span class="ms-2 small text-warning">@Html.Raw(RenderStars(avg)) <span class="text-muted">@avg.ToString("0.0")</span></span>
+                                }
+                            </div>
+                            <div class="room-card-location"><i class="fa-solid fa-location-dot"></i> @room.Building?.Address</div>
+                            <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
+                            <div class="room-card-amenities">
+                                @if (room.Amenities != null && room.Amenities.Count > 0)
+                                {
+                                    <span><i class="fa-solid fa-list"></i> @string.Join(", ", room.Amenities.Take(3).Select(a => a.Name))</span>
+                                    @if (room.Amenities.Count > 3)
+                                    {
+                                        <span> +@((room.Amenities.Count - 3)) tiện ích khác</span>
+                                    }
+                                }
+                            </div>
+                            <div class="room-card-link">
+                                <a href="@Url.Action("Details", new { id = room.Id })" class="btn btn-outline-primary btn-sm">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
-        <div class="col-md-2 d-grid">
-            <label class="form-label mb-1" style="visibility:hidden">Tìm kiếm</label>
-            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+        <div class="d-flex justify-content-center mt-4">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new {
+                page,
+                location = Context.Request.Query["location"],
+                minPrice = Context.Request.Query["minPrice"],
+                maxPrice = Context.Request.Query["maxPrice"],
+                buildingId = Context.Request.Query["buildingId"],
+                sort = Context.Request.Query["sort"],
+                amenities = Context.Request.Query["amenities"]
+            }), new PagedListRenderOptions {
+                UlElementClasses = new[] { "pagination" },
+                LiElementClasses = new[] { "page-item" },
+                PageClasses = new[] { "page-link" }
+            })
         </div>
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info mt-4">No rooms found.</div>
+        }
     </div>
-</form>
-<div class="row g-4">
-@foreach (var room in Model)
-{
-    <div class="col-12 col-md-6 col-lg-4">
-        <div class="room-card clickable-card" tabindex="0" onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON'){ window.location='@Url.Action("Details", new { id = room.Id })'; }" onkeydown="if(event.key==='Enter' && event.target===this){ window.location='@Url.Action("Details", new { id = room.Id })'; }">
-            @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
-            {
-                <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-            }
-            else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
-            {
-                <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-            }
-            else
-            {
-                <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
-            }
-            <div class="room-card-body">
-                <div class="room-card-title d-flex align-items-center justify-content-between">
-                    <span>@room.Name</span>
-                    @if (room.Reviews != null && room.Reviews.Count > 0)
-                    {
-                        var avg = room.Reviews.Average(r => r.Rating);
-                        <span class="ms-2 small text-warning">@Html.Raw(RenderStars(avg)) <span class="text-muted">@avg.ToString("0.0")</span></span>
-                    }
-                </div>
-                <div class="room-card-location"><i class="fa-solid fa-location-dot"></i> @room.Building?.Location</div>
-                <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
-                <div class="room-card-amenities">
-                    @if (room.Amenities != null && room.Amenities.Count > 0)
-                    {
-                        <span><i class="fa-solid fa-list"></i> @string.Join(", ", room.Amenities.Take(3).Select(a => a.Name))</span>
-                        @if (room.Amenities.Count > 3)
-                        {
-                            <span> +@((room.Amenities.Count - 3)) more</span>
-                        }
-                    }
-                </div>
-                <div class="room-card-link">
-                    <a href="@Url.Action("Details", new { id = room.Id })" class="btn btn-outline-primary btn-sm">Chi tiết</a>
-                </div>
-            </div>
-        </div>
-    </div>
-}
 </div>
-@if (!Model.Any())
-{
-    <div class="alert alert-info mt-4">No rooms found.</div>
+@section Scripts {
+    <script>
+        // Chỉ submit form khi click nút Lọc
+        document.getElementById('roomFilterForm').addEventListener('submit', function(e) {
+            // Không cần gì thêm, submit mặc định
+        });
+        // Khi thay đổi sort thì submit luôn
+        document.querySelector('select[name="sort"]').addEventListener('change', function() {
+            @* document.getElementById('roomFilterForm').submit(); *@
+        });
+    </script>
 }
 @functions {
     private string RenderStars(double rating)

@@ -1,0 +1,74 @@
+@* Sidebar filter for room search *@
+@{
+    var amenities = ViewBag.Amenities as List<RentalService.Models.Amenity>;
+    var selectedAmenities = Context.Request.Query["amenities"].ToString().Split(',', System.StringSplitOptions.RemoveEmptyEntries);
+    var minPrice = Context.Request.Query["minPrice"];
+    var maxPrice = Context.Request.Query["maxPrice"];
+    var sort = Context.Request.Query["sort"];
+}
+<div class="p-3 bg-light rounded shadow-sm mb-4">
+    <h5>Bộ lọc</h5>
+    <div class="mb-3">
+        <label class="form-label">Tiện ích</label>
+        <div class="d-flex flex-wrap gap-2">
+            @if (amenities != null)
+            {
+                foreach (var a in amenities)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="amenities" value="@a.Id" id="amenity_@a.Id" @(selectedAmenities.Contains(a.Id.ToString()) ? "checked" : "") />
+                        <label class="form-check-label" for="amenity_@a.Id">@a.Name</label>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Giá (VND)</label>
+        <div class="d-flex align-items-center gap-2">
+            <input type="number" name="minPrice" class="form-control" placeholder="Từ" value="@minPrice" min="0" style="max-width:100px;" />
+            <span>-</span>
+            <input type="number" name="maxPrice" class="form-control" placeholder="Đến" value="@maxPrice" min="0" style="max-width:100px;" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Sắp xếp</label>
+        <select name="sort" class="form-select">
+            @if (sort == "")
+            {
+                <option value="" selected>Mặc định</option>
+            }
+            else
+            {
+                <option value="">Mặc định</option>
+            }
+            @if (sort == "price_asc")
+            {
+                <option value="price_asc" selected>Giá tăng dần</option>
+            }
+            else
+            {
+                <option value="price_asc">Giá tăng dần</option>
+            }
+            @if (sort == "price_desc")
+            {
+                <option value="price_desc" selected>Giá giảm dần</option>
+            }
+            else
+            {
+                <option value="price_desc">Giá giảm dần</option>
+            }
+            @if (sort == "rating_desc")
+            {
+                <option value="rating_desc" selected>Đánh giá cao nhất</option>
+            }
+            else
+            {
+                <option value="rating_desc">Đánh giá cao nhất</option>
+            }
+        </select>
+    </div>
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Áp dụng</button>
+    </div>
+</div>

@@ -7,6 +7,7 @@ using RentalService.Services;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using X.PagedList;
 
 namespace RentalService.Controllers
 {
@@ -21,8 +22,10 @@ namespace RentalService.Controllers
         }
 
         // GET: /Rooms
-        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice, Guid? buildingId)
+        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice, Guid? buildingId, string[] amenities, string sort, int? page)
         {
+            int pageSize = 9;
+            int pageNumber = page ?? 1;
             var rooms = _context.Rooms
                 .Include(r => r.Images)
                 .Include(r => r.RoomImages)
@@ -40,9 +43,51 @@ namespace RentalService.Controllers
                 rooms = rooms.Where(r => r.Price >= minPrice);
             if (maxPrice.HasValue)
                 rooms = rooms.Where(r => r.Price <= maxPrice);
+            // Chỉ áp dụng sắp xếp khi bấm nút Lọc
+            // ... filter amenities ...
+            if (amenities != null && amenities.Length > 0)
+            {
+                var amenityGuids = amenities.Select(a => Guid.Parse(a)).ToList();
+                var roomListEF = await rooms.ToListAsync();
+                roomListEF = roomListEF.Where(r => r.Amenities != null && r.Amenities.Any(a => amenityGuids.Contains(a.Id))).ToList();
+                roomListEF = sort switch
+                {
+                    "price_asc" => roomListEF.OrderBy(r => r.Price).ToList(),
+                    "price_desc" => roomListEF.OrderByDescending(r => r.Price).ToList(),
+                    "rating_desc" => roomListEF.OrderByDescending(r => (r.Reviews != null && r.Reviews.Any()) ? r.Reviews.Average(rv => rv.Rating) : 0).ToList(),
+                    _ => roomListEF.OrderByDescending(r => r.CreatedAt).ToList()
+                };
+                ViewBag.Buildings = await _context.Buildings.ToListAsync();
+                ViewBag.SelectedBuildingId = buildingId;
+                ViewBag.Amenities = await _context.Amenities.ToListAsync();
+                return View(roomListEF.ToPagedList(pageNumber, pageSize));
+            }
+            if (sort == "rating_desc")
+            {
+                var roomList = await rooms.ToListAsync();
+                roomList = roomList.OrderByDescending(r => (r.Reviews != null && r.Reviews.Any()) ? r.Reviews.Average(rv => rv.Rating) : 0).ToList();
+                ViewBag.Buildings = await _context.Buildings.ToListAsync();
+                ViewBag.SelectedBuildingId = buildingId;
+                ViewBag.Amenities = await _context.Amenities.ToListAsync();
+                return View(roomList.ToPagedList(pageNumber, pageSize));
+            }
+            switch (sort)
+            {
+                case "price_asc":
+                    rooms = rooms.OrderBy(r => r.Price);
+                    break;
+                case "price_desc":
+                    rooms = rooms.OrderByDescending(r => r.Price);
+                    break;
+                default:
+                    rooms = rooms.OrderByDescending(r => r.CreatedAt);
+                    break;
+            }
             ViewBag.Buildings = await _context.Buildings.ToListAsync();
             ViewBag.SelectedBuildingId = buildingId;
-            return View(await rooms.ToListAsync());
+            ViewBag.Amenities = await _context.Amenities.ToListAsync();
+            var roomList2 = await rooms.ToListAsync();
+            return View(roomList2.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: /Rooms/Details/{id}

@@ -20,6 +20,7 @@ namespace RentalService.Controllers
         }
 
         // GET: /ViewAppointments
+        [Authorize(Roles = "customer")]
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
