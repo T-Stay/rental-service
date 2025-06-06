@@ -91,7 +91,10 @@
         <input type="hidden" name="centerLat" id="advanceLat" value="@centerLat" />
         <input type="hidden" name="centerLng" id="advanceLng" value="@centerLng" />
     </div>
-    <button type="submit" class="btn btn-primary w-100">Áp dụng</button>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary w-100">Áp dụng</button>
+        <button type="button" class="btn btn-secondary w-100" id="resetFilterBtn">Đặt lại</button>
+    </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script>
@@ -109,6 +112,37 @@
                 }
             }
         });
+        // Reset filter logic
+        var resetBtn = document.getElementById('resetFilterBtn');
+        if (resetBtn) {
+            resetBtn.onclick = function() {
+                // Uncheck all amenities
+                var amenityCheckboxes = filterForm.querySelectorAll('input[name="amenities"]');
+                amenityCheckboxes.forEach(function(cb) { cb.checked = false; });
+                // Reset price fields
+                filterForm.querySelector('input[name="minPrice"]').value = '';
+                filterForm.querySelector('input[name="maxPrice"]').value = '';
+                // Reset sort
+                filterForm.querySelector('select[name="sort"]').selectedIndex = 0;
+                // Reset advanced fields
+                var radius = filterForm.querySelector('input[name="radius"]');
+                if (radius) radius.value = '';
+                var advanceAddress = filterForm.querySelector('input[name="advanceAddress"]');
+                if (advanceAddress) advanceAddress.value = '';
+                var advanceLat = filterForm.querySelector('input[name="centerLat"]');
+                var advanceLng = filterForm.querySelector('input[name="centerLng"]');
+                if (advanceLat) advanceLat.value = '';
+                if (advanceLng) advanceLng.value = '';
+                // Reset map marker to default if map exists
+                if (map) {
+                    var defaultLat = 21.0285, defaultLng = 105.8542;
+                    map.setView([defaultLat, defaultLng], 13);
+                    if (typeof marker !== 'undefined') {
+                        marker.setLatLng([defaultLat, defaultLng]);
+                    }
+                }
+            };
+        }
     }
     function bindAdvanceToggle() {
         var toggleBtn = document.getElementById('toggleAdvanceBtn');

@@ -27,7 +27,7 @@ namespace RentalService.Controllers
         }
 
         // GET: /HostRooms?buildingId={buildingId}
-        public async Task<IActionResult> Index(Guid? buildingId)
+        public async Task<IActionResult> Index(Guid? buildingId, double? minArea, double? maxArea, string sort, string search, string status)
         {
             try
             {
@@ -36,6 +36,43 @@ namespace RentalService.Controllers
                     .Where(r => r.Building != null && r.Building.HostId.ToString() == userId);
                 if (buildingId.HasValue)
                     query = query.Where(r => r.BuildingId == buildingId);
+                if (!string.IsNullOrEmpty(search))
+                    query = query.Where(r => r.Name.Contains(search));
+                if (minArea.HasValue)
+                    query = query.Where(r => r.Area >= minArea.Value);
+                if (maxArea.HasValue)
+                    query = query.Where(r => r.Area <= maxArea.Value);
+                if (!string.IsNullOrEmpty(status))
+                {
+                    if (Enum.TryParse<RoomStatus>(status, out var statusEnum))
+                    {
+                        query = query.Where(r => r.Status == statusEnum);
+                    }
+                }
+                switch (sort)
+                {
+                    case "price_asc":
+                        query = query.OrderBy(r => r.Price);
+                        break;
+                    case "price_desc":
+                        query = query.OrderByDescending(r => r.Price);
+                        break;
+                    case "area_asc":
+                        query = query.OrderBy(r => r.Area);
+                        break;
+                    case "area_desc":
+                        query = query.OrderByDescending(r => r.Area);
+                        break;
+                    case "name_asc":
+                        query = query.OrderBy(r => r.Name);
+                        break;
+                    case "name_desc":
+                        query = query.OrderByDescending(r => r.Name);
+                        break;
+                    default:
+                        query = query.OrderByDescending(r => r.CreatedAt);
+                        break;
+                }
                 var rooms = await query
                     .Include(r => r.RoomImages)
                     .ToListAsync();
@@ -93,11 +130,12 @@ namespace RentalService.Controllers
                     var nameFormat = Request.Form["QuickAddNameFormat"].FirstOrDefault() ?? "Phòng A{0}";
                     int start = 1;
                     int.TryParse(Request.Form["QuickAddStart"], out start);
+                    double area = 0;
+                    double.TryParse(Request.Form["Area"], out area);
                     if (count > 1)
                     {
                         var quickAmenityIds = Request.Form["AmenityIds"].ToList();
                         var amenities = quickAmenityIds.Any() ? await _context.Amenities.Where(a => quickAmenityIds.Contains(a.Id.ToString())).ToListAsync() : new List<Amenity>();
-                        // Upload ảnh 1 lần, dùng chung URL cho các phòng
                         var uploadedImages = new List<RoomImage>();
                         if (RoomImages != null && RoomImages.Count > 0)
                         {
@@ -124,7 +162,8 @@ namespace RentalService.Controllers
                                 Status = room.Status,
                                 CreatedAt = DateTime.UtcNow,
                                 UpdatedAt = DateTime.UtcNow,
-                                Amenities = new List<Amenity>(amenities)
+                                Amenities = new List<Amenity>(amenities),
+                                Area = area
                             };
                             _context.Rooms.Add(newRoom);
                             // Tạo RoomImages riêng cho từng phòng, nhưng dùng chung URL
@@ -245,11 +284,7 @@ namespace RentalService.Controllers
                 dbRoom.Status = room.Status;
                 dbRoom.BuildingId = room.BuildingId;
                 dbRoom.UpdatedAt = DateTime.UtcNow;
-                // If you have a concurrency token (e.g., RowVersion), set it here
-#if HAS_ROWVERSION
-                dbRoom.RowVersion = room.RowVersion;
-#endif
-
+                dbRoom.Area = room.Area;
                 // Only add new amenities and remove missing ones to avoid duplicates
                 if (dbRoom.Amenities == null)
                 {
@@ -270,7 +305,6 @@ namespace RentalService.Controllers
                         dbRoom.Amenities.Add(a);
                     }
                 }
-
                 // Remove selected images (from DB and S3)
                 if (RemoveImageIds != null && RemoveImageIds.Count > 0)
                 {
@@ -288,12 +322,10 @@ namespace RentalService.Controllers
                                 await _s3Service.DeleteFileAsync(key);
                             }
                         }
-                        dbRoom.RoomImages.Remove(img); // Remove from tracked collection
-                        _context.RoomImages.Remove(img); // Remove from DbSet
+                        _context.RoomImages.Remove(img);
                     }
                 }
-
-                // Add new images
+                // Upload new images
                 if (RoomImages != null && RoomImages.Count > 0)
                 {
                     if (dbRoom.RoomImages == null)
@@ -311,7 +343,6 @@ namespace RentalService.Controllers
                         }
                     }
                 }
-
                 if (ModelState.IsValid)
                 {
                     try

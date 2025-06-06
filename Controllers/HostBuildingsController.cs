@@ -179,15 +179,22 @@ namespace RentalService.Controllers
         }
 
         // POST: /HostBuildings/Delete/{id}
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             try
             {
-                var building = await _context.Buildings.FindAsync(id);
+                var building = await _context.Buildings
+                    .Include(b => b.Rooms)
+                    .FirstOrDefaultAsync(b => b.Id == id);
                 if (building != null)
                 {
+                    if (building.Rooms != null && building.Rooms.Count > 0)
+                    {
+                        TempData["ToastError"] = "Không thể xóa tòa nhà khi vẫn còn phòng bên trong. Vui lòng xóa hết các phòng trước.";
+                        return RedirectToAction(nameof(Index));
+                    }
                     _context.Buildings.Remove(building);
                     await _context.SaveChangesAsync();
                 }

@@ -100,11 +100,11 @@ namespace RentalService.Controllers
                     var emailBody = $@"<html><body style='font-family:sans-serif;background:#f8fafc;margin:0;padding:0;'>
     <div style='background:linear-gradient(90deg,#1b6ec2 0%,#0077cc 100%);padding:24px 0;text-align:center;'>
         <span style='font-size:2rem;color:#fff;font-weight:bold;letter-spacing:1px;'>
-            T-Stay
+            Trọ Tốt
         </span>
     </div>
     <div style='padding:32px 16px 16px 16px;max-width:480px;margin:0 auto;background:#fff;border-radius:0 0 12px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);'>
-        <h2 style='color:#1b6ec2;'>Welcome to T-Stay!</h2>
+        <h2 style='color:#1b6ec2;'>Welcome to Trọ Tốt!</h2>
         <p>Hi {System.Net.WebUtility.HtmlEncode(user.Name)},</p>
         <p>Thank you for registering. Please confirm your account by clicking the button below:</p>
         <p style='text-align:center;margin:32px 0;'>
@@ -112,7 +112,7 @@ namespace RentalService.Controllers
         </p>
         <p>If you did not register, please ignore this email.</p>
         <hr style='margin:32px 0 16px 0;border:none;border-top:1px solid #eee;'>
-        <p style='font-size:12px;color:#888;text-align:center;'>T-Stay Team</p>
+        <p style='font-size:12px;color:#888;text-align:center;'>Trọ Tốt Team</p>
     </div>
 </body></html>";
                     SendEmail(user.Email, "Confirm your email - Rental Service", emailBody);
@@ -212,7 +212,7 @@ namespace RentalService.Controllers
                 var emailBody = $@"<html><body style='font-family:sans-serif;background:#f8fafc;margin:0;padding:0;'>
     <div style='background:linear-gradient(90deg,#1b6ec2 0%,#0077cc 100%);padding:24px 0;text-align:center;'>
         <span style='font-size:2rem;color:#fff;font-weight:bold;letter-spacing:1px;'>
-            T-Stay
+            Trọ Tốt
         </span>
     </div>
     <div style='padding:32px 16px 16px 16px;max-width:480px;margin:0 auto;background:#fff;border-radius:0 0 12px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);'>
@@ -224,7 +224,7 @@ namespace RentalService.Controllers
         </p>
         <p>If you did not request a password reset, you can safely ignore this email.</p>
         <hr style='margin:32px 0 16px 0;border:none;border-top:1px solid #eee;'>
-        <p style='font-size:12px;color:#888;text-align:center;'>T-Stay Team</p>
+        <p style='font-size:12px;color:#888;text-align:center;'>Trọ Tốt Team</p>
     </div>
 </body></html>";
                 SendEmail(user.Email, "Reset your password - Rental Service", emailBody);

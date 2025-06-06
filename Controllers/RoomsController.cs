@@ -89,7 +89,8 @@ namespace RentalService.Controllers
             {
                 var amenityGuids = amenities.Select(a => Guid.Parse(a)).ToList();
                 var roomListEF = await rooms.ToListAsync();
-                roomListEF = roomListEF.Where(r => r.Amenities != null && r.Amenities.Any(a => amenityGuids.Contains(a.Id))).ToList();
+                // Chỉ lấy phòng có đầy đủ tất cả amenities được chọn
+                roomListEF = roomListEF.Where(r => r.Amenities != null && amenityGuids.All(ag => r.Amenities.Any(a => a.Id == ag))).ToList();
                 roomListEF = sort switch
                 {
                     "price_asc" => roomListEF.OrderBy(r => r.Price).ToList(),

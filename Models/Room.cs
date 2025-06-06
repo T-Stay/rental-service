@@ -22,6 +22,7 @@ namespace RentalService.Models
         public List<Review>? Reviews { get; set; }
         public List<Favorite>? Favorites { get; set; }
         public List<RoomImage>? RoomImages { get; set; }
+        public double Area { get; set; } // Diện tích phòng (m2)
     }
 
     public enum RoomStatus

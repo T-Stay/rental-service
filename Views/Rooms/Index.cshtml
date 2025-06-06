@@ -67,6 +67,7 @@
                             </div>
                             <div class="room-card-location"><i class="fa-solid fa-location-dot"></i> @room.Building?.Address</div>
                             <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
+                            <div class="room-card-area"><i class="fa-solid fa-maximize"></i> @room.Area.ToString("N1") m²</div>
                             <div class="room-card-amenities">
                                 @if (room.Amenities != null && room.Amenities.Count > 0)
                                 {

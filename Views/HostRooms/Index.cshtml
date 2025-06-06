@@ -21,74 +21,125 @@
     {
         <div class="alert alert-success">@TempData["ToastSuccess"]</div>
     }
-    <form method="get" class="mb-3">
-        <label>Tòa nhà:</label>
-        <select name="buildingId" onchange="this.form.submit()" class="form-select d-inline w-auto ms-2">
-            <option value="">Tất cả</option>
-            @if (buildings != null)
-            {
-                foreach (var b in buildings)
-                {
-                    if (selectedBuildingId == b.Id)
-                    {
-                        <option value="@b.Id" selected>@b.Name</option>
-                    }
-                    else
-                    {
-                        <option value="@b.Id">@b.Name</option>
-                    }
-                }
-            }
-        </select>
-        <a href="@Url.Action("Create", new { buildingId = selectedBuildingId })" class="btn btn-success ms-3">Đăng phòng mới</a>
-    </form>
-    <div class="row g-4">
-    @foreach (var room in Model)
-    {
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="room-card clickable-card h-100" tabindex="0" onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON'){ window.location='@Url.Action("Details", "HostRooms", new { id = room.Id })'; }" onkeydown="if(event.key==='Enter' && event.target===this){ window.location='@Url.Action("Details", "HostRooms", new { id = room.Id })'; }">
-                @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
-                {
-                    <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                }
-                else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
-                {
-                    <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                }
-                else
-                {
-                    <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
-                }
-                <div class="room-card-body">
-                    <div class="room-card-title">@room.Name</div>
-                    <div class="room-card-location"><i class="fa-solid fa-building"></i> @room.Building?.Name</div>
-                    <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
-                    <div class="room-card-status mb-2"><span class="badge bg-secondary">@room.Status</span></div>
-                    <div class="room-card-link d-flex gap-1 flex-wrap">
-                        <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm">Chi tiết</a>
-                        <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Chỉnh sửa</a>
-                        <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Xóa</a>
-                        @if (room.Status == RentalService.Models.RoomStatus.Active)
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <form method="get" class="card p-3 shadow-sm">
+                <div class="mb-3">
+                    <label class="form-label mb-1">Tòa nhà:</label>
+                    <select name="buildingId" class="form-select">
+                        <option value="">Tất cả tòa nhà</option>
+                        @if (buildings != null)
                         {
-                            <form asp-action="SetStatus" method="post" style="display:inline">
-                                <input type="hidden" name="id" value="@room.Id" />
-                                <input type="hidden" name="status" value="Inactive" />
-                                <button type="submit" class="btn btn-warning btn-sm">Ẩn</button>
-                            </form>
+                            foreach (var b in buildings)
+                            {
+                                if (selectedBuildingId == b.Id)
+                                {
+                                    <option value="@b.Id" selected>@b.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@b.Id">@b.Name</option>
+                                }
+                            }
                         }
-                        else
-                        {
-                            <form asp-action="SetStatus" method="post" style="display:inline">
-                                <input type="hidden" name="id" value="@room.Id" />
-                                <input type="hidden" name="status" value="Active" />
-                                <button type="submit" class="btn btn-success btn-sm">Hiện</button>
-                            </form>
-                        }
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label mb-1">Tìm kiếm tên phòng</label>
+                    <input type="text" name="search" class="form-control" value="@Context.Request.Query["search"]" placeholder="Nhập tên phòng..." />
+                </div>
+                <div class="mb-3 row align-items-end">
+                    <div class="col-6 pe-1">
+                        <label class="form-label mb-1">Diện tích từ</label>
+                        <input type="number" name="minArea" class="form-control form-control-sm" value="@Context.Request.Query["minArea"]" min="0" step="0.1" />
+                    </div>
+                    <div class="col-6 ps-1">
+                        <label class="form-label mb-1">đến</label>
+                        <input type="number" name="maxArea" class="form-control form-control-sm" value="@Context.Request.Query["maxArea"]" min="0" step="0.1" />
                     </div>
                 </div>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label mb-1">Trạng thái phòng</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Active" selected="@(Context.Request.Query["status"]=="Active"?"selected":null)">Đang hoạt động</option>
+                        <option value="Inactive" selected="@(Context.Request.Query["status"]=="Inactive"?"selected":null)">Ngừng hoạt động</option>
+                        <option value="Hidden" selected="@(Context.Request.Query["status"]=="Hidden"?"selected":null)">Ẩn</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label mb-1">Sắp xếp</label>
+                    <select name="sort" class="form-select">
+                        <option value="">Mặc định</option>
+                        <option value="price_asc" selected="@(Context.Request.Query["sort"]=="price_asc"?"selected":null)">Giá tăng dần</option>
+                        <option value="price_desc" selected="@(Context.Request.Query["sort"]=="price_desc"?"selected":null)">Giá giảm dần</option>
+                        <option value="area_asc" selected="@(Context.Request.Query["sort"]=="area_asc"?"selected":null)">Diện tích tăng dần</option>
+                        <option value="area_desc" selected="@(Context.Request.Query["sort"]=="area_desc"?"selected":null)">Diện tích giảm dần</option>
+                        <option value="name_asc" selected="@(Context.Request.Query["sort"]=="name_asc"?"selected":null)">Tên A-Z</option>
+                        <option value="name_desc" selected="@(Context.Request.Query["sort"]=="name_desc"?"selected":null)">Tên Z-A</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-primary flex-fill">Lọc</button>
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary flex-fill">Đặt lại</a>
+                </div>
+            </form>
         </div>
-    }
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div></div>
+                <a href="@Url.Action("Create", new { buildingId = selectedBuildingId })" class="btn btn-success"><i class="fa fa-plus"></i> Đăng phòng mới</a>
+            </div>
+            <div class="row g-4">
+                @foreach (var room in Model)
+                {
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="room-card clickable-card h-100" tabindex="0" onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON'){ window.location='@Url.Action("Details", "HostRooms", new { id = room.Id })'; }" onkeydown="if(event.key==='Enter' && event.target===this){ window.location='@Url.Action("Details", "HostRooms", new { id = room.Id })'; }">
+                            @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
+                            {
+                                <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                            }
+                            else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
+                            {
+                                <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                            }
+                            else
+                            {
+                                <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
+                            }
+                            <div class="room-card-body">
+                                <div class="room-card-title">@room.Name</div>
+                                <div class="room-card-location"><i class="fa-solid fa-location-dot"></i> @room.Building?.Address</div>
+                                <div class="room-card-area"><i class="fa-solid fa-maximize"></i> @room.Area.ToString("N1") m²</div>
+                                <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
+                                <div class="room-card-status mb-2"><span class="badge bg-secondary">@room.Status</span></div>
+                                <div class="room-card-link d-flex gap-1 flex-wrap">
+                                    <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm">Chi tiết</a>
+                                    <a href="@Url.Action("Edit", new { id = room.Id })" class="btn btn-primary btn-sm">Chỉnh sửa</a>
+                                    <a href="@Url.Action("Delete", new { id = room.Id })" class="btn btn-danger btn-sm">Xóa</a>
+                                    @if (room.Status == RentalService.Models.RoomStatus.Active)
+                                    {
+                                        <form asp-action="SetStatus" method="post" style="display:inline">
+                                            <input type="hidden" name="id" value="@room.Id" />
+                                            <input type="hidden" name="status" value="Inactive" />
+                                            <button type="submit" class="btn btn-warning btn-sm">Ẩn</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="SetStatus" method="post" style="display:inline">
+                                            <input type="hidden" name="id" value="@room.Id" />
+                                            <input type="hidden" name="status" value="Active" />
+                                            <button type="submit" class="btn btn-success btn-sm">Hiện</button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Quay lại bảng điều khiển</a>
+        </div>
     </div>
-    <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary mt-2">Quay lại bảng điều khiển</a>
 </div>

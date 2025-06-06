@@ -1,10 +1,10 @@
 // Floating Chatbot Widget for Gemini API (client-side only)
 // Paste your API key and system message below
 const GEMINI_PROXY_ENDPOINT = "/api/gemini-proxy"; // Sử dụng endpoint proxy mới
-const SYSTEM_MESSAGE = `Bạn là trợ lý AI của nền tảng T-Stay, một website giúp người dùng tìm kiếm, đặt phòng trọ, căn hộ, nhà ở và hỗ trợ chủ trọ quản lý phòng, lịch hẹn, yêu cầu thuê. Hãy trả lời ngắn gọn, thân thiện, chính xác, bằng tiếng Việt, sử dụng markdown nếu phù hợp.
+const SYSTEM_MESSAGE = `Bạn là trợ lý AI của nền tảng Trọ Tốt, một website giúp người dùng tìm kiếm, đặt phòng trọ, căn hộ, nhà ở và hỗ trợ chủ trọ quản lý phòng, lịch hẹn, yêu cầu thuê. Hãy trả lời ngắn gọn, thân thiện, chính xác, bằng tiếng Việt, sử dụng markdown nếu phù hợp.
 
-# Thông tin về T-Stay
-- T-Stay là nền tảng kết nối khách thuê và chủ trọ/phòng/căn hộ.
+# Thông tin về Trọ Tốt
+- Trọ Tốt là nền tảng kết nối khách thuê và chủ trọ/phòng/căn hộ.
 - Người dùng có thể tìm kiếm phòng, xem chi tiết, đặt lịch hẹn xem phòng, gửi yêu cầu thuê, quản lý các yêu cầu và lịch hẹn.
 - Chủ trọ có thể đăng bài cho thuê, quản lý phòng, xem và duyệt các yêu cầu thuê, quản lý lịch hẹn.
 
@@ -347,7 +347,7 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
     chatWindow.innerHTML = `
         <div id="floating-chatbot-header">
             <span class="chatbot-avatar"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#0078d4"/><path d="M7 10.5C7 9.11929 8.11929 8 9.5 8H14.5C15.8807 8 17 9.11929 17 10.5V13.5C17 14.8807 15.8807 16 14.5 16H10.4142C10.149 16 9.89464 16.1054 9.70711 16.2929L8.35355 17.6464C8.15829 17.8417 7.84171 17.8417 7.64645 17.6464C7.45118 17.4512 7.45118 17.1346 7.64645 16.9393L8.29289 16.2929C8.10536 16.1054 8 15.851 8 15.5858V10.5Z" fill="#fff"/></svg></span>
-            <span class="chatbot-title">Trợ lý T-Stay</span>
+            <span class="chatbot-title">Trợ lý Trọ Tốt</span>
             <button id="floating-chatbot-expand" title="Mở rộng" aria-label="Mở rộng">⤢</button>
             <button id="floating-chatbot-close">×</button>
         </div>
@@ -365,7 +365,7 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
     modal.innerHTML = `
         <div id="floating-chatbot-modal-content">
             <div id="floating-chatbot-modal-header">
-                <span class="chatbot-title">Trợ lý T-Stay</span>
+                <span class="chatbot-title">Trợ lý Trọ Tốt</span>
                 <button id="floating-chatbot-modal-close" title="Thu nhỏ" aria-label="Thu nhỏ">×</button>
             </div>
             <div id="floating-chatbot-modal-messages"></div>
@@ -395,7 +395,7 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
         const realMsgCount = Array.from(targetDiv.children).filter(div => !div.classList.contains('chatbot-typing')).length;
         if (realMsgCount === 0) {
             appendMessage('bot',
-                '**Xin chào!** 👋\nTôi là trợ lý AI T-Stay.\nBạn cần hỗ trợ gì?\n\nBạn có thể hỏi về:\n- Tìm phòng, đặt lịch xem phòng\n- Gửi yêu cầu thuê\n- Quản lý phòng, lịch hẹn\n\nHãy nhập câu hỏi bên dưới!', true, false, isModal);
+                '**Xin chào!** 👋\nTôi là trợ lý AI Trọ Tốt.\nBạn cần hỗ trợ gì?\n\nBạn có thể hỏi về:\n- Tìm phòng, đặt lịch xem phòng\n- Gửi yêu cầu thuê\n- Quản lý phòng, lịch hẹn\n\nHãy nhập câu hỏi bên dưới!', true, false, isModal);
         }
     }
 

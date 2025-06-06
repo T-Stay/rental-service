@@ -24,6 +24,7 @@
             {
                 <div class="mb-3"><strong>Tiện nghi:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
             }
+            <div class="mb-2"><strong>Diện tích:</strong> @Model.Area.ToString("N1") m²</div>
             @if (Model.Building?.Host?.ContactInformations != null && Model.Building.Host.ContactInformations.Count > 0)
             {
                 <div class="mt-3">
