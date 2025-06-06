@@ -15,6 +15,16 @@
     {
         <div class="alert alert-danger">@error</div>
     }
+    @if (ViewBag.ContactInfoIncomplete == true)
+    {
+        <div class="alert alert-warning d-flex align-items-center justify-content-between mt-2">
+            <div>
+                <i class="fa fa-exclamation-triangle me-2"></i>
+                <b>Bạn cần thêm ít nhất 2 thông tin liên hệ để sử dụng đầy đủ các chức năng.</b>
+                <span class="ms-2">Vui lòng cập nhật <a href="@Url.Action("Index", "Profile")" class="alert-link">thông tin liên hệ</a> của bạn.</span>
+            </div>
+        </div>
+    }
     <div class="row mb-4 g-4">
         <div class="col-md-3 col-6">
             <div class="card shadow-sm border-0 h-100 bg-light">

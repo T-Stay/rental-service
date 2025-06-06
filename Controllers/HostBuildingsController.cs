@@ -23,15 +23,42 @@ namespace RentalService.Controllers
         }
 
         // GET: /HostBuildings
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, string sort)
         {
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var buildings = await _context.Buildings
+                var buildingsQuery = _context.Buildings
                     .Where(b => b.HostId.ToString() == userId)
                     .Include(b => b.Rooms)
-                    .ToListAsync();
+                    .AsQueryable();
+
+                // Filter by name
+                if (!string.IsNullOrEmpty(search))
+                {
+                    buildingsQuery = buildingsQuery.Where(b => b.Name.Contains(search));
+                }
+
+                // Sort
+                switch (sort)
+                {
+                    case "name_asc":
+                        buildingsQuery = buildingsQuery.OrderBy(b => b.Name);
+                        break;
+                    case "name_desc":
+                        buildingsQuery = buildingsQuery.OrderByDescending(b => b.Name);
+                        break;
+                    case "created_desc":
+                        buildingsQuery = buildingsQuery.OrderByDescending(b => b.CreatedAt);
+                        break;
+                    default:
+                        buildingsQuery = buildingsQuery.OrderBy(b => b.CreatedAt);
+                        break;
+                }
+
+                var buildings = await buildingsQuery.ToListAsync();
+                ViewBag.Search = search;
+                ViewBag.Sort = sort;
                 return View(buildings);
             }
             catch (Exception ex)
@@ -179,7 +206,8 @@ namespace RentalService.Controllers
             try
             {
                 var building = await _context.Buildings
-                    .Include(b => b.Rooms)
+                    .Include(b => b.Rooms!)
+                        .ThenInclude(r => r.RoomImages)
                     .FirstOrDefaultAsync(b => b.Id == id);
                 if (building == null) return NotFound();
                 return View(building);

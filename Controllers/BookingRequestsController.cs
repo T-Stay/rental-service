@@ -20,13 +20,43 @@ namespace RentalService.Controllers
         }
 
         // GET: /BookingRequests
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, string status, string sort)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var requests = await _context.BookingRequests
+            var requestsQuery = _context.BookingRequests
                 .Where(b => b.UserId.ToString() == userId)
                 .Include(b => b.Room)
-                .ToListAsync();
+                .AsQueryable();
+            // Filter by search (room name)
+            if (!string.IsNullOrEmpty(search))
+            {
+                requestsQuery = requestsQuery.Where(b => b.Room != null && b.Room.Name.Contains(search));
+            }
+            // Filter by status
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<RentalService.Models.BookingRequestStatus>(status, out var st))
+            {
+                requestsQuery = requestsQuery.Where(b => b.Status == st);
+            }
+            // Sort
+            switch (sort)
+            {
+                case "room_asc":
+                    requestsQuery = requestsQuery.OrderBy(b => b.Room != null ? b.Room.Name : "");
+                    break;
+                case "room_desc":
+                    requestsQuery = requestsQuery.OrderByDescending(b => b.Room != null ? b.Room.Name : "");
+                    break;
+                case "created_asc":
+                    requestsQuery = requestsQuery.OrderBy(b => b.CreatedAt);
+                    break;
+                default:
+                    requestsQuery = requestsQuery.OrderByDescending(b => b.CreatedAt);
+                    break;
+            }
+            var requests = await requestsQuery.ToListAsync();
+            ViewBag.Search = search;
+            ViewBag.Status = status;
+            ViewBag.Sort = sort;
             return View(requests);
         }
 

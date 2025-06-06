@@ -48,6 +48,9 @@ public class HomeController : Controller
     public async Task<IActionResult> CustomerDashboard()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // Check contact info count
+        var contactInfoCount = await _context.ContactInformations.CountAsync(c => c.UserId.ToString() == userId);
+        ViewBag.ContactInfoIncomplete = contactInfoCount < 2;
         var favorites = await _context.Favorites
             .Include(f => f.Room)
             .ThenInclude(r => r.Building!) // null-forgiving operator

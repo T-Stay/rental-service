@@ -1,11 +1,39 @@
 @model IEnumerable<RentalService.Models.BookingRequest>
 @{
     ViewData["Title"] = "Yêu cầu đặt phòng";
+    var search = ViewBag.Search as string ?? "";
+    var status = ViewBag.Status as string ?? "";
+    var sort = ViewBag.Sort as string ?? "";
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="fw-bold text-danger mb-0"><i class="fa-solid fa-envelope-open-text me-2"></i>Yêu cầu đặt phòng</h2>
     <a href="@Url.Action("Index", "HostDashboard")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
 </div>
+<form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+        <input type="text" name="search" class="form-control" placeholder="Tìm phòng hoặc khách thuê..." value="@search" />
+    </div>
+    <div class="col-auto">
+        <select name="status" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(status) ? "selected" : null)">Tất cả trạng thái</option>
+            @foreach (var st in Enum.GetNames(typeof(RentalService.Models.BookingRequestStatus)))
+            {
+                <option value="@st" selected="@(status == st ? "selected" : null)">@st</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <select name="sort" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(sort) ? "selected" : null)">Mới nhất</option>
+            <option value="created_asc" selected="@(sort == "created_asc" ? "selected" : null)">Cũ nhất</option>
+            <option value="room_asc" selected="@(sort == "room_asc" ? "selected" : null)">Phòng A-Z</option>
+            <option value="room_desc" selected="@(sort == "room_desc" ? "selected" : null)">Phòng Z-A</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Lọc</button>
+    </div>
+</form>
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <table class="table table-hover mb-0">

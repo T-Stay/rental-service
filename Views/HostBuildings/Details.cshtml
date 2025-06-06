@@ -3,71 +3,94 @@
     ViewData["Title"] = "Chi tiết tòa nhà";
     var error = ViewBag.Error as string;
 }
+<link rel="stylesheet" href="~/css/hostbuilding-details.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 <div class="container mt-4">
     <h2>Chi tiết tòa nhà</h2>
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
     }
-    <div class="mb-3">
-        <label class="fw-bold">Tên tòa nhà:</label>
-        <div>@Model.Name</div>
-    </div>
-    <div class="mb-3">
-        <label class="fw-bold">Địa chỉ:</label>
-        <div>@Model.Address</div>
-    </div>
-    <div class="mb-3">
-        <label class="fw-bold">Mô tả:</label>
-        <div>@Model.Description</div>
-    </div>
-    <div class="mb-3">
-        <label class="fw-bold">Tọa độ:</label>
-        <div>@Model.Location</div>
-    </div>
-    <div class="mb-3">
-        <label class="fw-bold">Bản đồ vị trí:</label>
-        <div id="map" style="height: 300px;"></div>
-    </div>
-    <div class="mb-3">
-        <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">Sửa</a>
-        <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger">Xóa</a>
-        <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Quay lại danh sách</a>
+    <div class="building-details-row">
+        <div class="building-info-col">
+            <div class="mb-3">
+                <label class="fw-bold">Tên tòa nhà:</label>
+                <div>@Model.Name</div>
+            </div>
+            <div class="mb-3">
+                <label class="fw-bold">Địa chỉ:</label>
+                <div>@Model.Address</div>
+            </div>
+            <div class="mb-3">
+                <label class="fw-bold">Mô tả:</label>
+                <div>@Model.Description</div>
+            </div>
+            <div class="mb-3 d-none">
+                <label class="fw-bold">Tọa độ:</label>
+                <div>@Model.Location</div>
+            </div>
+            <div class="mb-3">
+                <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-warning">Sửa</a>
+                <a href="@Url.Action("Delete", new { id = Model.Id })" class="btn btn-danger">Xóa</a>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Quay lại danh sách</a>
+            </div>
+        </div>
+        <div class="building-map-col">
+            <div id="map" style="height: 300px; width: 100%; max-width: 600px;"></div>
+            @if (!string.IsNullOrEmpty(Model.Location))
+            {
+                var loc = Model.Location.Split(',');
+                if (loc.Length == 2)
+                {
+                    var lat = loc[0].Trim();
+                    var lng = loc[1].Trim();
+                    <a class="btn btn-outline-primary open-google-map-btn" target="_blank" href="https://www.google.com/maps/search/?api=1&query=@lat,@lng">
+                        <i class="fa-brands fa-google"></i> Mở trên Google Maps
+                    </a>
+                }
+            }
+        </div>
     </div>
     <hr />
     <h4>Danh sách phòng</h4>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Tên phòng</th>
-                <th>Giá</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-        @if (Model.Rooms != null && Model.Rooms.Count > 0)
+    <div class="row g-4">
+    @if (Model.Rooms != null && Model.Rooms.Count > 0)
+    {
+        foreach (var room in Model.Rooms)
         {
-            foreach (var room in Model.Rooms)
-            {
-                <tr>
-                    <td>@room.Name</td>
-                    <td>@room.Price.ToString("N0") ₫</td>
-                    <td>
-                        @(room.Status == RentalService.Models.RoomStatus.Active ? "Còn trống" : "Đã ngừng cho thuê")
-                    </td>
-                    <td>
-                        <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-info btn-sm">Chi tiết</a>
-                    </td>
-                </tr>
-            }
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="room-card h-100">
+                    @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
+                    {
+                        <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                    }
+                    else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
+                    {
+                        <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                    }
+                    else
+                    {
+                        <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
+                    }
+                    <div class="room-card-body">
+                        <div class="room-card-title">@room.Name</div>
+                        <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
+                        <div class="room-card-status mb-2"><span class="badge bg-secondary">@room.Status</span></div>
+                        <div class="room-card-link d-flex gap-1 flex-wrap">
+                            <a href="@Url.Action("Details", "HostRooms", new { id = room.Id })" class="btn btn-outline-info btn-sm">Chi tiết</a>
+                            <a href="@Url.Action("Edit", "HostRooms", new { id = room.Id })" class="btn btn-primary btn-sm">Chỉnh sửa</a>
+                            <a href="@Url.Action("Delete", "HostRooms", new { id = room.Id })" class="btn btn-danger btn-sm">Xóa</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         }
-        else
-        {
-            <tr><td colspan="4" class="text-center">Chưa có phòng nào</td></tr>
-        }
-        </tbody>
-    </table>
+    }
+    else
+    {
+        <div class="col-12 text-center">Chưa có phòng nào</div>
+    }
+    </div>
 </div>
 @section Scripts {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />

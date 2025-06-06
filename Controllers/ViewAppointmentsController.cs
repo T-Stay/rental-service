@@ -21,13 +21,34 @@ namespace RentalService.Controllers
 
         // GET: /ViewAppointments
         [Authorize(Roles = "customer")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string status, string sort)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var appointments = await _context.ViewAppointments
+            var query = _context.ViewAppointments
                 .Where(a => a.UserId.ToString() == userId)
                 .Include(a => a.Room)
-                .ToListAsync();
+                .AsQueryable();
+            // Filter by status
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<RentalService.Models.ViewAppointmentStatus>(status, out var st))
+            {
+                query = query.Where(a => a.Status == st);
+            }
+            // Sort
+            switch (sort)
+            {
+                case "date_asc":
+                    query = query.OrderBy(a => a.AppointmentTime);
+                    break;
+                case "date_desc":
+                    query = query.OrderByDescending(a => a.AppointmentTime);
+                    break;
+                default:
+                    query = query.OrderByDescending(a => a.CreatedAt);
+                    break;
+            }
+            var appointments = await query.ToListAsync();
+            ViewBag.Status = status;
+            ViewBag.Sort = sort;
             return View(appointments);
         }
 
@@ -203,35 +224,52 @@ namespace RentalService.Controllers
 
         // GET: /ViewAppointments/HostRoomAppointments
         [Authorize(Roles = "host")]
-        public async Task<IActionResult> HostRoomAppointments(Guid? roomId, string status)
+        public async Task<IActionResult> HostRoomAppointments(Guid? buildingId, Guid? roomId, string status, string sort)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var buildings = await _context.Buildings.Where(b => b.HostId.ToString() == userId).ToListAsync();
+            var rooms = new List<Room>();
+            if (buildingId.HasValue)
+            {
+                rooms = await _context.Rooms.Where(r => r.BuildingId == buildingId.Value && r.Building != null && r.Building.HostId.ToString() == userId).ToListAsync();
+            }
+            else
+            {
+                rooms = await _context.Rooms.Where(r => r.Building != null && r.Building.HostId.ToString() == userId).ToListAsync();
+            }
             var query = _context.ViewAppointments
                 .Include(a => a.Room)
                 .Include(a => a.User)
                 .Where(a => a.Room != null && a.Room.Building != null && a.Room.Building.HostId.ToString() == userId);
+            if (buildingId.HasValue)
+                query = query.Where(a => a.Room != null && a.Room.BuildingId == buildingId.Value);
             if (roomId.HasValue)
                 query = query.Where(a => a.RoomId == roomId);
-            if (!string.IsNullOrEmpty(status) && Enum.TryParse<ViewAppointmentStatus>(status, out var st))
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<RentalService.Models.ViewAppointmentStatus>(status, out var st))
                 query = query.Where(a => a.Status == st);
+            // Sort
+            switch (sort)
+            {
+                case "date_asc":
+                    query = query.OrderBy(a => a.AppointmentTime);
+                    break;
+                case "date_desc":
+                    query = query.OrderByDescending(a => a.AppointmentTime);
+                    break;
+                default:
+                    query = query.OrderByDescending(a => a.CreatedAt);
+                    break;
+            }
             var appointments = await query
                 .Include(a => a.User)
                 .Include(a => a.Room)
                 .ToListAsync();
-            foreach (var appt in appointments)
-            {
-                if (appt.User?.ContactInformations != null)
-                {
-                    // Already loaded
-                }
-                if (appt.Room?.Building?.Host?.ContactInformations != null)
-                {
-                    // Already loaded
-                }
-            }
-            ViewBag.Rooms = await _context.Rooms.Where(r => r.Building != null && r.Building.HostId.ToString() == userId).ToListAsync();
+            ViewBag.Buildings = buildings;
+            ViewBag.SelectedBuildingId = buildingId;
+            ViewBag.Rooms = rooms;
             ViewBag.SelectedRoomId = roomId;
             ViewBag.Status = status;
+            ViewBag.Sort = sort;
             return View("HostRoomAppointments", appointments);
         }
     }

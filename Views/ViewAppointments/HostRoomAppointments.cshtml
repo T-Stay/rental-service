@@ -1,9 +1,12 @@
 @model IEnumerable<RentalService.Models.ViewAppointment>
 @{
     ViewData["Title"] = "Lịch hẹn xem phòng (chủ nhà)";
+    var buildings = ViewBag.Buildings as List<RentalService.Models.Building>;
+    var selectedBuildingId = ViewBag.SelectedBuildingId as Guid?;
     var rooms = ViewBag.Rooms as List<RentalService.Models.Room>;
     var selectedRoomId = ViewBag.SelectedRoomId as Guid?;
     var status = ViewBag.Status as string;
+    var sort = ViewBag.Sort as string ?? "";
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="fw-bold text-success mb-0"><i class="fa-solid fa-calendar-day me-2"></i>Lịch hẹn xem phòng (chủ nhà)</h2>
@@ -11,44 +14,43 @@
 </div>
 <form method="get" class="mb-3 row g-2 align-items-end">
     <div class="col-auto">
-        <label class="form-label mb-0">Phòng:</label>
-    </div>
-    <div class="col-auto">
-        <select name="roomId" class="form-select">
-            <option value="">Tất cả</option>
-            @if (rooms != null)
+        <select name="buildingId" class="form-select" id="buildingSelect">
+            <option value="">Tất cả tòa nhà</option>
+            @if (buildings != null)
             {
-                foreach (var r in rooms)
+                foreach (var b in buildings)
                 {
-                    if (selectedRoomId == r.Id)
-                    {
-                        <option value="@r.Id" selected>@r.Name</option>
-                    }
-                    else
-                    {
-                        <option value="@r.Id">@r.Name</option>
-                    }
+                    <option value="@b.Id" selected="@(selectedBuildingId == b.Id ? "selected" : null)">@b.Name</option>
                 }
             }
         </select>
     </div>
     <div class="col-auto">
-        <label class="form-label mb-0">Trạng thái:</label>
+        <select name="roomId" class="form-select" id="roomSelect">
+            <option value="">Tất cả Phòng</option>
+            @if (rooms != null)
+            {
+                foreach (var r in rooms)
+                {
+                    <option value="@r.Id" selected="@(selectedRoomId == r.Id ? "selected" : null)" data-building="@r.BuildingId">@r.Name</option>
+                }
+            }
+        </select>
     </div>
     <div class="col-auto">
         <select name="status" class="form-select">
-            <option value="">Tất cả</option>
+            <option value="">Tất cả trạng thái</option>
             @foreach (var st in Enum.GetNames(typeof(RentalService.Models.ViewAppointmentStatus)))
             {
-                if (status == st)
-                {
-                    <option value="@st" selected>@st</option>
-                }
-                else
-                {
-                    <option value="@st">@st</option>
-                }
+                <option value="@st" selected="@(status == st ? "selected" : null)">@st</option>
             }
+        </select>
+    </div>
+    <div class="col-auto">
+        <select name="sort" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(sort) ? "selected" : null)">Mới nhất</option>
+            <option value="date_asc" selected="@(sort == "date_asc" ? "selected" : null)">Thời gian tăng dần</option>
+            <option value="date_desc" selected="@(sort == "date_desc" ? "selected" : null)">Thời gian giảm dần</option>
         </select>
     </div>
     <div class="col-auto">
@@ -185,6 +187,32 @@
             toast.style.visibility = 'hidden';
         }, 1500);
     }
+
+    // Tự động filter phòng theo tòa nhà
+    document.addEventListener('DOMContentLoaded', function () {
+        var buildingSelect = document.getElementById('buildingSelect');
+        var roomSelect = document.getElementById('roomSelect');
+        if (buildingSelect && roomSelect) {
+            buildingSelect.addEventListener('change', function () {
+                var buildingId = this.value;
+                for (var i = 0; i < roomSelect.options.length; i++) {
+                    var opt = roomSelect.options[i];
+                    if (!opt.value) continue;
+                    if (!buildingId || opt.getAttribute('data-building') === buildingId) {
+                        opt.style.display = '';
+                    } else {
+                        opt.style.display = 'none';
+                        if (opt.selected) roomSelect.selectedIndex = 0;
+                    }
+                }
+            });
+            // Trigger filter on page load if building is selected
+            if (buildingSelect.value) {
+                var event = new Event('change');
+                buildingSelect.dispatchEvent(event);
+            }
+        }
+    });
 </script>
 <style>
     .copy-btn {

@@ -27,6 +27,9 @@ namespace RentalService.Controllers
             try
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                // Check contact info count
+                var contactInfoCount = await _context.ContactInformations.CountAsync(c => c.UserId.ToString() == userId);
+                ViewBag.ContactInfoIncomplete = contactInfoCount < 2;
                 var buildings = await _context.Buildings
                     .Where(b => b.HostId.ToString() == userId)
                     .Include(b => b.Rooms)
