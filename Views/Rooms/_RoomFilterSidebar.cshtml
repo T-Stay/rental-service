@@ -4,42 +4,26 @@
     var selectedAmenities = Context.Request.Query["amenities"].ToString().Split(',', System.StringSplitOptions.RemoveEmptyEntries);
     var minPrice = Context.Request.Query["minPrice"];
     var maxPrice = Context.Request.Query["maxPrice"];
+    var minArea = Context.Request.Query["minArea"];
+    var maxArea = Context.Request.Query["maxArea"];
     var sort = Context.Request.Query["sort"];
     var radius = Context.Request.Query["radius"];
     var centerLat = Context.Request.Query["centerLat"];
     var centerLng = Context.Request.Query["centerLng"];
     var advanceAddress = Context.Request.Query["advanceAddress"];
     var hasAdvance = !string.IsNullOrEmpty(radius) && !string.IsNullOrEmpty(centerLat) && !string.IsNullOrEmpty(centerLng);
+    // Sắp xếp tiện ích đã chọn lên đầu
+    if (amenities != null && selectedAmenities.Length > 0)
+    {
+        amenities = amenities.OrderByDescending(a => selectedAmenities.Contains(a.Id.ToString())).ToList();
+    }
 }
 <div class="p-3 bg-light rounded shadow-sm mb-4">
     <h5>Bộ lọc</h5>
     <div class="mb-3">
-        <label class="form-label">Tiện ích</label>
-        <div class="d-flex flex-wrap gap-2">
-            @if (amenities != null)
-            {
-                foreach (var a in amenities)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="amenities" value="@a.Id" id="amenity_@a.Id" @(selectedAmenities.Contains(a.Id.ToString()) ? "checked" : "") />
-                        <label class="form-check-label" for="amenity_@a.Id">@a.Name</label>
-                    </div>
-                }
-            }
-        </div>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Giá (VND)</label>
-        <div class="d-flex align-items-center gap-2">
-            <input type="number" name="minPrice" class="form-control" placeholder="Từ" value="@minPrice" min="0" style="max-width:100px;" />
-            <span>-</span>
-            <input type="number" name="maxPrice" class="form-control" placeholder="Đến" value="@maxPrice" min="0" style="max-width:100px;" />
-        </div>
-    </div>
-    <div class="mb-3">
         <label class="form-label">Sắp xếp</label>
         <select name="sort" class="form-select">
-            @if (sort == "")
+            @if (string.IsNullOrEmpty(sort))
             {
                 <option value="" selected>Mặc định</option>
             }
@@ -73,8 +57,41 @@
             }
         </select>
     </div>
-    
-    <button class="btn btn-link p-0 mb-2" type="button" id="toggleAdvanceBtn">Tìm kiếm nâng cao <i class="fa fa-chevron-down"></i></button>
+    <div class="mb-3">
+        <label class="form-label">Giá (VND)</label>
+        <div class="d-flex align-items-center gap-2">
+            <input type="number" name="minPrice" class="form-control" placeholder="Từ" value="@minPrice" min="0" style="max-width:100px;" />
+            <span>-</span>
+            <input type="number" name="maxPrice" class="form-control" placeholder="Đến" value="@maxPrice" min="0" style="max-width:100px;" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Diện tích (m²)</label>
+        <div class="d-flex align-items-center gap-2">
+            <input type="number" name="minArea" class="form-control" placeholder="Từ" value="@minArea" min="0" style="max-width:100px;" step="0.1" />
+            <span>-</span>
+            <input type="number" name="maxArea" class="form-control" placeholder="Đến" value="@maxArea" min="0" style="max-width:100px;" step="0.1" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Tiện ích</label>
+        <div class="d-flex flex-wrap gap-2 amenities-list expanded" id="amenitiesList" style="max-height:180px;overflow:auto;">
+            @if (amenities != null)
+            {
+                foreach (var a in amenities)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="amenities" value="@a.Id" id="amenity_@a.Id" @(selectedAmenities.Contains(a.Id.ToString()) ? "checked" : "") />
+                        <label class="form-check-label" for="amenity_@a.Id">@a.Name</label>
+                    </div>
+                }
+            }
+        </div>
+        <div class="d-flex justify-content-center">
+            <button class="toggle-btn mt-1" type="button" id="toggleAmenitiesBtn"><i class="fa fa-chevron-down ms-1"></i></button>
+        </div>
+    </div>
+    <button class="toggle-btn-advance mb-2" type="button" id="toggleAdvanceBtn"><span>Tìm kiếm nâng cao</span> <i class="fa fa-chevron-down ms-1"></i></button>
     <div id="advanceOptions" style="display:@(hasAdvance ? "block" : "none")">
         <div class="mb-3">
             <label class="form-label">Địa điểm cụ thể</label>
@@ -95,11 +112,105 @@
         <button type="submit" class="btn btn-primary w-100">Áp dụng</button>
         <button type="button" class="btn btn-secondary w-100" id="resetFilterBtn">Đặt lại</button>
     </div>
+    <style>
+    .toggle-btn {
+        background: none;
+        border: none;
+        color: #0d6efd;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+        margin: 0 auto;
+        width: 100%;
+    }
+    .toggle-btn:focus {
+        outline: none;
+        color: #0a58ca;
+    }
+    .toggle-btn .fa-chevron-down {
+        transition: transform 0.3s;
+    }
+    .toggle-btn.expanded .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+    .amenities-list {
+        transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1);
+        will-change: max-height;
+        overflow: hidden;
+    }
+    .amenities-list.collapsed {
+        max-height: 40px !important;
+        overflow: hidden !important;
+        mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    }
+    .amenities-list.expanded {
+        max-height: 1000px !important;
+        mask-image: none;
+    }
+    .amenities-list.scrolling {
+        overflow-y: auto !important;
+    }
+    .toggle-btn-advance {
+        background: none;
+        border: none;
+        color: #198754;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: color 0.2s;
+    }
+    .toggle-btn-advance:focus {
+        outline: none;
+        color: #145c32;
+    }
+    .toggle-btn-advance .fa-chevron-down {
+        transition: transform 0.3s;
+    }
+    .toggle-btn-advance.expanded .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+    </style>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script>
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
     var map = null;
+    var amenitiesList = document.getElementById('amenitiesList');
+    var toggleAmenitiesBtn = document.getElementById('toggleAmenitiesBtn');
+    var collapsed = false;
+    if (toggleAmenitiesBtn && amenitiesList) {
+        // Đảm bảo không có scroll khi đang transition
+        amenitiesList.addEventListener('transitionend', function(e) {
+            if (!collapsed && amenitiesList.classList.contains('expanded')) {
+                amenitiesList.classList.add('scrolling');
+            } else {
+                amenitiesList.classList.remove('scrolling');
+            }
+        });
+        toggleAmenitiesBtn.onclick = function() {
+            collapsed = !collapsed;
+            if (collapsed) {
+                amenitiesList.classList.remove('expanded');
+                amenitiesList.classList.add('collapsed');
+                toggleAmenitiesBtn.classList.remove('expanded');
+                amenitiesList.classList.remove('scrolling');
+            } else {
+                amenitiesList.classList.remove('collapsed');
+                amenitiesList.classList.add('expanded');
+                toggleAmenitiesBtn.classList.add('expanded');
+                // Đợi transitionend mới thêm scrolling
+            }
+        };
+        // Mặc định là mở rộng
+        amenitiesList.classList.add('expanded');
+        toggleAmenitiesBtn.classList.add('expanded');
+        // Đảm bảo scroll chỉ hiện khi đã mở rộng xong
+        setTimeout(function() { amenitiesList.classList.add('scrolling'); }, 600);
+    }
     // Prevent form submit on Enter
     var filterForm = document.getElementById('roomFilterForm');
     if (filterForm) {
@@ -122,6 +233,9 @@
                 // Reset price fields
                 filterForm.querySelector('input[name="minPrice"]').value = '';
                 filterForm.querySelector('input[name="maxPrice"]').value = '';
+                // Reset area fields
+                filterForm.querySelector('input[name="minArea"]').value = '';
+                filterForm.querySelector('input[name="maxArea"]').value = '';
                 // Reset sort
                 filterForm.querySelector('select[name="sort"]').selectedIndex = 0;
                 // Reset advanced fields
@@ -144,25 +258,28 @@
             };
         }
     }
-    function bindAdvanceToggle() {
-        var toggleBtn = document.getElementById('toggleAdvanceBtn');
-        if (toggleBtn) {
-            toggleBtn.onclick = function(e) {
-                e.preventDefault();
-                var adv = document.getElementById('advanceOptions');
-                var isHidden = adv.style.display === 'none';
-                adv.style.display = isHidden ? 'block' : 'none';
-                // Nếu vừa mở ra thì invalidateSize cho map
-                if (isHidden && map) {
-                    setTimeout(function() { map.invalidateSize(); }, 200);
-                }
-            };
-        }
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bindAdvanceToggle);
-    } else {
-        bindAdvanceToggle();
+    // Tìm kiếm nâng cao
+    var toggleBtn = document.getElementById('toggleAdvanceBtn');
+    var advanceOptions = document.getElementById('advanceOptions');
+    var advanceExpanded = advanceOptions && advanceOptions.style.display !== 'none';
+    if (toggleBtn && advanceOptions) {
+        toggleBtn.onclick = function(e) {
+            e.preventDefault();
+            advanceExpanded = !advanceExpanded;
+            advanceOptions.style.display = advanceExpanded ? 'block' : 'none';
+            if (advanceExpanded) {
+                toggleBtn.classList.add('expanded');
+            } else {
+                toggleBtn.classList.remove('expanded');
+            }
+            // Nếu vừa mở ra thì invalidateSize cho map
+            if (advanceExpanded && map) {
+                setTimeout(function() { map.invalidateSize(); }, 200);
+            }
+        };
+        // Set trạng thái icon ban đầu
+        if (advanceExpanded) toggleBtn.classList.add('expanded');
+        else toggleBtn.classList.remove('expanded');
     }
     // Map init
     if (document.getElementById('advanceMap')) {
@@ -193,7 +310,7 @@
                     if (!address) return;
                     fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
                         .then(res => res.json())
-                        .then(data => {
+                        .then(function(data) {
                             if (data && data.length > 0) {
                                 setAdvanceLocation(data[0].lat, data[0].lon);
                             }
@@ -207,6 +324,6 @@
             setTimeout(function() { map.invalidateSize(); }, 200);
         }
     }
-})();
+});
 </script>
 </div>

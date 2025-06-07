@@ -2,7 +2,7 @@
     ViewData["Title"] = "Trang Chủ";
     var isCustomer = User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer");
 }
-<div class="hero-section position-relative text-white" style="background: linear-gradient(rgba(27,110,194,0.7), rgba(0,119,204,0.7)), url('/images/hero-bg.jpg') center/cover no-repeat; min-height: 60vh; display: flex; align-items: center;">
+<div class="hero-section position-relative text-white" style="background: linear-gradient(rgba(27,110,194,0.7), rgba(0,119,204,0.7)), url('/images/hero-bg.jpg') center/cover no-repeat; min-height: 60vh; display: flex; align-items: center; border-radius: 1rem; overflow: hidden;">
     <div class="container py-5">
         <div class="row align-items-center">
             <div class="col-lg-7">

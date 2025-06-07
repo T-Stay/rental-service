@@ -16,29 +16,7 @@
 </div>
 <h2>Tìm phòng</h2>
 <div class="row">
-    <div class="col-md-3">
-        <form method="get" id="roomFilterForm">
-            @Html.Partial("_RoomFilterSidebar")
-        </form>
-    </div>
     <div class="col-md-9">
-        <div class="d-flex justify-content-center mt-4">
-            @Html.PagedListPager(Model, page => Url.Action("Index", new
-                {
-                    page,
-                    location = Context.Request.Query["location"],
-                    minPrice = Context.Request.Query["minPrice"],
-                    maxPrice = Context.Request.Query["maxPrice"],
-                    buildingId = Context.Request.Query["buildingId"],
-                    sort = Context.Request.Query["sort"],
-                    amenities = Context.Request.Query["amenities"]
-                }), new PagedListRenderOptions
-       {
-           UlElementClasses = new[] { "pagination" },
-           LiElementClasses = new[] { "page-item" },
-           PageClasses = new[] { "page-link" }
-       })
-        </div>
         <div class="row g-4">
             @foreach (var room in Model)
             {
@@ -71,8 +49,28 @@
                             <div class="room-card-amenities">
                                 @if (room.Amenities != null && room.Amenities.Count > 0)
                                 {
-                                    <span><i class="fa-solid fa-list"></i> @string.Join(", ", room.Amenities.Take(3).Select(a => a.Name))</span>
-                                    @if (room.Amenities.Count > 3)
+                                    var selectedAmenities = Context.Request.Query["amenities"].ToString().Split(',', System.StringSplitOptions.RemoveEmptyEntries);
+                                    var orderedAmenities = (selectedAmenities.Length > 0)
+                                        ? room.Amenities.OrderByDescending(a => selectedAmenities.Contains(a.Id.ToString())).ToList()
+                                        : room.Amenities.ToList();
+                                    <span><i class="fa-solid fa-list"></i>
+                                        @for (int i = 0; i < Math.Min(3, orderedAmenities.Count); i++)
+                                        {
+                                            var a = orderedAmenities[i];
+                                            var isSelected = selectedAmenities.Contains(a.Id.ToString());
+                                            if (i > 0) { @:,
+                                            }
+                                            if (isSelected)
+                                            {
+                                                <span style="font-weight:bold;color:#0d6efd">@a.Name</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@a.Name</span>
+                                            }
+                                        }
+                                    </span>
+                                    if (room.Amenities.Count > 3)
                                     {
                                         <span> +@((room.Amenities.Count - 3)) tiện ích khác</span>
                                     }
@@ -96,6 +94,8 @@
                 location = Context.Request.Query["location"],
                 minPrice = Context.Request.Query["minPrice"],
                 maxPrice = Context.Request.Query["maxPrice"],
+                minArea = Context.Request.Query["minArea"],
+                maxArea = Context.Request.Query["maxArea"],
                 buildingId = Context.Request.Query["buildingId"],
                 sort = Context.Request.Query["sort"],
                 amenities = Context.Request.Query["amenities"]
@@ -105,6 +105,11 @@
                 PageClasses = new[] { "page-link" }
             })
         </div>
+    </div>
+    <div class="col-md-3">
+        <form method="get" id="roomFilterForm">
+            @Html.Partial("_RoomFilterSidebar")
+        </form>
     </div>
 </div>
 @section Scripts {

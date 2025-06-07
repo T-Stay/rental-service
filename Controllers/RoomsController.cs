@@ -22,7 +22,7 @@ namespace RentalService.Controllers
         }
 
         // GET: /Rooms
-        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice, Guid? buildingId, string[] amenities, string sort, double? centerLat, double? centerLng, double? radius, int? page, string advanceAddress)
+        public async Task<IActionResult> Index(string location, decimal? minPrice, decimal? maxPrice, Guid? buildingId, string[] amenities, string sort, double? centerLat, double? centerLng, double? radius, int? page, string advanceAddress, double? minArea, double? maxArea)
         {
             int pageSize = 9;
             int pageNumber = page ?? 1;
@@ -83,6 +83,10 @@ namespace RentalService.Controllers
                 rooms = rooms.Where(r => r.Price >= minPrice);
             if (maxPrice.HasValue)
                 rooms = rooms.Where(r => r.Price <= maxPrice);
+            if (minArea.HasValue)
+                rooms = rooms.Where(r => r.Area >= minArea.Value);
+            if (maxArea.HasValue)
+                rooms = rooms.Where(r => r.Area <= maxArea.Value);
             // Chỉ áp dụng sắp xếp khi bấm nút Lọc
             // ... filter amenities ...
             if (amenities != null && amenities.Length > 0)
