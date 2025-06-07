@@ -299,7 +299,7 @@ namespace RentalService.Controllers
                 catch (Exception ex)
                 {
                     Console.WriteLine("Failed to send email:");
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex);
                     // Optionally log ex.StackTrace or log it somewhere else
                 }
             });

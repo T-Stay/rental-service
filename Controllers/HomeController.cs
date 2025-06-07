@@ -30,10 +30,6 @@ public class HomeController : Controller
                 {
                     return RedirectToAction("AdminDashboard", "Admin");
                 }
-                else if (User.IsInRole("customer"))
-                {
-                    return RedirectToAction("CustomerDashboard", "Home");
-                }
             }
         }
         catch (Exception ex)

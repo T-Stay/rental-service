@@ -5,31 +5,85 @@
 }
 @if (room != null)
 {
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">@room.Name</h5>
-            <p class="card-text"><strong>Vị trí:</strong> @room.Building?.Location</p>
-            <p class="card-text"><strong>Giá:</strong> @room.Price.ToString("N0") </p>
-            <p class="card-text"><strong>Mô tả:</strong> @room.Description</p>
+    <div class="container mt-4">
+        <div class="row g-3 justify-content-center align-items-center">
+            <div class="col-md-4 d-flex align-items-center">
+                <div class="card shadow-sm w-100 mb-0">
+                    <div class="card-header bg-success text-white fw-bold">
+                        <i class="fa-solid fa-calendar-plus"></i> Đặt lịch xem phòng
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="Create" method="post" id="appointmentForm">
+                            <input type="hidden" name="roomId" value="@ViewBag.RoomId" />
+                            <div class="mb-3">
+                                <h5 class="card-title mb-1">
+                                    <a href="@Url.Action("Details", "Rooms", new { id = room.Id })" target="_blank">@room.Name</a>
+                                </h5>
+                                <div class="mb-1 text-muted" style="font-size:0.95em"><i class="fa-solid fa-location-dot"></i> @room.Building?.Address</div>
+                                <div class="mb-1 text-success fw-bold">@room.Price.ToString("N0") ₫ / tháng</div>
+                                <div class="mb-1" style="font-size:0.95em"><strong>Diện tích:</strong> @room.Area.ToString("N1") m²</div>
+                                @if (room.Amenities != null && room.Amenities.Count > 0)
+                                {
+                                    <div class="mb-1" style="font-size:0.95em"><strong>Tiện nghi:</strong> @string.Join(", ", room.Amenities.Select(a => a.Name))</div>
+                                }
+                                <div class="mb-1" style="font-size:0.95em"><strong>Tòa nhà:</strong> @room.Building?.Name</div>
+                                <div class="mb-1" style="font-size:0.95em"><strong>Mô tả:</strong> @room.Description</div>
+                                @if (room.Building?.Host?.ContactInformations != null && room.Building.Host.ContactInformations.Count > 0)
+                                {
+                                    <div class="mt-2">
+                                        <span class="fw-bold">Liên hệ chủ nhà:</span>
+                                        <ul class="mb-1" style="font-size:0.95em">
+                                            @foreach (var c in room.Building.Host.ContactInformations)
+                                            {
+                                                if (c.Type.ToString() == "FacebookLink")
+                                                {
+                                                    <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem Facebook</a></li>
+                                                }
+                                                else if (c.Type.ToString() == "Email")
+                                                {
+                                                    <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="navigator.clipboard.writeText('@c.Data'); toastr.success('Đã sao chép!')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
+                                                }
+                                                else if (c.Type.ToString() == "PhoneNumber")
+                                                {
+                                                    <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="navigator.clipboard.writeText('@c.Data'); toastr.success('Đã sao chép!')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
+                                                }
+                                                else
+                                                {
+                                                    <li><strong>@c.Type:</strong> @c.Data</li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+                                }
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Thời gian hẹn</label>
+                                <input type="datetime-local" name="appointmentTime" class="form-control" id="appointmentTimeInput" />
+                            </div>
+                            <button type="submit" class="btn btn-success w-100" id="submitBtn" disabled>Đặt lịch</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex gap-2 justify-content-center mt-3">
+            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
+            <a href="@Url.Action("Index")" class="btn btn-outline-success"><i class="fa-solid fa-list"></i> Quay lại danh sách lịch hẹn</a>
         </div>
     </div>
 }
-<div class="card shadow-sm mb-4" style="max-width: 500px; margin: 0 auto;">
-    <div class="card-header bg-success text-white fw-bold">
-        <i class="fa-solid fa-calendar-plus"></i> Đặt lịch xem phòng
-    </div>
-    <div class="card-body">
-        <form asp-action="Create" method="post">
-            <input type="hidden" name="roomId" value="@ViewBag.RoomId" />
-            <div class="mb-3">
-                <label class="form-label">Thời gian hẹn</label>
-                <input type="datetime-local" name="appointmentTime" class="form-control" />
-            </div>
-            <button type="submit" class="btn btn-success w-100">Đặt lịch</button>
-        </form>
-    </div>
-</div>
-<div class="d-flex gap-2 justify-content-center">
-    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-secondary"><i class="fa-solid fa-gauge-high"></i> Bảng điều khiển</a>
-    <a href="@Url.Action("Index")" class="btn btn-outline-success"><i class="fa-solid fa-list"></i> Quay lại danh sách lịch hẹn</a>
-</div>
+<style>
+    .copy-btn { border: none; background: none; color: #007bff; cursor: pointer; margin-left: 0.5rem; }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var input = document.getElementById('appointmentTimeInput');
+        var btn = document.getElementById('submitBtn');
+        if(input && btn) {
+            input.addEventListener('input', function() {
+                btn.disabled = !input.value;
+            });
+            btn.disabled = !input.value;
+        }
+    });
+</script>

@@ -26,7 +26,10 @@ html {
 }
 
 body {
-  margin-bottom: 80px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0;
   background: var(--gray-light);
   color: var(--text-main);
 }
@@ -42,7 +45,7 @@ body {
 }
 
 .main-header-bar .navbar-brand {
-  color: var(--text-light) !important;
+  color: #fff !important;
   font-size: 1.5rem;
   letter-spacing: 1px;
 }
@@ -50,37 +53,53 @@ body {
 .main-header-bar .nav-link.active, .main-header-bar .nav-link[aria-current="page"] {
   background: rgba(255,255,255,0.15);
   border-radius: 0.5rem;
-  color: var(--text-light) !important;
+  color: #fff !important;
   font-weight: bold;
 }
 
 .main-header-bar .nav-link {
-  color: var(--main-blue) !important;
+  color: #e3e3e3 !important;
   margin-right: 0.5rem;
   transition: color 0.2s;
 }
 
 .main-header-bar .nav-link:hover {
-  color: var(--text-light) !important;
+  color: #fff !important;
 }
 
 .page-header {
   background: #f8fafc;
-  border-bottom: 1px solid var(--gray-medium);
+  border-bottom: 1px solid #e5e5e5;
   padding: 1.5rem 0 1rem 0;
   margin-bottom: 2rem;
 }
 
+.container.main-content {
+  flex: 1 0 auto;
+}
+
 .footer {
-  background: #f8fafc;
+  background: linear-gradient(90deg, #1b6ec2 0%, #0077cc 100%);
+  color: #fff;
   text-align: center;
   padding: 1rem 0;
-  position: fixed;
-  left: 0;
+  position: relative;
   bottom: 0;
   width: 100%;
-  z-index: 100;
-  border-top: 1px solid var(--gray-medium);
+  margin-top: auto;
+}
+
+.footer a, .footer a:visited, .footer a:active {
+  color: #e3e3e3 !important;
+}
+
+.footer a:hover {
+  color: #fff !important;
+  text-decoration: underline;
+}
+
+.footer .fw-bold, .footer h5, .footer h6 {
+  color: #fff;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -141,11 +160,67 @@ body {
   cursor: pointer;
 }
 
-@media (max-width: 767px) {
-  .main-header-bar .navbar-brand {
-    font-size: 1.1rem;
-  }
-  .page-header h1 {
-    font-size: 1.5rem;
-  }
+/* --- Dropdown & Responsive Fixes (moved from _Layout.cshtml) --- */
+.main-header-bar .navbar-nav.me-auto .dropdown-menu {
+    background: linear-gradient(90deg, #1b6ec2 0%, #0077cc 100%);
+    color: #fff;
+    border: none;
+    margin-top: 0;
+    /* Loại bỏ khoảng cách giữa menu và dropdown */
+}
+.main-header-bar .navbar-nav.me-auto .dropdown-menu .dropdown-item {
+    color: #e3e3e3;
+    transition: background 0.15s, color 0.15s;
+}
+.main-header-bar .navbar-nav.me-auto .dropdown-menu .dropdown-item.active,
+.main-header-bar .navbar-nav.me-auto .dropdown-menu .dropdown-item:active,
+.main-header-bar .navbar-nav.me-auto .dropdown-menu .dropdown-item:hover {
+    background: #fff;
+    color: #1b6ec2;
+    font-weight: bold;
+}
+.main-header-bar .navbar-nav.me-auto .nav-item.dropdown .dropdown-toggle::after {
+    transition: transform 0.2s;
+}
+.main-header-bar .navbar-nav.me-auto .nav-item.dropdown.show .dropdown-toggle::after {
+    transform: rotate(180deg);
+}
+.main-header-bar .navbar-nav.me-auto .dropdown-menu-end {
+    right: 0;
+    left: auto;
+    max-width: 90vw;
+    min-width: 220px;
+    overflow-x: auto;
+}
+@media screen and (max-width: 600px) {
+    .main-header-bar .navbar-nav.me-auto .dropdown-menu-end {
+        left: 0 !important;
+        right: 0 !important;
+        min-width: 160px;
+        max-width: 98vw;
+    }
+}
+.main-header-bar .navbar-nav.ms-auto .dropdown-menu {
+    background: #fff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    margin-top: 0.5rem;
+}
+.main-header-bar .navbar-nav.ms-auto .dropdown-menu .dropdown-item {
+    color: #212529;
+}
+.main-header-bar .navbar-nav.ms-auto .dropdown-menu .dropdown-item.active,
+.main-header-bar .navbar-nav.ms-auto .dropdown-menu .dropdown-item:active {
+    background: #f8f9fa;
+    color: #16181b;
+}
+.main-header-bar .navbar-nav.ms-auto .nav-item.dropdown .dropdown-toggle::after {
+    transition: none;
+}
+.main-header-bar .navbar-nav.ms-auto .nav-item.dropdown.show .dropdown-toggle::after {
+    transform: none;
+}
+.notification-text {
+    word-break: break-word;
+    white-space: normal;
 }
