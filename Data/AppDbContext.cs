@@ -28,6 +28,7 @@ namespace RentalService.Data
         public DbSet<Report> Reports { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ContactInformation> ContactInformations { get; set; }
+        public DbSet<PhoneOtp> PhoneOtps { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -226,6 +227,16 @@ namespace RentalService.Data
                 .WithMany(u => u.ContactInformations)
                 .HasForeignKey(ci => ci.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Unique constraint: PhoneNumber must be unique
+            modelBuilder.Entity<ContactInformation>()
+                .HasIndex(ci => ci.Data)
+                .IsUnique()
+                .HasFilter("[Type] = 1"); // 1 = PhoneNumber enum
+
+            // PhoneOtp: unique per phone, not used for FK
+            modelBuilder.Entity<PhoneOtp>()
+                .HasIndex(p => p.PhoneNumber);
         }
     }
 }

@@ -74,6 +74,7 @@
                         {
                             @:<span>@c.Data
                             @:    <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button>
+                            @:    <span class="badge @(c.IsVerified ? "bg-success" : "bg-warning text-dark") ms-2">@(c.IsVerified ? "Đã xác thực" : "Chưa xác thực")</span>
                             @:</span>
                         }
                         else
@@ -94,10 +95,10 @@
                 }
             </ul>
             <button class="btn btn-outline-primary mb-2" type="button" onclick="document.getElementById('addContactForm').style.display='flex'">Thêm liên hệ</button>
-            <form id="addContactForm" asp-action="AddContact" method="post" class="mt-3 row g-2 align-items-end" style="display:none;">
+            <form id="addContactForm" asp-action="AddContact" method="post" class="mt-3 row g-2 align-items-end" style="display:none;" onsubmit="return onAddContactSubmit(event)">
                 <div class="col-auto">
                     <label class="form-label mb-0">Loại:</label>
-                    <select name="type" class="form-select">
+                    <select name="type" class="form-select" id="contactTypeSelect" onchange="onContactTypeChange()">
                         <option value="Email">Email</option>
                         <option value="PhoneNumber">Số điện thoại</option>
                         <option value="FacebookLink">Liên kết Facebook</option>
@@ -105,13 +106,113 @@
                 </div>
                 <div class="col-auto">
                     <label class="form-label mb-0">Dữ liệu:</label>
-                    <input name="data" class="form-control" required />
+                    <input name="data" class="form-control" id="contactDataInput" required />
                 </div>
-                <div class="col-auto">
+                <div class="col-auto" id="otpActions" style="display:none;">
+                    <button type="button" class="btn btn-outline-primary" id="sendOtpBtn" onclick="sendOtp()">Gửi mã OTP</button>
+                    <span id="otpCountdown" class="ms-2 text-muted" style="min-width:60px;display:inline-block;"></span>
+                </div>
+                <div class="col-auto" id="otpVerifyBox" style="display:none;">
+                    <input type="text" class="form-control" id="otpInput" placeholder="Nhập mã OTP" maxlength="6" style="width:120px;display:inline-block;" />
+                    <button type="button" class="btn btn-outline-success ms-2" onclick="verifyOtp()">Xác thực OTP</button>
+                </div>
+                <div class="col-auto" id="addContactBtnBox">
                     <button type="submit" class="btn btn-success">Thêm</button>
                     <button type="button" class="btn btn-secondary ms-2" onclick="document.getElementById('addContactForm').style.display='none'">Hủy</button>
                 </div>
             </form>
+<script>
+let otpTimer = null;
+let otpSeconds = 0;
+function onContactTypeChange() {
+    var type = document.getElementById('contactTypeSelect').value;
+    document.getElementById('otpActions').style.display = (type === 'PhoneNumber') ? 'block' : 'none';
+    document.getElementById('otpVerifyBox').style.display = 'none';
+    document.getElementById('otpCountdown').innerText = '';
+    document.getElementById('sendOtpBtn').disabled = false;
+    document.getElementById('otpInput').value = '';
+    document.getElementById('addContactBtnBox').style.display = (type === 'PhoneNumber') ? 'none' : 'block';
+}
+function sendOtp() {
+    var phone = document.getElementById('contactDataInput').value;
+    if (!phone || phone.length < 8) { toastr.error('Số điện thoại không hợp lệ'); return; }
+    document.getElementById('sendOtpBtn').disabled = true;
+    fetch('/Profile/SendPhoneOtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'phone=' + encodeURIComponent(phone)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            toastr.success('Đã gửi mã OTP!');
+            document.getElementById('otpVerifyBox').style.display = 'block';
+            startOtpCountdown(30);
+        } else {
+            toastr.error(res.message);
+            document.getElementById('sendOtpBtn').disabled = false;
+        }
+    });
+}
+function startOtpCountdown(seconds) {
+    otpSeconds = seconds;
+    document.getElementById('otpCountdown').innerText = '(' + otpSeconds + 's)';
+    if (otpTimer) clearInterval(otpTimer);
+    otpTimer = setInterval(() => {
+        otpSeconds--;
+        document.getElementById('otpCountdown').innerText = '(' + otpSeconds + 's)';
+        if (otpSeconds <= 0) {
+            clearInterval(otpTimer);
+            document.getElementById('otpCountdown').innerText = '';
+            document.getElementById('sendOtpBtn').disabled = false;
+        }
+    }, 1000);
+}
+function verifyOtp() {
+    var phone = document.getElementById('contactDataInput').value;
+    var otp = document.getElementById('otpInput').value;
+    if (!otp) { toastr.error('Nhập mã OTP'); return; }
+    fetch('/Profile/VerifyPhoneOtp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'phone=' + encodeURIComponent(phone) + '&otp=' + encodeURIComponent(otp)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) {
+            toastr.success('Xác thực thành công!');
+            // Tự động submit form để thêm số điện thoại
+            let form = document.getElementById('addContactForm');
+            let typeSelect = document.getElementById('contactTypeSelect');
+            let dataInput = document.getElementById('contactDataInput');
+            // Tạo input ẩn để submit đúng giá trị
+            let hiddenType = document.createElement('input');
+            hiddenType.type = 'hidden';
+            hiddenType.name = 'type';
+            hiddenType.value = 'PhoneNumber';
+            let hiddenData = document.createElement('input');
+            hiddenData.type = 'hidden';
+            hiddenData.name = 'data';
+            hiddenData.value = dataInput.value;
+            form.appendChild(hiddenType);
+            form.appendChild(hiddenData);
+            form.submit();
+        } else {
+            toastr.error(res.message);
+        }
+    });
+}
+function onAddContactSubmit(e) {
+    var type = document.getElementById('contactTypeSelect').value;
+    if (type === 'PhoneNumber') {
+        toastr.error('Bạn cần xác thực OTP trước khi thêm số điện thoại!');
+        return false;
+    }
+    return true;
+}
+// Khởi tạo trạng thái ban đầu
+onContactTypeChange();
+</script>
         </div>
     </div>
 </div>

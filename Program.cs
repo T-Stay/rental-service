@@ -38,6 +38,14 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddSingleton<S3Service>();
 // Đăng ký IHttpClientFactory để dùng DI cho HttpClient
 builder.Services.AddHttpClient();
+// Đăng ký SmsService vào DI container để có thể inject vào controller nếu cần
+// builder.Services.AddTransient<SmsService>(sp =>
+//     new SmsService(
+//         Environment.GetEnvironmentVariable("TWILIO_ACCOUNT_SID") ?? "YOUR_SID",
+//         Environment.GetEnvironmentVariable("TWILIO_AUTH_TOKEN") ?? "YOUR_TOKEN",
+//         Environment.GetEnvironmentVariable("TWILIO_FROM_PHONE") ?? "+12000000000"
+//     )
+// );
 
 var app = builder.Build();
 

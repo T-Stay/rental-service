@@ -22,5 +22,6 @@ namespace RentalService.Models
         [MaxLength(256)]
         public string Data { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsVerified { get; set; } = false;
     }
 }
