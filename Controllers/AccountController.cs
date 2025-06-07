@@ -117,12 +117,8 @@ namespace RentalService.Controllers
 </body></html>";
                     SendEmail(user.Email, "Confirm your email - Rental Service", emailBody);
                 }
-                ViewBag.Message = "Registration successful! Please check your email to confirm your account.";
-                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                {
-                    return Redirect(returnUrl);
-                }
-                return View();
+                // Chuyển hướng sang trang xác nhận đăng ký thành công
+                return RedirectToAction("RegisterSuccess");
             }
             foreach (var error in result.Errors)
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -305,5 +301,11 @@ namespace RentalService.Controllers
             });
         }
         public IActionResult AccessDenied() => View();
+
+        [HttpGet]
+        public IActionResult RegisterSuccess()
+        {
+            return View();
+        }
     }
 }
