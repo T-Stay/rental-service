@@ -16,7 +16,12 @@
             </div>
             <div class="mb-3">
                 <label class="form-label">Mật khẩu</label>
-                <input name="password" type="password" class="form-control" required />
+                <div class="input-group">
+                    <input name="password" type="password" class="form-control" required id="loginPasswordInput" />
+                    <button type="button" class="btn btn-outline-secondary" tabindex="-1" id="loginPasswordToggle" onclick="togglePasswordVisibility('loginPasswordInput','loginPasswordToggle')">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
         </form>
@@ -31,4 +36,5 @@
 </div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/show-password.js"></script>
 }
