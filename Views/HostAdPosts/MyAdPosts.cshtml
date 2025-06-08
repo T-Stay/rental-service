@@ -1,0 +1,41 @@
+@model IEnumerable<RentalService.Models.AdPost>
+@{
+    ViewBag.Title = "Danh sách bài quảng cáo của tôi";
+}
+<h2>Danh sách bài quảng cáo của tôi</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Gói</th>
+            <th>Trạng thái</th>
+            <th>Lượt xem</th>
+            <th>Ngày tạo</th>
+            <th>Phòng quảng cáo</th>
+            <th>Badge</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ad in Model)
+        {
+            <tr>
+                <td>@ad.Title</td>
+                <td>@ad.PackageType</td>
+                <td>@(ad.IsActive ? "Đã duyệt" : "Chờ duyệt")</td>
+                <td>@ad.ViewCount</td>
+                <td>@ad.CreatedAt.ToShortDateString()</td>
+                <td>
+                    @if (ad.Rooms != null)
+                    {
+                        foreach (var room in ad.Rooms)
+                        {
+                            <span class="badge badge-info">@room.Name</span> 
+                        }
+                    }
+                </td>
+                <td>@ad.Badge</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a href="@Url.Action("Create")" class="btn btn-success">Đăng bài mới</a>

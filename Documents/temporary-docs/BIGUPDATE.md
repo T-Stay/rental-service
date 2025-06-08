@@ -20,16 +20,16 @@
 
 ### A. Đăng bài quảng cáo & gói dịch vụ
 
-- [ ] **Thiết kế lại lưu trữ gói dịch vụ cho chủ trọ**
-   - [ ] Tạo model UserAdPackage (hoặc HostAdPackage): lưu thông tin gói mà chủ trọ đã mua (loại gói, ngày mua, ngày hết hạn, số lượng bài còn lại, trạng thái...)
-   - [ ] Một gói dịch vụ có thể cho phép đăng nhiều bài quảng cáo (UserAdPackage liên kết nhiều AdPost)
+- [x] **Thiết kế lại lưu trữ gói dịch vụ cho chủ trọ**
+   - [x] Tạo model UserAdPackage (hoặc HostAdPackage): lưu thông tin gói mà chủ trọ đã mua (loại gói, ngày mua, ngày hết hạn, số lượng bài còn lại, trạng thái...)
+   - [x] Một gói dịch vụ có thể cho phép đăng nhiều bài quảng cáo (UserAdPackage liên kết nhiều AdPost)
    - [ ] Khi đăng bài mới, kiểm tra số lượng bài còn lại trong gói, trừ dần khi đăng bài
    - [ ] Cho phép chủ trọ mua nhiều gói cùng lúc, mỗi gói quản lý riêng số lượng bài
 
-- [ ] **Tạo dữ liệu cho bài quảng cáo**
-   - [ ] Tạo model AdPost (chứa tiêu đề, nội dung, ảnh, chủ trọ, trạng thái, liên kết tới UserAdPackage, loại gói, thứ tự ưu tiên, badge, lượt xem, ngày tạo...)
-   - [ ] Thêm trường liên kết tới nhiều phòng (AdPost có thể chứa 1 danh sách các phòng quảng cáo, ví dụ: List<Room> hoặc List<Guid> RoomIds)
-   - [ ] Tạo enum AdPackageType (Free, Dong, Bac, Vang, KimCuong)
+- [x] **Tạo dữ liệu cho bài quảng cáo**
+   - [x] Tạo model AdPost (chứa tiêu đề, nội dung, ảnh, chủ trọ, trạng thái, liên kết tới UserAdPackage, loại gói, thứ tự ưu tiên, badge, lượt xem, ngày tạo...)
+   - [x] Thêm trường liên kết tới nhiều phòng (AdPost có thể chứa 1 danh sách các phòng quảng cáo, ví dụ: List<Room> hoặc List<Guid> RoomIds)
+   - [x] Tạo enum AdPackageType (Free, Dong, Bac, Vang, KimCuong)
 
 - [ ] **Luồng đăng bài cho chủ trọ**
    - [ ] Form đăng bài quảng cáo (không trùng với đăng phòng thông thường)

@@ -29,6 +29,8 @@ namespace RentalService.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<ContactInformation> ContactInformations { get; set; }
         public DbSet<PhoneOtp> PhoneOtps { get; set; }
+        public DbSet<UserAdPackage> UserAdPackages { get; set; }
+        public DbSet<AdPost> AdPosts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -237,6 +239,18 @@ namespace RentalService.Data
             // PhoneOtp: unique per phone, not used for FK
             modelBuilder.Entity<PhoneOtp>()
                 .HasIndex(p => p.PhoneNumber);
+
+            // UserAdPackage - AdPost (one-to-many)
+            modelBuilder.Entity<UserAdPackage>()
+                .HasMany(p => p.AdPosts)
+                .WithOne(a => a.UserAdPackage)
+                .HasForeignKey(a => a.UserAdPackageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // AdPost - Room (many-to-many)
+            modelBuilder.Entity<AdPost>()
+                .HasMany(a => a.Rooms)
+                .WithMany();
         }
     }
 }

@@ -18,6 +18,8 @@ namespace RentalService.Models
     {
         Pending,
         Confirmed,
-        Cancelled
+        Cancelled,
+        Refunded, // Đã hoàn tiền
+        Rejected // Bị từ chối
     }
 }

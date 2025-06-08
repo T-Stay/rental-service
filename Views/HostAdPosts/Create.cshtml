@@ -1,0 +1,531 @@
+@model RentalService.Models.AdPost
+@{
+    ViewData["Title"] = "Đăng bài quảng cáo";
+    var packages = ViewBag.Packages as List<RentalService.Models.UserAdPackage> ?? new
+    List<RentalService.Models.UserAdPackage>();
+    var rooms = ViewBag.Rooms as List<RentalService.Models.Room> ?? new List<RentalService.Models.Room>();
+    var buildings = rooms.Select(r => r.Building).Where(b => b != null).Distinct().ToList();
+    bool noPackage = !packages.Any();
+}
+<div class="container mt-4">
+    <h2 class="mb-4">Đăng bài quảng cáo</h2>
+    @if (noPackage)
+    {
+        <div class="alert alert-warning">
+            Bạn chưa có gói dịch vụ nào để đăng bài quảng cáo. <a href="/HostAdPackages/Buy" class="alert-link">Mua gói
+                ngay</a> để sử dụng tính năng này.
+        </div>
+    }
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4" id="adPostForm">
+        <div class="col-md-10 col-lg-8 mx-auto">
+            <div class="mb-3">
+                <label class="form-label">Chọn gói dịch vụ <span class="text-danger">*</span></label>
+                <select name="selectedPackageId" class="form-select" required id="selectedPackageId">
+                    <option value="">-- Chọn gói --</option>
+                    @foreach (var pkg in packages)
+                    {
+                        <option value="@pkg.Id">@pkg.PackageType - Còn @pkg.RemainingPosts bài, hết hạn:
+                            @pkg.ExpiryDate.ToShortDateString()</option>
+                    }
+                </select>
+                <span class="text-danger">@Html.ValidationMessage("selectedPackageId")</span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài quảng cáo" required
+                    id="adTitle" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Content" class="form-label">Nội dung <span class="text-danger">*</span></label>
+                <textarea asp-for="Content" class="form-control" rows="4" placeholder="Nhập nội dung quảng cáo" required
+                    id="adContent"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ảnh quảng cáo</label>
+                <div id="ad-image-preview-list" class="mb-2 d-flex flex-wrap align-items-center"></div>
+                <input type="file" name="images" id="ad-image-input" multiple class="form-control mt-2"
+                    accept="image/*" />
+                <div class="form-text">Có thể chọn nhiều ảnh, tối đa 5 ảnh.</div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Chọn tòa nhà <span class="text-danger">*</span></label>
+                <select id="buildingSelect" class="form-select" required name="selectedBuildingId">
+                    @foreach (var b in buildings)
+                    {
+                        <option value="@b.Id">@b.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Chọn phòng để quảng cáo <span class="text-danger">*</span></label>
+                <table class="table table-bordered table-hover" id="roomsTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="checkAllRooms" style="width: 22px; height: 22px;" /></th>
+                            <th class="sortable-header" data-sort-key="room-name">Tên phòng <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable-header" data-sort-key="building-name">Tòa nhà <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable-header" data-sort-key="price">Giá <i class="fas fa-sort"></i></th>
+                            <th class="sortable-header" data-sort-key="area">Diện tích <i class="fas fa-sort"></i></th>
+                            <th class="sortable-header" data-sort-key="status">Trạng thái <i class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var room in rooms)
+                        {
+                            var isActive = room.Status == RentalService.Models.RoomStatus.Active;
+                            <tr data-building-id="@room.BuildingId">
+                                <td>
+                                    <input type="checkbox" name="selectedRoomIds" value="@room.Id" class="room-checkbox"
+                                        style="width: 22px; height: 22px;" @(isActive ? "" : "disabled=\"disabled\"") />
+                                </td>
+                                <td data-sort-key="room-name" data-sort-value="@room.Name">@room.Name</td>
+                                <td data-sort-key="building-name" data-sort-value="@room.Building?.Name">@room.Building?.Name
+                                </td>
+                                <td data-sort-key="price" data-sort-value="@room.Price">@room.Price.ToString("N0")</td>
+                                <td data-sort-key="area" data-sort-value="@room.Area">@room.Area</td>
+                                <td data-sort-key="status" data-sort-value="@room.Status">
+                                    @if (isActive)
+                                    {
+                                        <span class="badge bg-success">Đang mở</span>
+                                    }
+                                    else if (room.Status == RentalService.Models.RoomStatus.Inactive)
+                                    {
+                                        <span class="badge bg-secondary">Đã khóa</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Ẩn</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div id="room-pagination"></div>
+                <span class="text-danger">@Html.ValidationMessage("selectedRoomIds")</span>
+            </div>
+            <div class="d-flex align-items-center mt-4">
+                <button type="submit" class="btn btn-success me-2" id="submitBtn" @(noPackage ? "disabled=\"disabled\""
+                                                                                                      : "")>Đăng bài</button>
+                <a href="@Url.Action("MyAdPosts")" class="btn btn-outline-secondary">Quay lại danh sách</a>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Preview images before upload (tối đa 5 ảnh)
+        const adImageInput = document.getElementById('ad-image-input');
+        if (adImageInput) {
+            adImageInput.addEventListener('change', function (e) {
+                const previewList = document.getElementById('ad-image-preview-list');
+                previewList.innerHTML = '';
+                Array.from(this.files).slice(0, 5).forEach((file, idx) => {
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        const box = document.createElement('div');
+                        box.className = 'image-preview-box position-relative m-2';
+                        box.setAttribute('data-new-image', idx);
+                        const img = document.createElement('img');
+                        img.src = ev.target.result;
+                        img.className = 'room-image-preview';
+                        img.alt = 'Ad Image';
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-sm btn-danger image-remove-btn position-absolute top-0 end-0 m-1';
+                        btn.title = 'Xóa ảnh này';
+                        btn.innerHTML = '&times;';
+                        btn.onclick = function () {
+                            box.remove();
+                            adImageInput.value = '';
+                        };
+                        box.appendChild(img);
+                        box.appendChild(btn);
+                        previewList.appendChild(box);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+        }
+
+        // Filter rooms by building
+        const buildingSelect = document.getElementById('buildingSelect');
+        const roomsTable = document.getElementById('roomsTable');
+        // --- Quản lý chọn phòng toàn cục ---
+        const checkAllRooms = document.getElementById('checkAllRooms');
+        let selectedRoomIds = new Set();
+
+        // Lấy danh sách roomId theo tòa nhà từ biến rooms (server render ra JS)
+        // Giả sử roomsList là mảng object { id, buildingId, ... } được render từ server
+        // Thêm đoạn này phía trên script quản lý chọn phòng:
+
+        // Render biến roomsList từ server (thêm trạng thái isActive)
+        window.roomsList = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(rooms.Select(r => new { id = r.Id.ToString(), buildingId = r.BuildingId.ToString(), isActive = r.Status == RentalService.Models.RoomStatus.Active })));
+
+        // Lấy tất cả id phòng thuộc tòa nhà đang chọn và trạng thái active
+        function getAllRoomIdsOfCurrentBuilding() {
+            const selectedBuildingId = buildingSelect.value;
+            return window.roomsList
+                .filter(r => (!selectedBuildingId || r.buildingId === selectedBuildingId) && r.isActive)
+                .map(r => r.id);
+        }
+
+        // Hiển thị danh sách các phòng đã chọn (luôn nằm phía dưới select building, phía trên table)
+        (function() {
+            const buildingSelectDiv = buildingSelect.closest('.mb-3');
+            let displayDiv = document.getElementById('selectedRoomsDisplay');
+            if (!displayDiv) {
+                displayDiv = document.createElement('div');
+                displayDiv.id = 'selectedRoomsDisplay';
+                displayDiv.style.margin = '10px 0 10px 0';
+                displayDiv.style.fontSize = '0.95em';
+                displayDiv.style.color = '#198754';
+                // Chèn sau select building
+                if (buildingSelectDiv && buildingSelectDiv.nextElementSibling) {
+                    buildingSelectDiv.parentNode.insertBefore(displayDiv, buildingSelectDiv.nextElementSibling);
+                } else {
+                    roomsTable.parentElement.insertBefore(displayDiv, roomsTable);
+                }
+            }
+            function updateSelectedRoomsDisplay() {
+                if (selectedRoomIds.size === 0) {
+                    displayDiv.innerHTML = '<b>Chưa chọn phòng nào.</b>';
+                } else {
+                    displayDiv.innerHTML = '<b>Đã chọn:</b> ' + selectedRoomIds.size + " phòng.";
+                }
+            }
+            window.updateSelectedRoomsDisplay = updateSelectedRoomsDisplay;
+            updateSelectedRoomsDisplay();
+        })();
+
+        // Lấy tất cả id phòng đang lọc (theo building, KHÔNG chỉ trang hiện tại)
+        function getFilteredRoomIds() {
+            // Lấy lại danh sách rows từ tất cả các trang (không chỉ trang hiện tại)
+            const allRows = Array.from(document.querySelectorAll('#roomsTable tbody tr'));
+            const selectedBuildingId = buildingSelect.value;
+            return allRows
+                .filter(row => !selectedBuildingId || row.dataset.buildingId === selectedBuildingId)
+                .map(row => row.querySelector('.room-checkbox').value);
+        }
+
+        // Cập nhật danh sách phòng đã chọn hiển thị phía trên bảng
+        function updateSelectedRoomsDisplay() {
+            if (selectedRoomIds.size === 0) {
+                selectedRoomsDisplay.innerHTML = '<b>Chưa chọn phòng nào.</b>';
+            } else {
+                selectedRoomsDisplay.innerHTML = '<b>Đã chọn:</b> ' + selectedRoomIds.size + " phòng.";
+            }
+        }
+
+        // Render lại trạng thái checked cho các checkbox phòng trên trang hiện tại
+        function updateRoomCheckboxes() {
+            const checkboxes = roomsTable.querySelectorAll('tbody .room-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = selectedRoomIds.has(cb.value.toString());
+            });
+            // Cập nhật trạng thái checkAllRooms: true nếu tất cả phòng active thuộc tòa nhà đều đã chọn
+            const ids = getAllRoomIdsOfCurrentBuilding();
+            checkAllRooms.checked = ids.length > 0 && ids.every(id => selectedRoomIds.has(id.toString()));
+            updateSelectedRoomsDisplay();
+        }
+
+        // Khi bấm select all
+        if (checkAllRooms && roomsTable) {
+            checkAllRooms.addEventListener('change', function () {
+                const ids = getAllRoomIdsOfCurrentBuilding();
+                if (checkAllRooms.checked) {
+                    ids.forEach(id => selectedRoomIds.add(id));
+                } else {
+                    ids.forEach(id => selectedRoomIds.delete(id));
+                }
+                updateRoomCheckboxes();
+            });
+        }
+
+        // Khi bấm từng checkbox phòng
+        roomsTable.addEventListener('change', function (e) {
+            if (e.target.classList.contains('room-checkbox')) {
+                const id = e.target.value.toString();
+                if (e.target.checked) selectedRoomIds.add(id);
+                else selectedRoomIds.delete(id);
+                updateRoomCheckboxes();
+            }
+        });
+
+        // Khi chuyển trang hoặc lọc lại, cập nhật lại trạng thái checkbox
+        function afterRenderTable() {
+            updateRoomCheckboxes();
+        }
+
+        // --- Sửa renderTable để gọi afterRenderTable ---
+        const _oldRenderTable = renderTable;
+        renderTable = function(page = 1) {
+            _oldRenderTable(page);
+            // Sau khi render lại trang, sync lại trạng thái checked từ selectedRoomIds
+            updateRoomCheckboxes();
+        };
+
+        // Khi submit form: tạo input hidden cho các id đã chọn
+        const adPostForm = document.getElementById('adPostForm');
+        if (adPostForm) {
+            adPostForm.addEventListener('submit', function () {
+                // Xóa input cũ
+                adPostForm.querySelectorAll('input[name="selectedRoomIds"][type="hidden"]').forEach(e => e.remove());
+                // Thêm input hidden cho từng id đã chọn
+                selectedRoomIds.forEach(id => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selectedRoomIds';
+                    input.value = id;
+                    adPostForm.appendChild(input);
+                });
+            });
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const table = document.getElementById("roomsTable");
+            const tbody = table.querySelector("tbody");
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            const headers = table.querySelectorAll(".sortable-header");
+            const buildingSelect = document.getElementById("buildingSelect");
+            const rowsPerPage = 5;
+            let currentPage = 1;
+            let currentSortKey = null;
+            let currentSortAsc = true;
+
+            function getFilteredRows() {
+                const selectedBuildingId = buildingSelect.value;
+                return rows.filter(row => {
+                    return !selectedBuildingId || row.dataset.buildingId === selectedBuildingId;
+                });
+            }
+
+            function getSortedRows(filteredRows) {
+                if (!currentSortKey) return filteredRows;
+
+                return [...filteredRows].sort((a, b) => {
+                    const aVal = a.querySelector(`[data-sort-key="${currentSortKey}"]`)?.getAttribute("data-sort-value") || "";
+                    const bVal = b.querySelector(`[data-sort-key="${currentSortKey}"]`)?.getAttribute("data-sort-value") || "";
+                    const cmp = aVal.localeCompare(bVal, undefined, { numeric: true, sensitivity: 'base' });
+                    return currentSortAsc ? cmp : -cmp;
+                });
+            }
+
+            function renderTable(page = 1) {
+                const filtered = getFilteredRows();
+                const sorted = getSortedRows(filtered);
+                tbody.innerHTML = "";
+                const start = (page - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                sorted.slice(start, end).forEach(row => tbody.appendChild(row));
+                renderPagination(sorted.length, page);
+                afterRenderTable(); // Gọi hàm sau khi render xong
+            }
+
+            function renderPagination(totalRows, page) {
+                const totalPages = Math.ceil(totalRows / rowsPerPage);
+                const paginationContainer = document.getElementById("room-pagination");
+                paginationContainer.innerHTML = "";
+
+                const ul = document.createElement("ul");
+                ul.className = "pagination";
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const li = document.createElement("li");
+                    li.className = "page-item" + (i === page ? " active" : "");
+                    const a = document.createElement("a");
+                    a.className = "page-link";
+                    a.href = "#";
+                    a.textContent = i;
+                    a.addEventListener("click", function (e) {
+                        e.preventDefault();
+                        currentPage = i;
+                        renderTable(currentPage);
+                    });
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                }
+
+                paginationContainer.appendChild(ul);
+            }
+
+            headers.forEach(header => {
+                const sortKey = header.getAttribute("data-sort-key");
+                header.addEventListener("click", function () {
+                    // 3-state toggle: asc -> desc -> none -> asc ...
+                    let state = 0; // 0: none, 1: asc, 2: desc
+                    if (header.classList.contains("sorted-asc")) state = 1;
+                    else if (header.classList.contains("sorted-desc")) state = 2;
+
+                    headers.forEach(h => h.classList.remove("sorted-asc", "sorted-desc"));
+
+                    if (state === 0) {
+                        // none -> asc
+                        header.classList.add("sorted-asc");
+                        currentSortKey = sortKey;
+                        currentSortAsc = true;
+                    } else if (state === 1) {
+                        // asc -> desc
+                        header.classList.add("sorted-desc");
+                        currentSortKey = sortKey;
+                        currentSortAsc = false;
+                    } else {
+                        // desc -> none
+                        currentSortKey = null;
+                    }
+                    renderTable(1);
+                });
+            });
+
+            buildingSelect.addEventListener("change", function () {
+                // Reset lại set khi đổi tòa nhà
+                selectedRoomIds = new Set();
+                currentPage = 1;
+                renderTable(currentPage);
+            });
+
+            renderTable();
+        });
+    </script>
+
+}
+<style>
+    .container form {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px #e9ecef;
+        padding: 2.5rem 2rem 2rem 2rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .room-image-preview {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px #ccc;
+    }
+
+    .image-preview-box {
+        display: inline-block;
+        position: relative;
+    }
+
+    .image-remove-btn {
+        background: rgba(220, 53, 69, 0.85);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        font-size: 1.2rem;
+        line-height: 1;
+        padding: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .image-remove-btn:hover {
+        background: #dc3545;
+    }
+
+    #room-pagination {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #198754;
+        border-color: #198754;
+        color: #fff;
+    }
+
+    .pagination .page-link {
+        color: #198754;
+        border-radius: 6px;
+        margin: 0 2px;
+        min-width: 32px;
+        text-align: center;
+    }
+
+    .pagination .page-link:focus {
+        box-shadow: 0 0 0 0.15rem #19875433;
+    }
+
+    .sortable-header {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        font-weight: 500;
+    }
+
+    .sort-icon-static {
+        color: #222;
+        font-size: 1.1em;
+        margin-left: 2px;
+        vertical-align: middle;
+        opacity: 0.7;
+    }
+
+    .sort-icon-dynamic {
+        margin-left: 2px;
+        vertical-align: middle;
+        font-weight: normal;
+        display: inline-block;
+        min-width: 15px;
+    }
+
+    .sort-active .sort-icon-dynamic {
+        font-weight: bold;
+        filter: drop-shadow(0 0 2px #19875455);
+    }
+
+    .sorted-asc .sort-icon-dynamic,
+    .sorted-desc .sort-icon-dynamic {
+        filter: drop-shadow(0 0 2px #198754);
+    }
+
+    .sorted-asc .sort-icon-dynamic svg polygon,
+    .sorted-desc .sort-icon-dynamic svg polygon {
+        fill: #198754 !important;
+    }
+
+    .sort-active .sort-icon-static {
+        color: #198754;
+        font-weight: bold;
+        opacity: 1;
+    }
+
+    .sorted-asc,
+    .sorted-desc {
+        background: #f1f3f5;
+    }
+
+    .sortable-header i {
+        color: #ccc;
+        transition: color 0.2s;
+    }
+
+    .sortable-header.sorted-asc i,
+    .sortable-header.sorted-desc i {
+        font-weight: bold;
+        color: #007bff;
+    }
+</style>
