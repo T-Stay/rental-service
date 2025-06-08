@@ -48,14 +48,18 @@
                             else if (role == "host")
                             {
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" || ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" || (ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments") || ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" href="#" id="hostDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" 
+                                    || ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" 
+                                    || ViewContext.RouteData.Values["controller"]?.ToString() == "HostAdPosts"
+                                    || (ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments") || ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" href="#" id="hostDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Chủ nhà
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" ? "active" : "")" asp-controller="HostBuildings" asp-action="Index">Tòa nhà của tôi</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")" asp-controller="HostRooms" asp-action="Index">Phòng của tôi</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")" asp-controller="ViewAppointments" asp-action="HostRoomAppointments">Lịch xem phòng</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" asp-controller="HostDashboard" asp-action="Index">Bảng điều khiển</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" asp-controller="HostDashboard" asp-action="Index"><i class="fa-solid fa-gauge-high me-2"></i>Bảng điều khiển</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" ? "active" : "")" asp-controller="HostBuildings" asp-action="Index"><i class="fa-solid fa-building me-2"></i>Tòa nhà của tôi</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")" asp-controller="HostRooms" asp-action="Index"><i class="fa-solid fa-door-open me-2"></i>Phòng của tôi</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")" asp-controller="ViewAppointments" asp-action="HostRoomAppointments"><i class="fa-solid fa-calendar-check me-2"></i>Lịch xem phòng</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostAdPosts" ? "active" : "")" asp-controller="HostAdPosts" asp-action="MyAdPosts"><i class="fa-solid fa-bullhorn me-2"></i>Quản lý quảng cáo</a></li>
                                     </ul>
                                 </li>
                             }

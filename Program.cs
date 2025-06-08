@@ -90,19 +90,19 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Seed amenities: auto add if not exist by name
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var amenitiesList = new[]
-    {
-        "WiFi", "Máy lạnh", "Hệ thống sưởi", "Bếp", "Máy giặt", "Máy sấy", "Đậu xe miễn phí", "Hồ bơi", "Phòng gym", "Cho phép thú cưng", "Ban công riêng", "TV màn hình phẳng", "Bồn tắm", "Camera an ninh", "Bảo vệ 24/7", "Bàn làm việc", "Thang máy", "Két sắt", "Máy nước nóng", "Sân vườn"
-    };
-    foreach (var amenityName in amenitiesList)
-    {
-        if (!db.Amenities.Any(a => a.Name == amenityName))
-        {
-            db.Amenities.Add(new Amenity { Id = Guid.NewGuid(), Name = amenityName });
-        }
-    }
-    await db.SaveChangesAsync();
+    //var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    //var amenitiesList = new[]
+    //{
+    //    "WiFi", "Máy lạnh", "Hệ thống sưởi", "Bếp", "Máy giặt", "Máy sấy", "Đậu xe miễn phí", "Hồ bơi", "Phòng gym", "Cho phép thú cưng", "Ban công riêng", "TV màn hình phẳng", "Bồn tắm", "Camera an ninh", "Bảo vệ 24/7", "Bàn làm việc", "Thang máy", "Két sắt", "Máy nước nóng", "Sân vườn"
+    //};
+    //foreach (var amenityName in amenitiesList)
+    //{
+    //    if (!db.Amenities.Any(a => a.Name == amenityName))
+    //    {
+    //        db.Amenities.Add(new Amenity { Id = Guid.NewGuid(), Name = amenityName });
+    //    }
+    //}
+    //await db.SaveChangesAsync();
 }
 
 // Configure the HTTP request pipeline.

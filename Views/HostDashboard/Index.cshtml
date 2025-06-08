@@ -66,6 +66,18 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-3 col-6">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-bullhorn fa-2x text-primary mb-2"></i>
+                    <h5 class="card-title">Quảng cáo</h5>
+                    <p class="display-6 fw-semibold">
+                        @((ViewBag.MyAdPostsCount != null) ? ViewBag.MyAdPostsCount : 0)
+                    </p>
+                    <a href="@Url.Action("MyAdPosts", "HostAdPosts")" class="btn btn-outline-primary btn-sm w-100">Quản lý quảng cáo</a>
+                </div>
+            </div>
+        </div>
     </div>
     @if (notifications != null && notifications.Count > 0)
     {
@@ -88,6 +100,8 @@
     <div class="mt-4 mb-4 d-flex flex-wrap gap-2">
         <a href="@Url.Action("Create", "HostBuildings")" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Thêm tòa nhà mới</a>
         <a href="@Url.Action("Create", "HostRooms")" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Đăng phòng mới</a>
+        <a href="@Url.Action("Create", "HostAdPosts")" class="btn btn-primary"><i class="fa-solid fa-bullhorn me-1"></i> Đăng quảng cáo mới</a>
+        <a href="@Url.Action("MyAdPosts", "HostAdPosts")" class="btn btn-outline-primary"><i class="fa-solid fa-list me-1"></i> Danh sách quảng cáo</a>
     </div>
     <div class="row g-4">
         <div class="col-md-6">

@@ -391,4 +391,14 @@ function showQr(pkg) {
     }
     document.querySelector('#qrSection img').src = qrImg;
 }
+// Tự động mở modal mua gói nếu có query ?buyPackage=1
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('buyPackage') === '1') {
+        setTimeout(function() {
+            var modal = new bootstrap.Modal(document.getElementById('buyPackageModal'));
+            modal.show();
+        }, 300);
+    }
+})();
 </script>

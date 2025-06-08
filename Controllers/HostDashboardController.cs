@@ -55,6 +55,9 @@ namespace RentalService.Controllers
                     .Where(n => n.UserId.ToString() == userId)
                     .OrderByDescending(n => n.CreatedAt)
                     .ToListAsync();
+                // Thêm thống kê số lượng quảng cáo của chủ trọ
+                var myAdPostsCount = await _context.AdPosts.CountAsync(a => a.HostId == userId);
+                ViewBag.MyAdPostsCount = myAdPostsCount;
                 ViewBag.Buildings = buildings;
                 ViewBag.Rooms = rooms;
                 ViewBag.Appointments = appointments;
