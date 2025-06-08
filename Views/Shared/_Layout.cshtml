@@ -122,6 +122,15 @@
                 </div>
             </div>
         </nav>
+        <!-- Search Bar with Animation -->
+        <div class="search-bar-animated-container">
+            <form id="globalSearchForm" class="search-bar-animated" autocomplete="off" action="/Home/Index" method="get">
+                <input type="text" id="globalSearchInput" name="search" class="search-bar-input" placeholder="Tìm kiếm quảng cáo, phòng trọ..." aria-label="Tìm kiếm" />
+                <button type="submit" class="search-bar-btn"><i class="fa fa-search"></i></button>
+                <div class="search-bar-suggestions" id="searchSuggestions" style="display:none;"></div>
+            </form>
+        </div>
+        <!-- End Search Bar -->
         <div class="page-header text-center">
             @* <h1 class="fw-bold mb-0">@ViewData["Title"]</h1> *@
         </div>

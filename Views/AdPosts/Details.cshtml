@@ -106,11 +106,14 @@
                     <img src="/images/no-image.png" class="img-fluid rounded shadow-sm" style="max-height:340px;object-fit:cover;width:100%;" alt="No Image" />
                 }
             </div>
-            <div class="card p-3 mb-3">
-                <div><b>Gói dịch vụ:</b> @Model.PackageType.ToVietnameseLabel()</div>
-                <div><b>Ngày tạo:</b> @Model.CreatedAt.ToString("dd/MM/yyyy")</div>
-                <div><b>Trạng thái:</b> @(Model.IsActive ? "Đang hiển thị" : "Đang chờ duyệt")</div>
-            </div>
+            @if ((User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.HostId || User.FindFirst("role")?.Value == "admin")))
+            {
+                <div class="card p-3 mb-3">
+                    <div><b>Gói dịch vụ:</b> @Model.PackageType.ToVietnameseLabel()</div>
+                    <div><b>Ngày tạo:</b> @Model.CreatedAt.ToString("dd/MM/yyyy")</div>
+                    <div><b>Trạng thái:</b> @(Model.IsActive ? "Đang hiển thị" : "Đang chờ duyệt")</div>
+                </div>
+            }
             @if (Model.Rooms != null && Model.Rooms.Any() && Model.Rooms.FirstOrDefault()?.Building != null)
             {
                 var building = Model.Rooms.FirstOrDefault().Building;

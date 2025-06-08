@@ -68,5 +68,21 @@ namespace RentalService.Controllers
             }
             return NotFound();
         }
+
+        // GET: /AdPosts/SearchSuggestions?q=...
+        [HttpGet]
+        public async Task<IActionResult> SearchSuggestions(string q)
+        {
+            if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
+                return Json(new List<object>());
+            var ads = await _context.AdPosts
+                .Where(a => a.IsActive && (a.Title.Contains(q) || a.Content.Contains(q)))
+                .OrderByDescending(a => a.PackageType)
+                .ThenByDescending(a => a.CreatedAt)
+                .Take(7)
+                .Select(a => new { id = a.Id, content = a.Title })
+                .ToListAsync();
+            return Json(ads);
+        }
     }
 }

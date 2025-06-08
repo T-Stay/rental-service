@@ -1,21 +1,13 @@
-﻿@model IEnumerable<RentalService.Models.AdPost>
+@model IEnumerable<RentalService.Models.AdPost>
 @{
     ViewData["Title"] = "Trang Chủ";
     var kimCuongAds = Model?.Where(ad => ad.PackageType == RentalService.Models.AdPackageType.KimCuong).ToList() ?? new List<RentalService.Models.AdPost>();
     var vangAds = Model?.Where(ad => ad.PackageType == RentalService.Models.AdPackageType.Vang).ToList() ?? new List<RentalService.Models.AdPost>();
     var bacAds = Model?.Where(ad => ad.PackageType == RentalService.Models.AdPackageType.Bac).ToList() ?? new List<RentalService.Models.AdPost>();
     var dongAds = Model?.Where(ad => ad.PackageType == RentalService.Models.AdPackageType.Dong || ad.PackageType == RentalService.Models.AdPackageType.Free).ToList() ?? new List<RentalService.Models.AdPost>();
-    var search = ViewBag.Search as string;
-}
-@if (!string.IsNullOrWhiteSpace(search))
-{
-    <div class="alert alert-info mb-4 d-flex align-items-center justify-content-between flex-wrap">
-        <span>Đang lọc các quảng cáo liên quan đến: <b>@search</b></span>
-        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-sm ms-3 mt-2 mt-md-0">Bỏ lọc</a>
-    </div>
 }
 <div class="container mt-4">
-    <h2 class="mb-4">Bài viết đề xuất</h2>
+    <h2 class="mb-4">Bài viết nổi bật</h2>
     <!-- Kim cương: mỗi ad 1 row, col-12 -->
     <div class="mb-5">
         @foreach (var ad in kimCuongAds)
@@ -97,6 +89,7 @@
     </div>
     <!-- Vàng: mỗi row 2 col-md-6 (hoặc col-md-5 để rộng hơn) -->
     <div class="mb-5">
+        <div class="row mb-2"><div class="col"><h4>Gói vàng</h4></div></div>
         @for (int i = 0; i < vangAds.Count; i += 2)
         {
             <div class="row mb-4">
@@ -158,6 +151,7 @@
     </div>
     <!-- Bạc: mỗi row 3 col-md-4 -->
     <div class="mb-5">
+        <div class="row mb-2"><div class="col"><h4>Gói bạc</h4></div></div>
         @for (int i = 0; i < bacAds.Count; i += 3)
         {
             <div class="row mb-4">
@@ -219,6 +213,7 @@
     </div>
     <!-- Đồng: mỗi row 3 col-md-4 -->
     <div class="mb-5">
+        <div class="row mb-2"><div class="col"><h4>Gói đồng</h4></div></div>
         @for (int i = 0; i < dongAds.Count; i += 3)
         {
             <div class="row mb-4">

@@ -19,7 +19,7 @@ public class HomeController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string? search)
     {
         // if authenticated, redirect to the appropriate dashboard
         try
@@ -37,16 +37,35 @@ public class HomeController : Controller
             _logger.LogError(ex, "Error during authentication check in HomeController.Index");
             // Handle the error as needed, e.g., show an error page or log it
         }
-        // Lấy danh sách bài quảng cáo (chỉ bài active, sắp xếp theo gói và thứ tự ưu tiên)
+        var query = _context.AdPosts
+            .Include(a => a.UserAdPackage)
+            .Include(a => a.Rooms)
+            .Where(a => a.IsActive && a.UserAdPackage.IsActive && a.UserAdPackage.ExpiryDate > DateTime.Now);
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(a => a.Title.Contains(search) || a.Content.Contains(search));
+            ViewBag.Search = search;
+        }
+        var ads = await query
+            .OrderByDescending(a => a.PackageType)
+            .ThenBy(a => a.PriorityOrder)
+            .Take(12)
+            .ToListAsync();
+        return View(ads);
+    }
+
+    // Demo layout: render Index2.cshtml
+    public async Task<IActionResult> Index2()
+    {
         var ads = await _context.AdPosts
             .Include(a => a.UserAdPackage)
             .Include(a => a.Rooms)
             .Where(a => a.IsActive && a.UserAdPackage.IsActive && a.UserAdPackage.ExpiryDate > DateTime.Now)
             .OrderByDescending(a => a.PackageType)
             .ThenBy(a => a.PriorityOrder)
-            .Take(12)
+            .Take(20)
             .ToListAsync();
-        return View(ads);
+        return View("Index2", ads);
     }
 
     [Authorize(Roles = "customer")]

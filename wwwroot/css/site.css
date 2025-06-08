@@ -224,3 +224,88 @@ body {
     word-break: break-word;
     white-space: normal;
 }
+
+/* Animated Search Bar Styles */
+.search-bar-animated-container {
+  width: 100%;
+  background: #f8fafc;
+  padding: 1.2rem 0 0.5rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(30, 60, 120, 0.04);
+  z-index: 10;
+}
+.search-bar-animated {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 2rem;
+  box-shadow: 0 2px 12px rgba(30, 60, 120, 0.08);
+  transition: box-shadow 0.3s;
+}
+.search-bar-animated:focus-within {
+  box-shadow: 0 4px 24px rgba(30, 60, 120, 0.18);
+}
+.search-bar-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0.9rem 1.2rem;
+  font-size: 1.1rem;
+  border-radius: 2rem 0 0 2rem;
+  transition: background 0.2s;
+}
+.search-bar-input:focus {
+  background: #f0f6ff;
+}
+.search-bar-btn {
+  border: none;
+  background: var(--main-blue-gradient);
+  color: #fff;
+  border-radius: 0 2rem 2rem 0;
+  padding: 0.9rem 1.4rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(30, 60, 120, 0.08);
+}
+.search-bar-btn:hover, .search-bar-btn:focus {
+  background: #0077cc;
+}
+.search-bar-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 0 0 1rem 1rem;
+  box-shadow: 0 4px 16px rgba(30, 60, 120, 0.12);
+  z-index: 100;
+  max-height: 260px;
+  overflow-y: auto;
+  animation: fadeInUp 0.25s cubic-bezier(.4,1.4,.6,1) both;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.search-bar-suggestion-item {
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  transition: background 0.18s;
+  font-size: 1rem;
+}
+.search-bar-suggestion-item:hover, .search-bar-suggestion-item.active {
+  background: #f0f6ff;
+  color: var(--main-blue);
+}
+.search-suggest-highlight {
+  font-weight: bold;
+  color: #1b6ec2;
+  background: none;
+}
