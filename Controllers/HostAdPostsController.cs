@@ -7,6 +7,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using RentalService.Services;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace RentalService.Controllers
 {
@@ -14,9 +17,11 @@ namespace RentalService.Controllers
     public class HostAdPostsController : Controller
     {
         private readonly AppDbContext _context;
-        public HostAdPostsController(AppDbContext context)
+        private readonly S3Service _s3Service;
+        public HostAdPostsController(AppDbContext context, S3Service s3Service)
         {
             _context = context;
+            _s3Service = s3Service;
         }
 
         // GET: /HostAdPosts/Create
@@ -39,7 +44,12 @@ namespace RentalService.Controllers
         // POST: /HostAdPosts/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AdPost model, Guid selectedPackageId, List<Guid> selectedRoomIds)
+        public async Task<IActionResult> Create(
+            string title,
+            string content,
+            Guid selectedPackageId,
+            List<Guid> selectedRoomIds,
+            List<IFormFile> images)
         {
             var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
             var package = await _context.UserAdPackages.FirstOrDefaultAsync(p => p.Id == selectedPackageId && p.UserId == userId && p.IsActive && p.RemainingPosts > 0 && p.ExpiryDate > DateTime.Now);
@@ -47,21 +57,62 @@ namespace RentalService.Controllers
             {
                 ModelState.AddModelError("selectedPackageId", "Gói dịch vụ không hợp lệ hoặc đã hết lượt đăng.");
             }
-            if (!selectedRoomIds.Any())
+            if (selectedRoomIds == null || !selectedRoomIds.Any())
             {
                 ModelState.AddModelError("selectedRoomIds", "Vui lòng chọn ít nhất một phòng để quảng cáo.");
             }
             if (ModelState.IsValid)
             {
-                model.Id = Guid.NewGuid();
-                model.HostId = userId ?? string.Empty;
-                model.UserAdPackageId = package != null ? package.Id : Guid.Empty;
-                model.PackageType = package != null ? package.PackageType : Models.AdPackageType.Free;
-                model.CreatedAt = DateTime.Now;
-                model.IsActive = false; // Chờ duyệt
-                model.ViewCount = 0;
-                model.Rooms = await _context.Rooms.Where(r => selectedRoomIds.Contains(r.Id)).ToListAsync();
-                _context.AdPosts.Add(model);
+                var ad = new AdPost
+                {
+                    Id = Guid.NewGuid(),
+                    Title = title,
+                    Content = content,
+                    HostId = userId ?? string.Empty,
+                    UserAdPackageId = package?.Id ?? Guid.Empty,
+                    PackageType = package?.PackageType ?? AdPackageType.Free,
+                    CreatedAt = DateTime.Now,
+                    IsActive = false,
+                    ViewCount = 0,
+                    PriorityOrder = 0
+                };
+                // Badge theo gói
+                var pkgType = package?.PackageType ?? AdPackageType.Free;
+                switch (pkgType)
+                {
+                    case AdPackageType.KimCuong:
+                        ad.Badge = "Vip Kim Cương";
+                        break;
+                    case AdPackageType.Vang:
+                        ad.Badge = "Vip Vàng";
+                        break;
+                    case AdPackageType.Bac:
+                        ad.Badge = "Vip Bạc";
+                        break;
+                    default:
+                        ad.Badge = string.Empty;
+                        break;
+                }
+                // Xử lý upload ảnh lên S3
+                var imageUrls = new List<string>();
+                if (images != null)
+                {
+                    foreach (var file in images)
+                    {
+                        if (file.Length > 0)
+                        {
+                            var fileName = $"adposts/{ad.Id}/{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+                            using (var stream = file.OpenReadStream())
+                            {
+                                var url = await _s3Service.UploadFileAsync(stream, fileName, file.ContentType);
+                                imageUrls.Add(url);
+                            }
+                        }
+                    }
+                }
+                ad.ImageUrls = string.Join(",", imageUrls);
+                ad.Rooms = selectedRoomIds != null ? await _context.Rooms.Where(r => selectedRoomIds.Contains(r.Id)).ToListAsync() : new List<Room>();
+                _context.AdPosts.Add(ad);
                 if (package != null) package.RemainingPosts--;
                 await _context.SaveChangesAsync();
                 return RedirectToAction("MyAdPosts");
@@ -69,15 +120,19 @@ namespace RentalService.Controllers
             // Reload lại packages và rooms nếu có lỗi
             ViewBag.Packages = await _context.UserAdPackages.Where(p => p.UserId == userId && p.IsActive && p.RemainingPosts > 0 && p.ExpiryDate > DateTime.Now).ToListAsync();
             ViewBag.Rooms = await _context.Rooms.Include(r => r.Building).Where(r => r.Building != null && r.Building.HostId.ToString() == userId).ToListAsync();
-            return View(model);
+            return View();
         }
 
         // GET: /HostAdPosts/MyAdPosts
         public async Task<IActionResult> MyAdPosts()
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            var adPosts = await _context.AdPosts.Include(a => a.Rooms).Where(a => a.HostId == userId).ToListAsync();
-            return View(adPosts);
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var ads = await _context.AdPosts
+                .Include(a => a.Rooms)
+                .Where(a => a.HostId == userId)
+                .OrderByDescending(a => a.CreatedAt)
+                .ToListAsync();
+            return View(ads);
         }
     }
 }

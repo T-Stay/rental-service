@@ -27,10 +27,15 @@ namespace RentalService.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = await _context.Users
-    .Include(u => u.ContactInformations)
-    .Include(u => u.UserAdPackages)
-    .FirstOrDefaultAsync(u => u.Id.ToString() == userId);
+                .Include(u => u.ContactInformations)
+                .FirstOrDefaultAsync(u => u.Id.ToString() == userId);
             if (user == null) return NotFound();
+            // Lấy UserAdPackages trực tiếp từ context theo UserId
+            var userAdPackages = await _context.UserAdPackages
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.PurchaseDate)
+                .ToListAsync();
+            user.UserAdPackages = userAdPackages;
             return View(user);
         }
 

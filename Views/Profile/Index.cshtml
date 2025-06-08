@@ -337,7 +337,7 @@ onContactTypeChange();
                         @foreach (var pkg in Model.UserAdPackages.OrderByDescending(p => p.PurchaseDate))
                         {
                             <tr>
-                                <td>@pkg.PackageType</td>
+                                <td>@RentalService.Models.AdPackageTypeExtensions.ToVietnameseLabel(pkg.PackageType)</td>
                                 <td>@pkg.PurchaseDate.ToString("dd/MM/yyyy")</td>
                                 <td>@pkg.ExpiryDate.ToString("dd/MM/yyyy")</td>
                                 <td>@pkg.RemainingPosts</td>

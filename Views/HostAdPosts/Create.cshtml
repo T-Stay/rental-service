@@ -1,8 +1,9 @@
-@model RentalService.Models.AdPost
 @{
     ViewData["Title"] = "Đăng bài quảng cáo";
-    var packages = ViewBag.Packages as List<RentalService.Models.UserAdPackage> ?? new
-    List<RentalService.Models.UserAdPackage>();
+    var packages = (ViewBag.Packages as List<RentalService.Models.UserAdPackage> ?? new List<RentalService.Models.UserAdPackage>())
+        .Where(p => p.IsActive && p.RemainingPosts > 0 && p.ExpiryDate > DateTime.Now)
+        .OrderByDescending(p => p.ExpiryDate)
+        .ToList();
     var rooms = ViewBag.Rooms as List<RentalService.Models.Room> ?? new List<RentalService.Models.Room>();
     var buildings = rooms.Select(r => r.Building).Where(b => b != null).Distinct().ToList();
     bool noPackage = !packages.Any();
@@ -12,8 +13,19 @@
     @if (noPackage)
     {
         <div class="alert alert-warning">
-            Bạn chưa có gói dịch vụ nào để đăng bài quảng cáo. <a href="/Profile?buyPackage=1" class="alert-link">Mua gói
-                ngay</a> để sử dụng tính năng này.
+            Bạn chưa có gói dịch vụ nào để đăng bài quảng cáo. <a href="/Profile?buyPackage=1" class="alert-link">Mua gói ngay</a> để sử dụng tính năng này.<br />
+            <span class="text-muted small">Chỉ các gói còn lượt đăng, còn hạn sử dụng và đang hoạt động mới hiển thị ở đây.</span>
+        </div>
+    }
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
         </div>
     }
     <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4" id="adPostForm">
@@ -24,29 +36,24 @@
                     <option value="">-- Chọn gói --</option>
                     @foreach (var pkg in packages)
                     {
-                        <option value="@pkg.Id">@pkg.PackageType - Còn @pkg.RemainingPosts bài, hết hạn:
-                            @pkg.ExpiryDate.ToShortDateString()</option>
+                        <option value="@pkg.Id">@RentalService.Models.AdPackageTypeExtensions.ToVietnameseLabel(pkg.PackageType) - Còn @pkg.RemainingPosts bài, hết hạn: @pkg.ExpiryDate.ToShortDateString()</option>
                     }
                 </select>
                 <span class="text-danger">@Html.ValidationMessage("selectedPackageId")</span>
+                <div class="form-text text-muted">Chỉ hiển thị các gói còn lượt đăng, còn hạn sử dụng và đang hoạt động. Nếu gói của bạn không xuất hiện, hãy kiểm tra trạng thái hoặc hạn sử dụng trong <a href="/Profile">trang hồ sơ</a>.</div>
             </div>
             <div class="mb-3">
-                <label asp-for="Title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
-                <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề bài quảng cáo" required
-                    id="adTitle" />
-                <span asp-validation-for="Title" class="text-danger"></span>
+                <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                <input name="title" class="form-control" placeholder="Nhập tiêu đề bài quảng cáo" required id="adTitle" />
             </div>
             <div class="mb-3">
-                <label asp-for="Content" class="form-label">Nội dung <span class="text-danger">*</span></label>
-                <textarea asp-for="Content" class="form-control" rows="4" placeholder="Nhập nội dung quảng cáo" required
-                    id="adContent"></textarea>
-                <span asp-validation-for="Content" class="text-danger"></span>
+                <label class="form-label">Nội dung <span class="text-danger">*</span></label>
+                <textarea name="content" class="form-control" rows="4" placeholder="Nhập nội dung quảng cáo" required id="adContent"></textarea>
             </div>
             <div class="mb-3">
                 <label class="form-label">Ảnh quảng cáo</label>
                 <div id="ad-image-preview-list" class="mb-2 d-flex flex-wrap align-items-center"></div>
-                <input type="file" name="images" id="ad-image-input" multiple class="form-control mt-2"
-                    accept="image/*" />
+                <input type="file" name="images" id="ad-image-input" multiple class="form-control mt-2" accept="image/*" />
                 <div class="form-text">Có thể chọn nhiều ảnh, tối đa 5 ảnh.</div>
             </div>
             <div class="mb-3">
@@ -106,8 +113,8 @@
                     </tbody>
                 </table>
                 <div id="room-pagination"></div>
-                <span class="text-danger">@Html.ValidationMessage("selectedRoomIds")</span>
             </div>
+            <input type="hidden" name="HostId" value="@User.FindFirst("sub")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" />
             <div class="d-flex align-items-center mt-4">
                 <button type="submit" class="btn btn-success me-2" id="submitBtn" @(noPackage ? "disabled=\"disabled\""
                                                                                                       : "")>Đăng bài</button>
@@ -120,6 +127,30 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            if (document.getElementById('adContent')) {
+                ClassicEditor.create(document.getElementById('adContent'), {
+                    toolbar: [
+                        'heading', '|', 'bold', 'italic', 'underline', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo'
+                    ]
+                }).then(editor => {
+                    // Tăng chiều cao mặc định
+                    editor.ui.view.editable.element.style.minHeight = '220px';
+                    editor.ui.view.editable.element.style.height = '320px';
+                    editor.ui.view.editable.element.style.resize = 'vertical';
+                }).catch(error => { console.error(error); });
+            }
+        });
+    </script>
+    <style>
+        .ck-editor__editable {
+            min-height: 220px !important;
+            height: 320px !important;
+            resize: vertical !important;
+        }
+    </style>
     <script>
         // Preview images before upload (tối đa 5 ảnh)
         const adImageInput = document.getElementById('ad-image-input');

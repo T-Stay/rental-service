@@ -20,9 +20,25 @@ namespace RentalService.Controllers
         {
             var ad = await _context.AdPosts
                 .Include(a => a.Rooms)
+                    .ThenInclude(r => r.RoomImages)
+                .Include(a => a.Rooms)
+                    .ThenInclude(r => r.Building)
                 .Include(a => a.UserAdPackage)
-                .FirstOrDefaultAsync(a => a.Id == id && a.IsActive);
-            if (ad == null) return NotFound();
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (ad == null)
+                return NotFound();
+
+            string? userId = null;
+            if (User?.Identity != null && User.Identity.IsAuthenticated)
+            {
+                userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            }
+            var isOwner = userId != null && ad.HostId == userId;
+            if (!ad.IsActive && !isOwner)
+            {
+                // Chỉ chủ bài viết mới xem được bài chưa duyệt
+                return NotFound();
+            }
             return View(ad);
         }
     }
