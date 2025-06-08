@@ -215,4 +215,180 @@ onContactTypeChange();
 </script>
         </div>
     </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="mb-3 text-primary"><i class="fa fa-gift me-2"></i>Các gói dịch vụ đã mua</h5>
+            <a class="btn btn-outline-success mb-3" href="#" data-bs-toggle="modal" data-bs-target="#buyPackageModal">
+                <i class="fa fa-plus"></i> Mua gói dịch vụ mới
+            </a>
+            <!-- Modal mua gói dịch vụ -->
+            <div class="modal fade" id="buyPackageModal" tabindex="-1" aria-labelledby="buyPackageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="buyPackageModalLabel">Chọn gói dịch vụ</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-4 justify-content-center">
+                                <!-- Gói Đồng -->
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-primary shadow-sm">
+                                        <div class="card-header bg-primary text-white text-center fw-bold">Gói Đồng</div>
+                                        <div class="card-body d-flex flex-column h-100">
+                                            <div class="display-6 fw-bold text-primary mb-2 text-center">99.000đ</div>
+                                            <ul class="list-unstyled mb-4 ps-3 flex-grow-1" style="text-align:left;">
+                                                <li><i class="fa fa-check text-success me-2"></i>Đăng 3 bài quảng cáo</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Ưu tiên thấp</li>
+                                                <li><i class="fa fa-times text-danger me-2"></i>Badge nổi bật</li>
+                                                <li><i class="fa fa-times text-danger me-2"></i>Bump bài miễn phí</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Hạn sử dụng: 30 ngày</li>
+                                            </ul>
+                                            <div class="d-grid mt-auto"><button class="btn btn-outline-primary" onclick="showQr('dong')">Chọn gói này</button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Gói Bạc -->
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-secondary shadow-sm">
+                                        <div class="card-header bg-secondary text-white text-center fw-bold">Gói Bạc</div>
+                                        <div class="card-body d-flex flex-column h-100">
+                                            <div class="display-6 fw-bold text-secondary mb-2 text-center">199.000đ</div>
+                                            <ul class="list-unstyled mb-4 ps-3 flex-grow-1" style="text-align:left;">
+                                                <li><i class="fa fa-check text-success me-2"></i>Đăng 7 bài quảng cáo</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Ưu tiên trung bình</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Badge "Bạc" nổi bật</li>
+                                                <li><i class="fa fa-times text-danger me-2"></i>Bump bài miễn phí</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Hạn sử dụng: 45 ngày</li>
+                                            </ul>
+                                            <div class="d-grid mt-auto"><button class="btn btn-outline-secondary" onclick="showQr('bac')">Chọn gói này</button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Gói Vàng -->
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-warning shadow-sm">
+                                        <div class="card-header bg-warning text-dark text-center fw-bold">Gói Vàng</div>
+                                        <div class="card-body d-flex flex-column h-100">
+                                            <div class="display-6 fw-bold text-warning mb-2 text-center">399.000đ</div>
+                                            <ul class="list-unstyled mb-4 ps-3 flex-grow-1" style="text-align:left;">
+                                                <li><i class="fa fa-check text-success me-2"></i>Đăng 15 bài quảng cáo</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Ưu tiên cao</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Badge "Vàng" nổi bật</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Bump bài miễn phí 2 lần</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Hạn sử dụng: 60 ngày</li>
+                                            </ul>
+                                            <div class="d-grid mt-auto"><button class="btn btn-outline-warning text-dark" onclick="showQr('vang')">Chọn gói này</button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Gói Kim Cương -->
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-info shadow-sm">
+                                        <div class="card-header bg-info text-white text-center fw-bold">Gói Kim Cương</div>
+                                        <div class="card-body d-flex flex-column h-100">
+                                            <div class="display-6 fw-bold text-info mb-2 text-center">999.000đ</div>
+                                            <ul class="list-unstyled mb-4 ps-3 flex-grow-1" style="text-align:left;">
+                                                <li><i class="fa fa-check text-success me-2"></i>Đăng 40 bài quảng cáo</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Ưu tiên cao nhất</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Badge "Kim Cương" nổi bật</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Bump bài miễn phí không giới hạn</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Hạn sử dụng: 120 ngày</li>
+                                                <li><i class="fa fa-check text-success me-2"></i>Hỗ trợ CSKH ưu tiên</li>
+                                            </ul>
+                                            <div class="d-grid mt-auto"><button class="btn btn-outline-info text-dark" onclick="showQr('kimcuong')">Chọn gói này</button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="qrSection" class="text-center mt-4" style="display:none;">
+                                <h5>
+                                    Quét mã QR để thanh toán gói 
+                                    <span id="qrPackageName" class="fw-bold px-2 py-1 rounded" style="font-size:1.1em;">
+                                        <!-- Tên gói sẽ được cập nhật bằng JS, màu sắc sẽ cập nhật động -->
+                                    </span>:
+                                </h5>
+                                <img src="/images/qr.png" alt="QR code demo" style="max-width:220px;" class="mb-2" />
+                                <div class="alert alert-info mt-3">
+                                    Sau khi thanh toán, hệ thống sẽ tự động kích hoạt gói khi nhận được thông báo từ ngân hàng.<br />
+                                    Việc này có thể kéo dài từ 5 đến 10 phút. Quý khách vui lòng chờ đợi.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (Model.UserAdPackages != null && Model.UserAdPackages.Any())
+            {
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Loại gói</th>
+                            <th>Ngày mua</th>
+                            <th>Ngày hết hạn</th>
+                            <th>Số lượt còn lại</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pkg in Model.UserAdPackages.OrderByDescending(p => p.PurchaseDate))
+                        {
+                            <tr>
+                                <td>@pkg.PackageType</td>
+                                <td>@pkg.PurchaseDate.ToString("dd/MM/yyyy")</td>
+                                <td>@pkg.ExpiryDate.ToString("dd/MM/yyyy")</td>
+                                <td>@pkg.RemainingPosts</td>
+                                <td>
+                                    @if (!pkg.IsActive && pkg.ExpiryDate > DateTime.Now)
+                                    {
+                                        <span class="badge bg-warning text-dark">Chưa thanh toán</span>
+                                    }
+                                    else if (pkg.ExpiryDate < DateTime.Now)
+                                    {
+                                        <span class="badge bg-secondary">Hết hạn</span>
+                                    }
+                                    else if (pkg.IsActive)
+                                    {
+                                        <span class="badge bg-success">Đang hoạt động</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="text-muted">Bạn chưa có gói dịch vụ nào.</div>
+            }
+        </div>
+    </div>
 </div>
+<script>
+function showQr(pkg) {
+    let name = pkg === 'dong' ? 'Đồng' : (pkg === 'bac' ? 'Bạc' : (pkg === 'vang' ? 'Vàng' : 'Kim Cương'));
+    let qrImg = pkg === 'dong' ? '/images/qr1.png' : (pkg === 'bac' ? '/images/qr2.png' : (pkg === 'vang' ? '/images/qr3.png' : '/images/qr4.png'));
+    document.getElementById('qrSection').style.display = 'block';
+    let nameSpan = document.getElementById('qrPackageName');
+    nameSpan.innerText = name;
+    // Đặt màu sắc nổi bật cho từng gói
+    nameSpan.className = 'fw-bold px-2 py-1 rounded';
+    if(pkg === 'dong') {
+        nameSpan.style.background = '#0d6efd'; // primary
+        nameSpan.style.color = '#fff';
+    } else if(pkg === 'bac') {
+        nameSpan.style.background = '#6c757d'; // secondary
+        nameSpan.style.color = '#fff';
+    } else if(pkg === 'vang') {
+        nameSpan.style.background = '#ffc107'; // warning
+        nameSpan.style.color = '#212529'; // text-dark
+    } else if(pkg === 'kimcuong') {
+        nameSpan.style.background = '#0dcaf0'; // info
+        nameSpan.style.color = '#fff';
+    }
+    document.querySelector('#qrSection img').src = qrImg;
+}
+</script>

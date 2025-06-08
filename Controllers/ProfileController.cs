@@ -26,7 +26,10 @@ namespace RentalService.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var user = await _context.Users.Include(u => u.ContactInformations).FirstOrDefaultAsync(u => u.Id.ToString() == userId);
+            var user = await _context.Users
+    .Include(u => u.ContactInformations)
+    .Include(u => u.UserAdPackages)
+    .FirstOrDefaultAsync(u => u.Id.ToString() == userId);
             if (user == null) return NotFound();
             return View(user);
         }

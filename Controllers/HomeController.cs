@@ -19,7 +19,7 @@ public class HomeController : Controller
         _context = context;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         // if authenticated, redirect to the appropriate dashboard
         try
@@ -37,7 +37,15 @@ public class HomeController : Controller
             _logger.LogError(ex, "Error during authentication check in HomeController.Index");
             // Handle the error as needed, e.g., show an error page or log it
         }
-        return View();
+        // Lấy danh sách bài quảng cáo (chỉ bài active, sắp xếp theo gói và thứ tự ưu tiên)
+        var ads = await _context.AdPosts
+            .Include(a => a.UserAdPackage)
+            .Where(a => a.IsActive && a.UserAdPackage.IsActive && a.UserAdPackage.ExpiryDate > DateTime.Now)
+            .OrderByDescending(a => a.PackageType)
+            .ThenBy(a => a.PriorityOrder)
+            .Take(12)
+            .ToListAsync();
+        return View(ads);
     }
 
     [Authorize(Roles = "customer")]

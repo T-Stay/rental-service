@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Giới thiệu";
+}
+<div class="container mt-4">
+    <h2>Về Trọ Tốt</h2>
+    <p>Trang này cung cấp thông tin tổng quan về nền tảng, sứ mệnh và các tính năng nổi bật.</p>
+    <hr />
+    <div class="row mb-5">
+        <div class="col-md-7 d-flex flex-column justify-content-center align-items-start">
+            <h4 class="fw-bold">Tìm phòng, đặt lịch, quản lý dễ dàng</h4>
+            <p>Hệ thống giúp khách thuê và chủ trọ kết nối, quản lý phòng, đặt lịch xem phòng, trao đổi thông tin và thực hiện giao dịch một cách minh bạch, an toàn.</p>
+        </div>
+        <div class="col-md-5 text-center">
+            <img src="/images/about-hero.png" alt="About" class="img-fluid rounded shadow" />
+        </div>
+    </div>
+    <hr />
+    <div class="row text-center mb-5">
+        <div class="col-md-4 mb-4">
+            <p>Hàng trăm phòng, căn hộ phù hợp với mọi nhu cầu và ngân sách.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <i class="fa-solid fa-calendar-check fa-3x text-success mb-3"></i>
+            <h4 class="fw-bold">Đặt lịch xem phòng dễ dàng</h4>
+            <p>Chọn thời gian phù hợp, đặt lịch xem phòng chỉ với vài cú nhấp chuột.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <i class="fa-solid fa-user-shield fa-3x text-warning mb-3"></i>
+            <h4 class="fw-bold">An toàn & bảo mật</h4>
+            <p>Thông tin cá nhân và giao dịch của bạn luôn được bảo vệ tối đa.</p>
+        </div>
+    </div>
+    <hr />
+    <div class="row mb-5">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3">Bạn là khách thuê?</h5>
+                    <p class="card-text">Khám phá các phòng, đặt lịch xem và quản lý các yêu cầu đặt phòng của bạn một cách dễ dàng.</p>
+                    <a class="btn btn-outline-primary" asp-controller="Rooms" asp-action="Index">Tìm phòng ngay</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-3">Bạn là chủ nhà?</h5>
+                    <p class="card-text">Quản lý tòa nhà, phòng, lịch hẹn và các yêu cầu đặt phòng từ khách thuê một cách hiệu quả.</p>
+                    <a class="btn btn-outline-success" asp-controller="Account" asp-action="Register">Đăng ký làm chủ nhà</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

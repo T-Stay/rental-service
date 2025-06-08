@@ -20,6 +20,7 @@ namespace RentalService.Models
         public List<Report>? ReportsFiled { get; set; }
         public List<Report>? ReportsAgainst { get; set; }
         public List<ContactInformation>? ContactInformations { get; set; }
+        public virtual List<UserAdPackage>? UserAdPackages { get; set; }
     }
 
     public enum UserRole
