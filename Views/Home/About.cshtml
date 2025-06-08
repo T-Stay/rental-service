@@ -1,53 +1,127 @@
 @{
     ViewData["Title"] = "Giới thiệu";
+    var isCustomer = User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer");
 }
-<div class="container mt-4">
-    <h2>Về Trọ Tốt</h2>
-    <p>Trang này cung cấp thông tin tổng quan về nền tảng, sứ mệnh và các tính năng nổi bật.</p>
-    <hr />
-    <div class="row mb-5">
-        <div class="col-md-7 d-flex flex-column justify-content-center align-items-start">
-            <h4 class="fw-bold">Tìm phòng, đặt lịch, quản lý dễ dàng</h4>
-            <p>Hệ thống giúp khách thuê và chủ trọ kết nối, quản lý phòng, đặt lịch xem phòng, trao đổi thông tin và thực hiện giao dịch một cách minh bạch, an toàn.</p>
-        </div>
-        <div class="col-md-5 text-center">
-            <img src="/images/about-hero.png" alt="About" class="img-fluid rounded shadow" />
-        </div>
-    </div>
-    <hr />
-    <div class="row text-center mb-5">
-        <div class="col-md-4 mb-4">
-            <p>Hàng trăm phòng, căn hộ phù hợp với mọi nhu cầu và ngân sách.</p>
-        </div>
-        <div class="col-md-4 mb-4">
-            <i class="fa-solid fa-calendar-check fa-3x text-success mb-3"></i>
-            <h4 class="fw-bold">Đặt lịch xem phòng dễ dàng</h4>
-            <p>Chọn thời gian phù hợp, đặt lịch xem phòng chỉ với vài cú nhấp chuột.</p>
-        </div>
-        <div class="col-md-4 mb-4">
-            <i class="fa-solid fa-user-shield fa-3x text-warning mb-3"></i>
-            <h4 class="fw-bold">An toàn & bảo mật</h4>
-            <p>Thông tin cá nhân và giao dịch của bạn luôn được bảo vệ tối đa.</p>
+<div class="hero-section position-relative text-white" style="background: linear-gradient(rgba(27,110,194,0.7), rgba(0,119,204,0.7)), url('/images/hero-bg.jpg') center/cover no-repeat; min-height: 60vh; display: flex; align-items: center; border-radius: 1rem; overflow: hidden;">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <h1 class="display-3 fw-bold mb-3">Tìm Kiếm Chỗ Ở Hoàn Hảo Với <span class="text-warning">Trọ Tốt</span></h1>
+                <p class="lead mb-4">Đặt phòng, quản lý và khám phá các phòng và căn hộ độc đáo một cách dễ dàng. Trải nghiệm sự thoải mái, an toàn và tiện lợi - tất cả trong một nơi.</p>
+                <a href="@Url.Action("Index", "Rooms")" class="btn btn-warning btn-lg me-2 shadow"><i class="fa-solid fa-magnifying-glass"></i> Khám Phá Các Phòng</a>
+                <a href="@Url.Action("Register", "Account")" class="btn btn-outline-light btn-lg shadow"><i class="fa-solid fa-user-plus"></i> Tham Gia Ngay</a>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block text-end">
+                <img src="/images/hero-rooms.avif" alt="Rooms" class="img-fluid rounded shadow-lg" style="max-height: 320px;">
+            </div>
         </div>
     </div>
-    <hr />
-    <div class="row mb-5">
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-3">Bạn là khách thuê?</h5>
-                    <p class="card-text">Khám phá các phòng, đặt lịch xem và quản lý các yêu cầu đặt phòng của bạn một cách dễ dàng.</p>
-                    <a class="btn btn-outline-primary" asp-controller="Rooms" asp-action="Index">Tìm phòng ngay</a>
+</div>
+<div class="container my-5">
+    <div class="row text-center g-4">
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-bolt fa-2x text-primary mb-3"></i>
+                <h5 class="fw-bold mb-2">Đặt Ngay Lập Tức</h5>
+                <p class="text-muted">Đặt phòng yêu thích của bạn chỉ với vài cú nhấp chuột - nhanh chóng và không rắc rối.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-user-shield fa-2x text-success mb-3"></i>
+                <h5 class="fw-bold mb-2">Chủ Nhà Đã Được Xác Minh</h5>
+                <p class="text-muted">Ở lại với sự tự tin - các chủ nhà của chúng tôi đã được xác minh vì sự an toàn và yên tâm của bạn.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-wand-magic-sparkles fa-2x text-warning mb-3"></i>
+                <h5 class="fw-bold mb-2">Gợi Ý Thông Minh</h5>
+                <p class="text-muted">Nhận các gợi ý cá nhân hóa dựa trên sở thích và lịch sử của bạn.</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class=".clickable-card feature-card p-4 bg-white rounded shadow h-100">
+                <i class="fa-solid fa-lock fa-2x text-danger mb-3"></i>
+                <h5 class="fw-bold mb-2">Thanh Toán An Toàn</h5>
+                <p class="text-muted">Các giao dịch của bạn được bảo vệ bằng các biện pháp an ninh hàng đầu trong ngành.</p>
+            </div>
+        </div>
+    </div>
+</div>
+@if (isCustomer)
+{
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center">
+                        <h2 class="fw-bold text-primary mb-3"><i class="fa-solid fa-house-user me-2"></i>Chào Mừng Bạn Quay Lại Trọ Tốt!</h2>
+                        <p class="lead mb-4">Truy cập bảng điều khiển của bạn, quản lý đặt phòng và nhiều hơn nữa:</p>
+                        <div class="d-flex flex-wrap gap-3 justify-content-center mb-3">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-lg"><i class="fa-solid fa-gauge-high"></i> Bảng Điều Khiển</a>
+                            <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-success btn-lg"><i class="fa-solid fa-magnifying-glass"></i> Tìm Phòng</a>
+                            <a href="@Url.Action("Index", "Favorites")" class="btn btn-outline-danger btn-lg"><i class="fa-solid fa-heart"></i> Yêu Thích</a>
+                            <a href="@Url.Action("Index", "BookingRequests")" class="btn btn-outline-info btn-lg"><i class="fa-solid fa-envelope-open-text"></i> Đặt Phòng</a>
+                            <a href="@Url.Action("Index", "ViewAppointments")" class="btn btn-outline-warning btn-lg"><i class="fa-solid fa-calendar-check"></i> Lịch Hẹn</a>
+                        </div>
+                        <p class="text-muted">Cần trợ giúp? Truy cập <a href="#">trung tâm hỗ trợ</a> hoặc <a href="#">liên hệ với chúng tôi</a>.</p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-3">Bạn là chủ nhà?</h5>
-                    <p class="card-text">Quản lý tòa nhà, phòng, lịch hẹn và các yêu cầu đặt phòng từ khách thuê một cách hiệu quả.</p>
-                    <a class="btn btn-outline-success" asp-controller="Account" asp-action="Register">Đăng ký làm chủ nhà</a>
-                </div>
+    </div>
+}
+<div class="row mb-5">
+    <div class="col-md-7 d-flex flex-column justify-content-center align-items-start">
+        <h2 class="fw-bold mb-3">Chào mừng đến với Trọ Tốt!</h2>
+        <p class="lead mb-4">Nền tảng đặt phòng và quản lý căn hộ hiện đại, thuận tiện cho cả khách thuê và chủ nhà.</p>
+        <ul class="mb-4">
+            <li>Tìm kiếm và đặt phòng dễ dàng</li>
+            <li>Quản lý tòa nhà, phòng và lịch hẹn hiệu quả</li>
+            <li>Kết nối nhanh chóng giữa khách thuê và chủ nhà</li>
+        </ul>
+        <a class="btn btn-primary btn-lg px-4" asp-controller="Rooms" asp-action="Index">Khám phá các phòng</a>
+    </div>
+    <div class="col-md-5 text-center">
+        <img src="~/images/home-hero.avif" alt="Trọ Tốt" class="img-fluid rounded shadow" style="max-height:340px;object-fit:cover;" />
+    </div>
+</div>
+<hr />
+<div class="row text-center mb-5">
+    <div class="col-md-4 mb-4">
+        <i class="fa-solid fa-bed fa-3x text-primary mb-3"></i>
+        <h4 class="fw-bold">Đa dạng lựa chọn</h4>
+        <p>Hàng trăm phòng, căn hộ phù hợp với mọi nhu cầu và ngân sách.</p>
+    </div>
+    <div class="col-md-4 mb-4">
+        <i class="fa-solid fa-calendar-check fa-3x text-success mb-3"></i>
+        <h4 class="fw-bold">Đặt lịch xem phòng dễ dàng</h4>
+        <p>Chọn thời gian phù hợp, đặt lịch xem phòng chỉ với vài cú nhấp chuột.</p>
+    </div>
+    <div class="col-md-4 mb-4">
+        <i class="fa-solid fa-user-shield fa-3x text-warning mb-3"></i>
+        <h4 class="fw-bold">An toàn & bảo mật</h4>
+        <p>Thông tin cá nhân và giao dịch của bạn luôn được bảo vệ tối đa.</p>
+    </div>
+</div>
+<hr />
+<div class="row mb-5">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">Bạn là khách thuê?</h5>
+                <p class="card-text">Khám phá các phòng, đặt lịch xem và quản lý các yêu cầu đặt phòng của bạn một cách dễ dàng.</p>
+                <a class="btn btn-outline-primary" asp-controller="Rooms" asp-action="Index">Tìm phòng ngay</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title fw-bold mb-3">Bạn là chủ nhà?</h5>
+                <p class="card-text">Quản lý tòa nhà, phòng, lịch hẹn và các yêu cầu đặt phòng từ khách thuê một cách hiệu quả.</p>
+                <a class="btn btn-outline-success" asp-controller="Account" asp-action="Register">Đăng ký làm chủ nhà</a>
             </div>
         </div>
     </div>

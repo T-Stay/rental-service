@@ -29,6 +29,9 @@
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")" asp-controller="Rooms" asp-action="Index">Phòng</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "About" ? "active" : "")" asp-controller="Home" asp-action="About">Về chúng tôi</a>
+                        </li>
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
                             var role = User.FindFirst("role")?.Value ?? "user";

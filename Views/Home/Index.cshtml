@@ -14,7 +14,47 @@
         <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-sm ms-3 mt-2 mt-md-0">Bỏ lọc</a>
     </div>
 }
-<div class="container mt-4">
+<div class="container mt-1">
+    <!-- Hero Section -->
+    <div class="homepage-hero mb-5 p-4 rounded-4 shadow-sm bg-hero-light text-primary">
+        <div class="row align-items-center g-4">
+            <div class="col-12">
+                <h1 class="display-2 fw-bolder mb-3 text-primary text-center text-md-start"><i class="fa fa-home me-2"></i>Trọ Tốt</h1>
+                <p class="lead mb-4 text-secondary fs-3 fw-semibold text-center text-md-start">Nền tảng kết nối thuê & cho thuê phòng trọ, căn hộ, nhà nguyên căn nhanh chóng, uy tín và tiện lợi.</p>
+                <div class="row g-4 justify-content-center justify-content-md-start">
+                    <div class="col-12 col-md-4">
+                        <div class="cta-box p-5 rounded-4 bg-white border h-100 d-flex flex-column align-items-start">
+                            <div class="mb-2 fs-3 fw-bold text-primary"><i class="fa fa-search-location fa-xl text-info me-2"></i>Bạn là khách?</div>
+                            <div class="mb-3 fs-5 text-secondary">Khám phá hàng ngàn phòng trọ, căn hộ phù hợp nhu cầu của bạn.</div>
+                            <a href="@Url.Action("Index", "AdPosts")" class="btn btn-outline-primary btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-search me-1"></i>Tìm phòng ngay</a>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="cta-box p-5 rounded-4 bg-white border h-100 d-flex flex-column align-items-start">
+                            <div class="mb-2 fs-3 fw-bold text-success"><i class="fa fa-user-tie fa-xl text-success me-2"></i>Bạn là chủ nhà?</div>
+                            <div class="mb-3 fs-5 text-secondary">Đăng phòng cho thuê miễn phí, tiếp cận hàng ngàn khách thuê tiềm năng.</div>
+                            <a href="@Url.Action("Create", "AdPosts")" class="btn btn-outline-success btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-plus-circle me-1"></i>Đăng tin ngay</a>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <div class="cta-box p-5 rounded-4 bg-white border h-100 d-flex flex-column align-items-start">
+                            <div class="mb-2 fs-3 fw-bold text-info"><i class="fa fa-info-circle fa-xl text-info me-2"></i>Bạn muốn biết thêm?</div>
+                            <div class="mb-3 fs-5 text-secondary">Tìm hiểu về đội ngũ, sứ mệnh và giá trị của chúng tôi.</div>
+                            <a href="@Url.Action("About", "Home")" class="btn btn-outline-info btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-arrow-right me-1"></i>Về chúng tôi</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 flex-wrap mt-4 justify-content-center justify-content-md-start">
+                    <span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-4 py-2 fs-6"><i class="fa fa-bolt me-1"></i> Đăng phòng miễn phí</span>
+                    <span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-4 py-2 fs-6"><i class="fa fa-check-circle me-1"></i> Tin xác thực</span>
+                    <span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-4 py-2 fs-6"><i class="fa fa-users me-1"></i> Hỗ trợ 24/7</span>
+                    <span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-4 py-2 fs-6"><i class="fa fa-fire me-1"></i> Ưu đãi hấp dẫn</span>
+                    <span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-4 py-2 fs-6"><i class="fa fa-star me-1"></i> Chủ nhà uy tín</span>
+                    <span class="badge bg-info bg-opacity-10 text-primary fw-semibold px-4 py-2 fs-6"><i class="fa fa-shield-alt me-1"></i> Bảo mật thông tin</span>
+                </div>
+            </div>
+        </div>
+    </div>
     <h2 class="mb-4">Bài viết đề xuất</h2>
     <!-- Kim cương: mỗi ad 1 row, col-12 -->
     <div class="mb-5">
@@ -506,4 +546,8 @@
     .ad-card-link:active .card {
         filter: brightness(0.95);
     }
+    .homepage-hero .cta-box .fs-3 { font-size: 1.5rem !important; }
+    .homepage-hero .cta-box .fs-5 { font-size: 1.08rem !important; }
+    .homepage-hero h1.display-2 { font-size: 2.2rem !important; }
+    .homepage-hero p.lead { font-size: 1.15rem !important; }
 </style>
