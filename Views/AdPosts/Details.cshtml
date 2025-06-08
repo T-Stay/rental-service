@@ -4,8 +4,21 @@
     ViewData["Title"] = Model.Title;
 }
 <div class="container mt-4">
+    <form id="hiddenViewForm" method="post" style="display:none">
+        @Html.AntiForgeryToken()
+    </form>
     <div class="row">
         <div class="col-md-8 order-2 order-md-1">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                @if (User?.Identity != null && User.Identity.IsAuthenticated && User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.HostId)
+                {
+                    <a href="@Url.Action("MyAdPosts", "HostAdPosts")" class="btn btn-outline-primary"><i class="fa fa-list"></i> Quản lý quảng cáo của tôi</a>
+                }
+                else
+                {
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-info"><i class="fa fa-arrow-left"></i> Quay lại trang chủ</a>
+                }
+            </div>
             <div class="mb-3">
                 <h2>@Model.Title</h2>
                 <span class="badge bg-primary">@Model.Badge</span>
@@ -165,6 +178,19 @@
 </style>
 <link rel="stylesheet" href="/css/room-cards.css" />
 @section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tăng view count khi customer xem bài
+            var isCustomer = '@(User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))' === 'True';
+            if (isCustomer) {
+                var token = document.querySelector('#hiddenViewForm input[name="__RequestVerificationToken"]').value;
+                fetch('@Url.Action("IncreaseViewCount", "AdPosts", new { id = Model.Id })', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token }
+                });
+            }
+        });
+    </script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>

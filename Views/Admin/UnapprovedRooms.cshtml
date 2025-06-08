@@ -1,0 +1,40 @@
+@model IEnumerable<RentalService.Models.Room>
+@{
+    ViewData["Title"] = "Phòng/Trọ chưa duyệt";
+}
+<h2>Phòng/Trọ chưa duyệt</h2>
+<div class="row g-4">
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Không có phòng nào chờ duyệt.</div>
+}
+else
+{
+    foreach (var room in Model)
+    {
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="room-card h-100">
+                @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
+                {
+                    <img src="@room.RoomImages[0].ImageUrl" alt="Ảnh phòng" class="room-card-img" />
+                }
+                else
+                {
+                    <img src="/images/no-image.png" alt="Không có ảnh" class="room-card-img" />
+                }
+                <div class="room-card-body">
+                    <div class="room-card-title">@room.Name</div>
+                    <div class="room-card-location"><i class="fa-solid fa-building"></i> @room.Building?.Name</div>
+                    <div class="room-card-price">@room.Price.ToString("N0") ₫</div>
+                    <div class="room-card-status mb-2"><span class="badge bg-secondary">@room.Status</span></div>
+                    <div class="mb-2">@room.Description</div>
+                    <div class="mb-2">
+                        <a href="@Url.Action("Details", "Rooms", new { id = room.Id })" class="btn btn-outline-info btn-sm" target="_blank">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+</div>
+<a href="@Url.Action("Index")">Quay lại trang quản trị</a>

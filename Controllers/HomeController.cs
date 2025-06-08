@@ -28,7 +28,7 @@ public class HomeController : Controller
             {
                 if (User.IsInRole("admin"))
                 {
-                    return RedirectToAction("AdminDashboard", "Admin");
+                    return RedirectToAction("Index", "Admin");
                 }
             }
         }
@@ -40,6 +40,7 @@ public class HomeController : Controller
         // Lấy danh sách bài quảng cáo (chỉ bài active, sắp xếp theo gói và thứ tự ưu tiên)
         var ads = await _context.AdPosts
             .Include(a => a.UserAdPackage)
+            .Include(a => a.Rooms)
             .Where(a => a.IsActive && a.UserAdPackage.IsActive && a.UserAdPackage.ExpiryDate > DateTime.Now)
             .OrderByDescending(a => a.PackageType)
             .ThenBy(a => a.PriorityOrder)

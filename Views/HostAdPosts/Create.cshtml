@@ -28,7 +28,7 @@
             </ul>
         </div>
     }
-    <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4" id="adPostForm">
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="row g-4" id="adPostForm" novalidate>
         <div class="col-md-10 col-lg-8 mx-auto">
             <div class="mb-3">
                 <label class="form-label">Chọn gói dịch vụ <span class="text-danger">*</span></label>
@@ -129,14 +129,17 @@
     }
     <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
     <script>
+        // CKEditor: chỉ khởi tạo 1 lần, không lồng ghép nhiều lần
         document.addEventListener("DOMContentLoaded", function() {
-            if (document.getElementById('adContent')) {
-                ClassicEditor.create(document.getElementById('adContent'), {
+            var adContent = document.getElementById('adContent');
+            if (adContent && !adContent.classList.contains('ck-editor-initialized')) {
+                ClassicEditor.create(adContent, {
                     toolbar: [
                         'heading', '|', 'bold', 'italic', 'underline', 'link', 'bulletedList', 'numberedList', 'blockQuote', '|', 'undo', 'redo'
                     ]
                 }).then(editor => {
-                    // Tăng chiều cao mặc định
+                    window.CKEDITOR_INST = editor;
+                    adContent.classList.add('ck-editor-initialized');
                     editor.ui.view.editable.element.style.minHeight = '220px';
                     editor.ui.view.editable.element.style.height = '320px';
                     editor.ui.view.editable.element.style.resize = 'vertical';
@@ -296,12 +299,14 @@
         }
 
         // --- Sửa renderTable để gọi afterRenderTable ---
-        const _oldRenderTable = renderTable;
-        renderTable = function(page = 1) {
-            _oldRenderTable(page);
-            // Sau khi render lại trang, sync lại trạng thái checked từ selectedRoomIds
-            updateRoomCheckboxes();
-        };
+        // Đảm bảo renderTable luôn được định nghĩa trước khi override
+        if (typeof renderTable === 'function') {
+            const _oldRenderTable = renderTable;
+            renderTable = function(page = 1) {
+                _oldRenderTable(page);
+                updateRoomCheckboxes();
+            };
+        }
 
         // Khi submit form: tạo input hidden cho các id đã chọn
         const adPostForm = document.getElementById('adPostForm');
@@ -319,6 +324,25 @@
                 });
             });
         }
+    </script>
+    <script>
+        // CKEditor: fix lỗi required/validation khi submit
+        document.addEventListener("DOMContentLoaded", function() {
+            var form = document.getElementById('adPostForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    var editor = window.CKEDITOR_INST;
+                    var textarea = document.getElementById('adContent');
+                    if (editor && textarea) {
+                        textarea.value = editor.getData();
+                    }
+                    // Nếu textarea bị hidden (do CKEditor), bỏ required để tránh lỗi
+                    if (textarea && textarea.style.display === 'none') {
+                        textarea.required = false;
+                    }
+                });
+            }
+        });
     </script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {

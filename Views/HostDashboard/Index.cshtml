@@ -101,7 +101,10 @@
         <a href="@Url.Action("Create", "HostBuildings")" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Thêm tòa nhà mới</a>
         <a href="@Url.Action("Create", "HostRooms")" class="btn btn-success"><i class="fa-solid fa-plus me-1"></i> Đăng phòng mới</a>
         <a href="@Url.Action("Create", "HostAdPosts")" class="btn btn-primary"><i class="fa-solid fa-bullhorn me-1"></i> Đăng quảng cáo mới</a>
-        <a href="@Url.Action("MyAdPosts", "HostAdPosts")" class="btn btn-outline-primary"><i class="fa-solid fa-list me-1"></i> Danh sách quảng cáo</a>
+        @if (User.IsInRole("admin"))
+        {
+            <a href="@Url.Action("AdPostsToApprove", "Admin")" class="btn btn-warning"><i class="fa-solid fa-bullhorn me-1"></i> Duyệt bài quảng cáo</a>
+        }
     </div>
     <div class="row g-4">
         <div class="col-md-6">

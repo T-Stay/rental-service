@@ -124,14 +124,51 @@ namespace RentalService.Controllers
         }
 
         // GET: /HostAdPosts/MyAdPosts
-        public async Task<IActionResult> MyAdPosts()
+        public async Task<IActionResult> MyAdPosts(string packageType, string status, string q, string sort)
         {
             var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
-            var ads = await _context.AdPosts
+            var adsQuery = _context.AdPosts
                 .Include(a => a.Rooms)
-                .Where(a => a.HostId == userId)
-                .OrderByDescending(a => a.CreatedAt)
-                .ToListAsync();
+                .Where(a => a.HostId == userId);
+
+            // Filter by packageType
+            if (!string.IsNullOrEmpty(packageType))
+            {
+                if (Enum.TryParse<RentalService.Models.AdPackageType>(packageType, out var pkg))
+                {
+                    adsQuery = adsQuery.Where(a => a.PackageType == pkg);
+                }
+            }
+            // Filter by status
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (status == "approved")
+                    adsQuery = adsQuery.Where(a => a.IsActive);
+                else if (status == "pending")
+                    adsQuery = adsQuery.Where(a => !a.IsActive);
+            }
+            // Search by title
+            if (!string.IsNullOrEmpty(q))
+            {
+                adsQuery = adsQuery.Where(a => a.Title.Contains(q));
+            }
+            // Sort
+            switch (sort)
+            {
+                case "created_asc":
+                    adsQuery = adsQuery.OrderBy(a => a.CreatedAt);
+                    break;
+                case "views_desc":
+                    adsQuery = adsQuery.OrderByDescending(a => a.ViewCount);
+                    break;
+                case "views_asc":
+                    adsQuery = adsQuery.OrderBy(a => a.ViewCount);
+                    break;
+                default:
+                    adsQuery = adsQuery.OrderByDescending(a => a.CreatedAt);
+                    break;
+            }
+            var ads = await adsQuery.ToListAsync();
             return View(ads);
         }
     }
