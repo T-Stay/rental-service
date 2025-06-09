@@ -2,10 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using RentalService.Data;
 using RentalService.Models;
-using RentalService.Services;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -18,15 +16,11 @@ namespace RentalService.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
-        private readonly PayOSService _payosService;
-        private readonly IConfiguration _config;
 
-        public ProfileController(AppDbContext context, UserManager<User> userManager, IConfiguration config)
+        public ProfileController(AppDbContext context, UserManager<User> userManager)
         {
             _context = context;
             _userManager = userManager;
-            _config = config;
-            _payosService = new PayOSService(config);
         }
 
         public async Task<IActionResult> Index()
@@ -172,47 +166,6 @@ namespace RentalService.Controllers
                 await _context.SaveChangesAsync();
             }
             return Json(new { success = true, message = "Xác thực thành công" });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreatePayOSPayment(string package)
-        {
-            // Xác định thông tin gói
-            long amount = 0;
-            string description = "";
-            switch (package)
-            {
-                case "dong": amount = 99000; description = "Gói Đồng"; break;
-                case "bac": amount = 199000; description = "Gói Bạc"; break;
-                case "vang": amount = 399000; description = "Gói Vàng"; break;
-                case "kimcuong": amount = 999000; description = "Gói Kim Cương"; break;
-                default: return BadRequest("Gói không hợp lệ");
-            }
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            var orderId = Guid.NewGuid();
-            // Tạo UserAdPackage ở trạng thái chưa active
-            var pkgType = package switch {
-                "dong" => AdPackageType.Dong,
-                "bac" => AdPackageType.Bac,
-                "vang" => AdPackageType.Vang,
-                "kimcuong" => AdPackageType.KimCuong,
-                _ => AdPackageType.Free
-            };
-            int posts = pkgType == AdPackageType.Dong ? 3 : pkgType == AdPackageType.Bac ? 7 : pkgType == AdPackageType.Vang ? 15 : 40;
-            int days = pkgType == AdPackageType.Dong ? 30 : pkgType == AdPackageType.Bac ? 45 : pkgType == AdPackageType.Vang ? 60 : 120;
-            var userPkg = new UserAdPackage {
-                Id = orderId,
-                UserId = userId,
-                PackageType = pkgType,
-                PurchaseDate = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddDays(days),
-                RemainingPosts = posts,
-                IsActive = false
-            };
-            _context.UserAdPackages.Add(userPkg);
-            await _context.SaveChangesAsync();
-            var payUrl = await _payosService.CreatePaymentLinkAsync(orderId.ToString(), description, amount * 100, userId);
-            return Json(new { url = payUrl });
         }
     }
 }
