@@ -20,9 +20,9 @@ COPY --from=build /app/publish .
 # Cài đặt công cụ kiểm tra DNS và curl
 RUN apt-get update && apt-get install -y dnsutils curl
 
-# Kiểm tra DNS và outbound tới api.payos.vn khi build
-RUN nslookup api.payos.vn || true
-RUN curl -Iv https://api.payos.vn || true
+# Kiểm tra DNS và outbound tới api-merchant.payos.vn khi build
+RUN nslookup api-merchant.payos.vn || true
+RUN curl -Iv https://api-merchant.payos.vn || true
 
 # (Tùy chọn) Override DNS nếu cần, bỏ comment dòng sau nếu gặp lỗi DNS
 # RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf

@@ -258,7 +258,7 @@ namespace RentalService.Controllers
                 var payosService = new RentalService.Services.PayOSService(
                     payosClientId, payosApiKey, payosChecksumKey, payosReturnUrl, payosWebhookUrl
                 );
-                payUrl = await payosService.CreatePaymentLinkAsync(orderId.ToString(), description, amount * 100, userId);
+                payUrl = await payosService.CreatePaymentLinkAsync(orderId.ToString(), description, amount, userId);
             }
             catch (Exception ex)
             {

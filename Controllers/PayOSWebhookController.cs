@@ -31,7 +31,7 @@ namespace RentalService.Controllers
             {
                 body = await reader.ReadToEndAsync();
             }
-            var checksumKey = _config["PayOS:ChecksumKey"];
+            var checksumKey = _config["PayOS:ChecksumKey"] ?? string.Empty;
             var receivedChecksum = Request.Headers["x-checksum"].ToString();
             var calculatedChecksum = CalculateChecksum(body, checksumKey);
             if (receivedChecksum != calculatedChecksum)
@@ -39,19 +39,27 @@ namespace RentalService.Controllers
 
             var doc = JsonDocument.Parse(body);
             var root = doc.RootElement;
-            var orderId = root.GetProperty("data").GetProperty("orderId").GetString();
-            var status = root.GetProperty("data").GetProperty("status").GetString();
-            // Xử lý trạng thái thanh toán
+            // Lấy orderCode từ webhook
+            int orderCode = 0;
+            string status = root.GetProperty("data").GetProperty("status").GetString() ?? string.Empty;
+            try {
+                orderCode = root.GetProperty("data").GetProperty("orderCode").GetInt32();
+            } catch { return Ok(); }
             if (status == "PAID")
             {
-                // Tìm UserAdPackage theo orderId (nếu đã lưu khi tạo payment)
-                var pkg = await _context.UserAdPackages.FirstOrDefaultAsync(x => x.Id.ToString() == orderId);
-                if (pkg != null)
+                // Duyệt tất cả UserAdPackage, so sánh Id.GetHashCode() == orderCode
+                var pkgs = await _context.UserAdPackages.ToListAsync();
+                foreach (var pkg in pkgs)
                 {
-                    pkg.IsActive = true;
-                    pkg.PurchaseDate = DateTime.UtcNow;
-                    // Cập nhật ExpiryDate, RemainingPosts nếu cần
-                    await _context.SaveChangesAsync();
+                    int code = pkg.Id.GetHashCode();
+                    if (code < 0) code = -code;
+                    if (code == orderCode)
+                    {
+                        pkg.IsActive = true;
+                        pkg.PurchaseDate = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                        break;
+                    }
                 }
             }
             return Ok();
