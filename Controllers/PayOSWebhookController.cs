@@ -44,12 +44,16 @@ namespace RentalService.Controllers
                 var root = doc.RootElement;
                 // Lấy orderCode từ webhook
                 int orderCode = 0;
-                string status = root.GetProperty("data").GetProperty("status").GetString() ?? string.Empty;
-                try
+                string status = "";
+                if (root.TryGetProperty("data", out var dataElem))
                 {
-                    orderCode = root.GetProperty("data").GetProperty("orderCode").GetInt32();
+                    status = dataElem.GetProperty("status").GetString() ?? string.Empty;
+                    try
+                    {
+                        orderCode = dataElem.GetProperty("orderCode").GetInt32();
+                    }
+                    catch { return Ok(new { success = true }); }
                 }
-                catch { return Ok(); }
                 if (status == "PAID")
                 {
                     // Duyệt tất cả UserAdPackage, so sánh Id.GetHashCode() == orderCode
@@ -68,11 +72,13 @@ namespace RentalService.Controllers
                     }
                 }
             }
-            catch (JsonException)
+            catch (Exception ex)
             {
-                return Ok(); // Bỏ qua lỗi nếu không parse được JSON
+                // Log lỗi nếu cần thiết
+                Console.WriteLine($"Error processing webhook: {ex.Message}");
+                return Ok(new { success = true }); // Bỏ qua lỗi nếu không parse được JSON
             }
-            return Ok();
+            return Ok(new { success = true });
         }
 
         private string CalculateChecksum(string body, string key)
