@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Vxsw5Lw56G4=",
+  "dgSpecHash": "477i6GWqql0=",
   "success": true,
   "projectFilePath": "E:\\EXE\\rental-service\\RentalService.csproj",
   "expectedPackageFiles": [
@@ -181,8 +181,10 @@
     {
       "code": "NU1603",
       "level": "Warning",
-      "warningLevel": 1,
       "message": "RentalService depends on X.PagedList.Mvc.Core (>= 8.2.1) but X.PagedList.Mvc.Core 8.2.1 was not found. X.PagedList.Mvc.Core 8.4.0 was resolved instead.",
+      "projectPath": "E:\\EXE\\rental-service\\RentalService.csproj",
+      "warningLevel": 1,
+      "filePath": "E:\\EXE\\rental-service\\RentalService.csproj",
       "libraryId": "X.PagedList.Mvc.Core",
       "targetGraphs": [
         "net9.0"

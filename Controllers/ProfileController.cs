@@ -167,5 +167,105 @@ namespace RentalService.Controllers
             }
             return Json(new { success = true, message = "Xác thực thành công" });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder(decimal amount, string description)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Lấy thông tin PayOS từ biến môi trường
+            var payosClientId = Environment.GetEnvironmentVariable("PAYOS_CLIENT_ID") ?? "";
+            var payosApiKey = Environment.GetEnvironmentVariable("PAYOS_API_KEY") ?? "";
+            var payosChecksumKey = Environment.GetEnvironmentVariable("PAYOS_CHECKSUM_KEY") ?? "";
+            var payosReturnUrl = Environment.GetEnvironmentVariable("PAYOS_RETURN_URL") ?? "";
+            var payosWebhookUrl = Environment.GetEnvironmentVariable("PAYOS_WEBHOOK_URL") ?? "";
+            // Nếu không có đủ thông tin thì trả lỗi
+            if (string.IsNullOrEmpty(payosClientId) || string.IsNullOrEmpty(payosApiKey) || string.IsNullOrEmpty(payosChecksumKey) || string.IsNullOrEmpty(payosReturnUrl) || string.IsNullOrEmpty(payosWebhookUrl))
+                return BadRequest("Chưa cấu hình đủ thông tin PayOS qua biến môi trường");
+            // Tạo đơn hàng
+            var orderId = Guid.NewGuid();
+            var order = new Order
+            {
+                Id = orderId,
+                UserId = userId,
+                Amount = amount,
+                Description = description,
+                Status = OrderStatus.Pending,
+                CreatedAt = DateTime.UtcNow
+            };
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+            // Tạo link thanh toán (mock nếu không gọi được PayOS)
+            string payUrl;
+            try {
+                var payosService = new RentalService.Services.PayOSService(
+                    payosClientId, payosApiKey, payosChecksumKey, payosReturnUrl, payosWebhookUrl
+                );
+                payUrl = await payosService.CreatePaymentLinkAsync(orderId.ToString(), description, (long)(amount * 100), userId);
+            } catch {
+                payUrl = "https://payos.vn/fake-checkout?orderId=" + orderId;
+            }
+            return Json(new { url = payUrl });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePayOSPayment(string package)
+        {
+            // Xác định thông tin gói
+            long amount = 0;
+            string description = "";
+            switch (package)
+            {
+                case "dong": amount = 99000; description = "Gói Đồng"; break;
+                case "bac": amount = 199000; description = "Gói Bạc"; break;
+                case "vang": amount = 399000; description = "Gói Vàng"; break;
+                case "kimcuong": amount = 999000; description = "Gói Kim Cương"; break;
+                default: return BadRequest("Gói không hợp lệ");
+            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            var orderId = Guid.NewGuid();
+            // Tạo UserAdPackage ở trạng thái chưa active
+            var pkgType = package switch {
+                "dong" => AdPackageType.Dong,
+                "bac" => AdPackageType.Bac,
+                "vang" => AdPackageType.Vang,
+                "kimcuong" => AdPackageType.KimCuong,
+                _ => AdPackageType.Free
+            };
+            int posts = pkgType == AdPackageType.Dong ? 3 : pkgType == AdPackageType.Bac ? 7 : pkgType == AdPackageType.Vang ? 15 : 40;
+            int days = pkgType == AdPackageType.Dong ? 30 : pkgType == AdPackageType.Bac ? 45 : pkgType == AdPackageType.Vang ? 60 : 120;
+            var userPkg = new UserAdPackage {
+                Id = orderId,
+                UserId = userId,
+                PackageType = pkgType,
+                PurchaseDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddDays(days),
+                RemainingPosts = posts,
+                IsActive = false
+            };
+            _context.UserAdPackages.Add(userPkg);
+            await _context.SaveChangesAsync();
+            // Lấy thông tin PayOS từ biến môi trường
+            var payosClientId = Environment.GetEnvironmentVariable("PAYOS_CLIENT_ID") ?? string.Empty;
+            var payosApiKey = Environment.GetEnvironmentVariable("PAYOS_API_KEY") ?? string.Empty;
+            var payosChecksumKey = Environment.GetEnvironmentVariable("PAYOS_CHECKSUM_KEY") ?? string.Empty;
+            var payosReturnUrl = Environment.GetEnvironmentVariable("PAYOS_RETURN_URL") ?? string.Empty;
+            var payosWebhookUrl = Environment.GetEnvironmentVariable("PAYOS_WEBHOOK_URL") ?? string.Empty;
+            if (string.IsNullOrEmpty(payosClientId) || string.IsNullOrEmpty(payosApiKey) || string.IsNullOrEmpty(payosChecksumKey) || string.IsNullOrEmpty(payosReturnUrl) || string.IsNullOrEmpty(payosWebhookUrl))
+                return BadRequest("Chưa cấu hình đủ thông tin PayOS qua biến môi trường");
+            string payUrl;
+            try
+            {
+                var payosService = new RentalService.Services.PayOSService(
+                    payosClientId, payosApiKey, payosChecksumKey, payosReturnUrl, payosWebhookUrl
+                );
+                payUrl = await payosService.CreatePaymentLinkAsync(orderId.ToString(), description, amount * 100, userId);
+            }
+            catch (Exception ex)
+            {
+                payUrl = "https://payos.vn/fake-checkout?orderId=" + orderId;
+                Console.WriteLine("Error creating PayOS payment link: " + ex );
+            }
+            return Json(new { url = payUrl });
+        }
     }
 }

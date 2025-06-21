@@ -31,6 +31,7 @@ namespace RentalService.Data
         public DbSet<PhoneOtp> PhoneOtps { get; set; }
         public DbSet<UserAdPackage> UserAdPackages { get; set; }
         public DbSet<AdPost> AdPosts { get; set; }
+        public DbSet<Order> Orders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

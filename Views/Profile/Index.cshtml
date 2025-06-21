@@ -369,27 +369,21 @@ onContactTypeChange();
 </div>
 <script>
 function showQr(pkg) {
-    let name = pkg === 'dong' ? 'Đồng' : (pkg === 'bac' ? 'Bạc' : (pkg === 'vang' ? 'Vàng' : 'Kim Cương'));
-    let qrImg = pkg === 'dong' ? '/images/qr1.png' : (pkg === 'bac' ? '/images/qr2.png' : (pkg === 'vang' ? '/images/qr3.png' : '/images/qr4.png'));
-    document.getElementById('qrSection').style.display = 'block';
-    let nameSpan = document.getElementById('qrPackageName');
-    nameSpan.innerText = name;
-    // Đặt màu sắc nổi bật cho từng gói
-    nameSpan.className = 'fw-bold px-2 py-1 rounded';
-    if(pkg === 'dong') {
-        nameSpan.style.background = '#0d6efd'; // primary
-        nameSpan.style.color = '#fff';
-    } else if(pkg === 'bac') {
-        nameSpan.style.background = '#6c757d'; // secondary
-        nameSpan.style.color = '#fff';
-    } else if(pkg === 'vang') {
-        nameSpan.style.background = '#ffc107'; // warning
-        nameSpan.style.color = '#212529'; // text-dark
-    } else if(pkg === 'kimcuong') {
-        nameSpan.style.background = '#0dcaf0'; // info
-        nameSpan.style.color = '#fff';
-    }
-    document.querySelector('#qrSection img').src = qrImg;
+    // Gọi API tạo link thanh toán PayOS
+    fetch('/Profile/CreatePayOSPayment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'package=' + encodeURIComponent(pkg)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.url) {
+            window.location.href = res.url;
+        } else {
+            toastr.error('Không tạo được link thanh toán.');
+        }
+    })
+    .catch(() => toastr.error('Lỗi khi kết nối PayOS.'));
 }
 // Tự động mở modal mua gói nếu có query ?buyPackage=1
 (function() {
