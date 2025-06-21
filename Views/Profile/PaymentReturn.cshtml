@@ -1,0 +1,33 @@
+@{
+    ViewBag.Title = "Kết quả thanh toán";
+    var isSuccess = ViewBag.Status == "success";
+}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body text-center">
+                    <h2 class="mb-4">Kết quả thanh toán</h2>
+                    @if (isSuccess)
+                    {
+                        <div class="mb-3">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size:3rem;"></i>
+                        </div>
+                        <h4 class="text-success mb-3">Thanh toán thành công!</h4>
+                        <p class="mb-2">Gói dịch vụ của bạn đã được kích hoạt. Bạn có thể sử dụng các quyền lợi của gói ngay bây giờ.</p>
+                        <a href="/Profile" class="btn btn-success mt-3">Về trang cá nhân</a>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <i class="bi bi-x-circle-fill text-danger" style="font-size:3rem;"></i>
+                        </div>
+                        <h4 class="text-danger mb-3">Thanh toán thất bại</h4>
+                        <p class="mb-2">Không tìm thấy gói hoặc giao dịch chưa hoàn tất. Vui lòng thử lại hoặc liên hệ hỗ trợ.</p>
+                        <a href="/Profile" class="btn btn-outline-primary mt-3">Về trang cá nhân</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

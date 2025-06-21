@@ -39,8 +39,9 @@ namespace RentalService.Services
 
         public async Task<string> CreatePaymentLinkAsync(string orderUuid, string description, long amount, string cancelUrl, string? buyerName = null, string? buyerEmail = null, string? buyerPhone = null, string? buyerAddress = null)
         {
-            // PayOS chỉ nhận orderCode là int, nên hash UUID thành int (ví dụ: lấy 8 byte đầu của Guid làm long, cast về int, hoặc dùng GetHashCode)
-            int orderCode = orderUuid.GetHashCode();
+            // PayOS chỉ nhận orderCode là int, nên hash UUID thành int (dễ bị tràn số hoặc không khớp do thuật toán GetHashCode khác nhau giữa môi trường)
+            // Để đảm bảo orderCode gửi lên và trả về giống nhau, hãy chuyển Guid sang int một cách ổn định (ví dụ: lấy 4 byte đầu của Guid)
+            int orderCode = BitConverter.ToInt32(Guid.Parse(orderUuid).ToByteArray(), 0);
             if (orderCode < 0) orderCode = -orderCode; // PayOS yêu cầu số dương
 
             // Tạo signature đúng chuẩn PayOS
@@ -67,11 +68,40 @@ namespace RentalService.Services
             request.Headers.Add("x-api-key", _apiKey);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                // Nếu lỗi "Đơn thanh toán đã tồn tại", thử lấy lại link thanh toán cũ
+                try
+                {
+                    var errorDoc = JsonDocument.Parse(responseBody);
+                    if (errorDoc.RootElement.TryGetProperty("code", out var codeElem) && codeElem.GetString() == "231")
+                    {
+                        // Gọi API lấy lại link thanh toán cũ
+                        var getReq = new HttpRequestMessage(HttpMethod.Get, $"https://api-merchant.payos.vn/v2/payment-requests/{orderCode}");
+                        getReq.Headers.Add("x-client-id", _clientId);
+                        getReq.Headers.Add("x-api-key", _apiKey);
+                        var getResp = await _httpClient.SendAsync(getReq);
+                        var getBody = await getResp.Content.ReadAsStringAsync();
+                        using var getDoc = JsonDocument.Parse(getBody);
+                        if (getDoc.RootElement.TryGetProperty("data", out var dataElem2) && dataElem2.TryGetProperty("checkoutUrl", out var urlElem2))
+                        {
+                            var payUrl = urlElem2.GetString() ?? string.Empty;
+                            return payUrl;
+                        }
+                        throw new Exception("Không lấy được checkoutUrl từ đơn đã tồn tại: " + getBody);
+                    }
+                }
+                catch { /* ignore, sẽ throw lỗi phía dưới */ }
+                throw new Exception($"PayOS trả về lỗi: {responseBody}");
+            }
             using var doc = JsonDocument.Parse(responseBody);
-            var payUrl = doc.RootElement.GetProperty("data").GetProperty("checkoutUrl").GetString() ?? string.Empty;
-            return payUrl;
+            if (doc.RootElement.TryGetProperty("data", out var dataElem) && dataElem.TryGetProperty("checkoutUrl", out var urlElem))
+            {
+                var payUrl = urlElem.GetString() ?? string.Empty;
+                return payUrl;
+            }
+            throw new Exception("Không nhận được checkoutUrl từ PayOS: " + responseBody);
         }
 
         private static string CreateSignature(string data, string key)

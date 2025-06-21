@@ -56,11 +56,11 @@ namespace RentalService.Controllers
                 }
                 if (status == "PAID")
                 {
-                    // Duyệt tất cả UserAdPackage, so sánh Id.GetHashCode() == orderCode
+                    // Duyệt tất cả UserAdPackage, so sánh Id chuyển sang int bằng BitConverter.ToInt32(Guid.ToByteArray(), 0) == orderCode
                     var pkgs = await _context.UserAdPackages.ToListAsync();
                     foreach (var pkg in pkgs)
                     {
-                        int code = pkg.Id.GetHashCode();
+                        int code = BitConverter.ToInt32(pkg.Id.ToByteArray(), 0);
                         if (code < 0) code = -code;
                         if (code == orderCode)
                         {

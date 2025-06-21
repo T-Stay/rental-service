@@ -331,6 +331,7 @@ onContactTypeChange();
                             <th>Ngày hết hạn</th>
                             <th>Số lượt còn lại</th>
                             <th>Trạng thái</th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -346,13 +347,24 @@ onContactTypeChange();
                                     {
                                         <span class="badge bg-warning text-dark">Chưa thanh toán</span>
                                     }
-                                    else if (pkg.ExpiryDate < DateTime.Now)
+                                    else if (pkg.ExpiryDate < DateTime.Now || pkg.RemainingPosts <= 0)
                                     {
                                         <span class="badge bg-secondary">Hết hạn</span>
                                     }
                                     else if (pkg.IsActive)
                                     {
                                         <span class="badge bg-success">Đang hoạt động</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (!pkg.IsActive && pkg.ExpiryDate > DateTime.Now)
+                                    {
+                                        <button class="btn btn-sm btn-primary me-2" onclick="retryPayOS('@pkg.Id')"><i class="fa fa-credit-card me-1"></i>Thanh toán lại</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="cancelAdPackage('@pkg.Id')"><i class="fa fa-times me-1"></i>Hủy</button>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
                                     }
                                 </td>
                             </tr>
@@ -395,4 +407,29 @@ function showQr(pkg) {
         }, 300);
     }
 })();
+function retryPayOS(id) {
+    fetch('/Profile/RetryPayOS', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + encodeURIComponent(id)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.url) window.location.href = res.url;
+        else toastr.error('Không tạo được link thanh toán.');
+    });
+}
+function cancelAdPackage(id) {
+    if (!confirm('Bạn chắc chắn muốn hủy gói này?')) return;
+    fetch('/Profile/CancelAdPackage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + encodeURIComponent(id)
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.success) location.reload();
+        else toastr.error('Không hủy được gói.');
+    });
+}
 </script>

@@ -267,5 +267,69 @@ namespace RentalService.Controllers
             }
             return Json(new { url = payUrl });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> PaymentReturn(int orderCode)
+        {
+            // Duyệt UserAdPackage, so sánh Id chuyển sang int bằng BitConverter.ToInt32(Guid.ToByteArray(), 0) == orderCode
+            var pkgs = await _context.UserAdPackages.ToListAsync();
+            UserAdPackage? pkg = null;
+            foreach (var p in pkgs)
+            {
+                int code = BitConverter.ToInt32(p.Id.ToByteArray(), 0);
+                if (code < 0) code = -code;
+                if (code == orderCode)
+                {
+                    pkg = p;
+                    break;
+                }
+            }
+            if (pkg != null && !pkg.IsActive)
+            {
+                pkg.IsActive = true;
+                pkg.PurchaseDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+            ViewBag.Status = pkg != null && pkg.IsActive ? "success" : "fail";
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RetryPayOS(Guid id)
+        {
+            var pkg = await _context.UserAdPackages.FirstOrDefaultAsync(x => x.Id == id && !x.IsActive);
+            if (pkg == null) return NotFound();
+            // Lấy thông tin PayOS từ biến môi trường
+            var payosClientId = Environment.GetEnvironmentVariable("PAYOS_CLIENT_ID") ?? string.Empty;
+            var payosApiKey = Environment.GetEnvironmentVariable("PAYOS_API_KEY") ?? string.Empty;
+            var payosChecksumKey = Environment.GetEnvironmentVariable("PAYOS_CHECKSUM_KEY") ?? string.Empty;
+            var payosReturnUrl = Environment.GetEnvironmentVariable("PAYOS_RETURN_URL") ?? string.Empty;
+            var payosWebhookUrl = Environment.GetEnvironmentVariable("PAYOS_WEBHOOK_URL") ?? string.Empty;
+            if (string.IsNullOrEmpty(payosClientId) || string.IsNullOrEmpty(payosApiKey) || string.IsNullOrEmpty(payosChecksumKey) || string.IsNullOrEmpty(payosReturnUrl) || string.IsNullOrEmpty(payosWebhookUrl))
+                return BadRequest("Chưa cấu hình đủ thông tin PayOS qua biến môi trường");
+            var payosService = new RentalService.Services.PayOSService(
+                payosClientId, payosApiKey, payosChecksumKey, payosReturnUrl, payosWebhookUrl
+            );
+            // Số tiền và mô tả lấy lại từ gói
+            string description = RentalService.Models.AdPackageTypeExtensions.ToVietnameseLabel(pkg.PackageType);
+            long amount = pkg.PackageType == AdPackageType.Dong ? 99000 : pkg.PackageType == AdPackageType.Bac ? 199000 : pkg.PackageType == AdPackageType.Vang ? 399000 : 999000;
+            // Tạo cancelUrl đúng chuẩn (có thể về trang profile hoặc payment return)
+            int orderCode = pkg.Id.GetHashCode();
+            if (orderCode < 0) orderCode = -orderCode;
+            Console.WriteLine($"Retrying payment for package {pkg.Id} with orderCode {orderCode}");
+            string cancelUrl = $"/Profile/PaymentReturn?orderCode={orderCode}";
+            var payUrl = await payosService.CreatePaymentLinkAsync(pkg.Id.ToString(), description, amount, cancelUrl, User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return Json(new { url = payUrl });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelAdPackage(Guid id)
+        {
+            var pkg = await _context.UserAdPackages.FirstOrDefaultAsync(x => x.Id == id && !x.IsActive);
+            if (pkg == null) return NotFound();
+            _context.UserAdPackages.Remove(pkg);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
     }
 }
