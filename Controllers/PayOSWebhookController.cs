@@ -38,30 +38,39 @@ namespace RentalService.Controllers
             // if (receivedChecksum != calculatedChecksum)
             //     return Unauthorized();
 
-            var doc = JsonDocument.Parse(body);
-            var root = doc.RootElement;
-            // Lấy orderCode từ webhook
-            int orderCode = 0;
-            string status = root.GetProperty("data").GetProperty("status").GetString() ?? string.Empty;
-            try {
-                orderCode = root.GetProperty("data").GetProperty("orderCode").GetInt32();
-            } catch { return Ok(); }
-            if (status == "PAID")
+            try
             {
-                // Duyệt tất cả UserAdPackage, so sánh Id.GetHashCode() == orderCode
-                var pkgs = await _context.UserAdPackages.ToListAsync();
-                foreach (var pkg in pkgs)
+                var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+                // Lấy orderCode từ webhook
+                int orderCode = 0;
+                string status = root.GetProperty("data").GetProperty("status").GetString() ?? string.Empty;
+                try
                 {
-                    int code = pkg.Id.GetHashCode();
-                    if (code < 0) code = -code;
-                    if (code == orderCode)
+                    orderCode = root.GetProperty("data").GetProperty("orderCode").GetInt32();
+                }
+                catch { return Ok(); }
+                if (status == "PAID")
+                {
+                    // Duyệt tất cả UserAdPackage, so sánh Id.GetHashCode() == orderCode
+                    var pkgs = await _context.UserAdPackages.ToListAsync();
+                    foreach (var pkg in pkgs)
                     {
-                        pkg.IsActive = true;
-                        pkg.PurchaseDate = DateTime.UtcNow;
-                        await _context.SaveChangesAsync();
-                        break;
+                        int code = pkg.Id.GetHashCode();
+                        if (code < 0) code = -code;
+                        if (code == orderCode)
+                        {
+                            pkg.IsActive = true;
+                            pkg.PurchaseDate = DateTime.UtcNow;
+                            await _context.SaveChangesAsync();
+                            break;
+                        }
                     }
                 }
+            }
+            catch (JsonException)
+            {
+                return Ok(); // Bỏ qua lỗi nếu không parse được JSON
             }
             return Ok();
         }
