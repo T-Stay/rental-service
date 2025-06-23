@@ -1,0 +1,51 @@
+@model IEnumerable<RentalService.Models.Order>
+@{
+    ViewData["Title"] = "Lịch sử thanh toán";
+}
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fa fa-history me-2"></i>Lịch sử thanh toán</h2>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">Bạn chưa có giao dịch nào.</div>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Mã giao dịch</th>
+                    <th>Mô tả</th>
+                    <th>Số tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Thời gian</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.Description</td>
+                        <td>@order.Amount.ToString("N0") đ</td>
+                        <td>
+                            @if (order.Status == RentalService.Models.OrderStatus.Paid)
+                            {
+                                <span class="badge bg-success">Đã thanh toán</span>
+                            }
+                            else if (order.Status == RentalService.Models.OrderStatus.Pending)
+                            {
+                                <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Thất bại/Hủy</span>
+                            }
+                        </td>
+                        <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <a href="/Profile" class="btn btn-outline-primary mt-3"><i class="fa fa-arrow-left me-1"></i>Về trang cá nhân</a>
+</div>

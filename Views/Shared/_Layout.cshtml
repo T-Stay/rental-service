@@ -63,6 +63,7 @@
                                         <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")" asp-controller="HostRooms" asp-action="Index"><i class="fa-solid fa-door-open me-2"></i>Phòng của tôi</a></li>
                                         <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")" asp-controller="ViewAppointments" asp-action="HostRoomAppointments"><i class="fa-solid fa-calendar-check me-2"></i>Lịch xem phòng</a></li>
                                         <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostAdPosts" ? "active" : "")" asp-controller="HostAdPosts" asp-action="MyAdPosts"><i class="fa-solid fa-bullhorn me-2"></i>Quản lý quảng cáo</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Profile" && ViewContext.RouteData.Values["action"]?.ToString() == "PaymentHistory" ? "active" : "")" asp-controller="Profile" asp-action="PaymentHistory"><i class="fa-solid fa-receipt me-2"></i>Lịch sử thanh toán</a></li>
                                     </ul>
                                 </li>
                             }

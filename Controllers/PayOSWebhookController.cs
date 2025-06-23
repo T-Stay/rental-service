@@ -44,6 +44,7 @@ namespace RentalService.Controllers
                 var root = doc.RootElement;
                 // Lấy orderCode từ webhook
                 int orderCode = 0;
+                int amount = 0;
                 string status = "";
                 if (root.TryGetProperty("data", out var dataElem))
                 {
@@ -51,6 +52,7 @@ namespace RentalService.Controllers
                     try
                     {
                         orderCode = dataElem.GetProperty("orderCode").GetInt32();
+                        amount = dataElem.GetProperty("amount").GetInt32();
                     }
                     catch { return Ok(new { success = true }); }
                 }
@@ -58,17 +60,35 @@ namespace RentalService.Controllers
                 {
                     // Duyệt tất cả UserAdPackage, so sánh Id chuyển sang int bằng BitConverter.ToInt32(Guid.ToByteArray(), 0) == orderCode
                     var pkgs = await _context.UserAdPackages.ToListAsync();
+
+                    UserAdPackage neededPkg = null;
                     foreach (var pkg in pkgs)
                     {
                         int code = BitConverter.ToInt32(pkg.Id.ToByteArray(), 0);
                         if (code < 0) code = -code;
                         if (code == orderCode)
                         {
+                            neededPkg = pkg;
                             pkg.IsActive = true;
                             pkg.PurchaseDate = DateTime.UtcNow;
                             await _context.SaveChangesAsync();
                             break;
                         }
+                    }
+                    // Tạo order cho lịch sử giao dịch
+                    if (neededPkg != null)
+                    {
+                        var order = new Order
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = neededPkg.UserId,
+                            Amount = amount,
+                            Description = neededPkg.Id.ToString(),
+                            Status = OrderStatus.Paid,
+                            CreatedAt = DateTime.UtcNow
+                        };
+                        _context.Orders.Add(order);
+                        await _context.SaveChangesAsync();
                     }
                 }
             }

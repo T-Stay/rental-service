@@ -212,13 +212,14 @@ namespace RentalService.Controllers
         {
             // Xác định thông tin gói
             long amount = 0;
-            string description = "";
+            string shortDescription = "";
+            // full description = Thanh toán gói [Tên gói] trên trotot.com.vn cho tài khoản [userId] lúc [ngày giờ]
             switch (package)
             {
-                case "dong": amount = 99000; description = "Gói Đồng"; break;
-                case "bac": amount = 199000; description = "Gói Bạc"; break;
-                case "vang": amount = 399000; description = "Gói Vàng"; break;
-                case "kimcuong": amount = 999000; description = "Gói Kim Cương"; break;
+                case "dong": amount = 99000; shortDescription = "Gói Đồng"; break;
+                case "bac": amount = 199000; shortDescription = "Gói Bạc"; break;
+                case "vang": amount = 399000; shortDescription = "Gói Vàng"; break;
+                case "kimcuong": amount = 999000; shortDescription = "Gói Kim Cương"; break;
                 default: return BadRequest("Gói không hợp lệ");
             }
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
@@ -242,6 +243,7 @@ namespace RentalService.Controllers
                 RemainingPosts = posts,
                 IsActive = false
             };
+            string fullDescription = $"{shortDescription} trotot.com.vn";
             _context.UserAdPackages.Add(userPkg);
             await _context.SaveChangesAsync();
             // Lấy thông tin PayOS từ biến môi trường
@@ -258,7 +260,7 @@ namespace RentalService.Controllers
                 var payosService = new RentalService.Services.PayOSService(
                     payosClientId, payosApiKey, payosChecksumKey, payosReturnUrl, payosWebhookUrl
                 );
-                payUrl = await payosService.CreatePaymentLinkAsync(orderId.ToString(), description, amount, userId);
+                payUrl = await payosService.CreatePaymentLinkAsync(orderId.ToString(), fullDescription, amount, userId);
             }
             catch (Exception ex)
             {
@@ -311,14 +313,15 @@ namespace RentalService.Controllers
                 payosClientId, payosApiKey, payosChecksumKey, payosReturnUrl, payosWebhookUrl
             );
             // Số tiền và mô tả lấy lại từ gói
-            string description = RentalService.Models.AdPackageTypeExtensions.ToVietnameseLabel(pkg.PackageType);
+            string shortDescription = RentalService.Models.AdPackageTypeExtensions.ToVietnameseLabel(pkg.PackageType);
+            string fullDescription = $"{shortDescription} trotot.com.vn";
             long amount = pkg.PackageType == AdPackageType.Dong ? 99000 : pkg.PackageType == AdPackageType.Bac ? 199000 : pkg.PackageType == AdPackageType.Vang ? 399000 : 999000;
             // Tạo cancelUrl đúng chuẩn (có thể về trang profile hoặc payment return)
             int orderCode = pkg.Id.GetHashCode();
             if (orderCode < 0) orderCode = -orderCode;
             Console.WriteLine($"Retrying payment for package {pkg.Id} with orderCode {orderCode}");
             string cancelUrl = $"/Profile/PaymentReturn?orderCode={orderCode}";
-            var payUrl = await payosService.CreatePaymentLinkAsync(pkg.Id.ToString(), description, amount, cancelUrl, User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var payUrl = await payosService.CreatePaymentLinkAsync(pkg.Id.ToString(), fullDescription, amount, cancelUrl, User.FindFirstValue(ClaimTypes.NameIdentifier));
             return Json(new { url = payUrl });
         }
 
@@ -330,6 +333,17 @@ namespace RentalService.Controllers
             _context.UserAdPackages.Remove(pkg);
             await _context.SaveChangesAsync();
             return Json(new { success = true });
+        }
+
+        [Authorize(Roles = "host")]
+        public async Task<IActionResult> PaymentHistory()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var orders = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+            return View(orders);
         }
     }
 }
