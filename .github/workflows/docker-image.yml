@@ -5,7 +5,6 @@ on:
     workflows: [".NET Core CI"]
     types:
       - completed
-
 jobs:
   build:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -35,7 +34,7 @@ jobs:
             ghcr.io/t-stay/rental-service:${{ github.sha }}
           labels: |
             org.opencontainers.image.source=${{ github.repositoryUrl }}
-
+            
       - name: Trigger Render Deploy Webhook
         run: |
           curl -X POST "$RENDER_DEPLOY_WEBHOOK"
