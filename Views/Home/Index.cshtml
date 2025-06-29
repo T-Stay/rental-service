@@ -59,108 +59,33 @@
         </div>
     }
     <h2 class="mb-4">Bài viết đề xuất</h2>
-    <!-- Kim cương: mỗi ad 1 row, col-12 -->
+    <!-- Kim cương + Vàng: mỗi row 2 col-md-6, trộn chung, ưu tiên kim cương lên trước -->
     <div class="mb-5">
-        @foreach (var ad in kimCuongAds)
-        {
-            var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
-            var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
-            var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
-            var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
-            <div class="row mb-4">
-                <div class="col-12">
-                    <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
-                        <div class="card diamond-ad-card position-relative">
-                            <div class="ad-meta-top-left px-3 py-1">
-                                <span class="me-3"><i class="fa fa-eye me-1"></i>@ad.ViewCount lượt xem</span>
-                                <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count phòng</span>
-                            </div>
-                            <div class="row g-0">
-                                <div class="col-md-7">
-                                    <div class="card-body">
-                                        <h3 class="mb-2">@ad.Title</h3>
-                                        <span class="badge bg-info me-2">Kim cương</span>
-                                        <span class="badge bg-primary me-2">@ad.Badge</span>
-                                        <div class="mt-2 mb-2">
-                                            @if (minPrice > 0 && maxPrice > 0)
-                                            {
-                                                <span class="text-success fw-bold">@minPrice.ToString("N0")@(minPrice != maxPrice ? $" - {maxPrice.ToString("N0")}" : "") đ</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted">Liên hệ giá</span>
-                                            }
-                                        </div>
-                                        <!-- Kim cương -->
-                                        <div class="mt-2 position-relative">
-                                            <div class="ad-content-preview" style="overflow: hidden;">@Html.Raw(ad.Content)</div>
-                                            <div class="text-center mt-1">
-                                                <button class="btn btn-link btn-sm p-0 ad-see-more-btn" type="button" tabindex="-1">Xem thêm</button>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
-                                            <span class="text-start"><i class="fa fa-calendar-alt me-1"></i>@ad.CreatedAt.ToString("dd/MM/yyyy")</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-5">
-                                    <div class="diamond-img-grid">
-                                        @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
-                                        {
-                                            <div class="diamond-img-main">
-                                                <img src="@images[0]" class="img-fluid main-img-demo" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                                            </div>
-                                            <div class="diamond-img-thumbs mt-2">
-                                                @for (int k = 1; k < Math.Min(images.Length, 5); k++)
-                                                {
-                                                    <div class="diamond-img-thumb">
-                                                        <img src="@images[k]" class="img-fluid" alt="Thumb" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                                                        @if (k == 4 && images.Length > 5)
-                                                        {
-                                                            <div class="diamond-img-more">+@((images.Length-5).ToString())</div>
-                                                        }
-                                                    </div>
-                                                }
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div class="diamond-img-main">
-                                                <img src="/images/no-image.png" class="img-fluid main-img-demo" alt="No Image" />
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
+        @{
+            var topAds = kimCuongAds.Concat(vangAds).ToList();
         }
-    </div>
-    <!-- Vàng: mỗi row 2 col-md-6 (hoặc col-md-5 để rộng hơn) -->
-    <div class="mb-5">
-        @for (int i = 0; i < vangAds.Count; i += 2)
+        @for (int i = 0; i < topAds.Count; i += 2)
         {
             <div class="row mb-4">
-                @for (int j = i; j < Math.Min(i + 2, vangAds.Count); j++)
+                @for (int j = i; j < Math.Min(i + 2, topAds.Count); j++)
                 {
-                    var ad = vangAds[j];
+                    var ad = topAds[j];
                     var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
                     var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
                     var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
                     var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
+                    var isDiamond = ad.PackageType == RentalService.Models.AdPackageType.KimCuong;
                     <div class="col-md-6 col-lg-6 mb-3">
                         <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
-                            <div class="card gold-ad-card position-relative">
-                                <div class="gold-img-wrap">
+                            <div class="card @(isDiamond ? "diamond-ad-card" : "gold-ad-card") position-relative">
+                                <div class="@(isDiamond ? "diamond-img-wrap" : "gold-img-wrap")">
                                     @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
                                     {
-                                        <img src="@images[0]" class="gold-img-demo img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                                        <img src="@images[0]" class="@(isDiamond ? "diamond-img-demo" : "gold-img-demo") img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                                     }
                                     else
                                     {
-                                        <img src="/images/no-image.png" class="gold-img-demo img-fluid" alt="No Image" />
+                                        <img src="/images/no-image.png" class="@(isDiamond ? "diamond-img-demo" : "gold-img-demo") img-fluid" alt="No Image" />
                                     }
                                 </div>
                                 <div class="ad-meta-below-img px-3 py-1">
@@ -169,8 +94,14 @@
                                 </div>
                                 <div class="card-body">
                                     <h5 class="mb-2">@ad.Title</h5>
-                                    <span class="badge bg-warning text-dark me-2">Vàng</span>
-                                    <span class="badge bg-primary me-2">@ad.Badge</span>
+                                    @if (isDiamond)
+                                    {
+                                        <span class="badge bg-gradient-diamond animated-gradient me-2"><i class="fa fa-gem me-1"></i>Kim cương</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-gradient-gold animated-gradient me-2"><i class="fa fa-crown me-1"></i>Vàng</span>
+                                    }
                                     <div class="mb-2">
                                         @if (minPrice > 0 && maxPrice > 0)
                                         {
@@ -181,7 +112,6 @@
                                             <span class="text-muted">Liên hệ giá</span>
                                         }
                                     </div>
-                                    <!-- Vàng -->
                                     <div class="mt-2 position-relative">
                                         <div class="ad-content-preview truncate-2">@Html.Raw(ad.Content)</div>
                                         <div class="text-center mt-1">
@@ -199,90 +129,33 @@
             </div>
         }
     </div>
-    <!-- Bạc: mỗi row 3 col-md-4 -->
+    <!-- Bạc + Đồng: mỗi row 3 col-md-4, trộn chung, ưu tiên bạc lên trước -->
     <div class="mb-5">
-        @for (int i = 0; i < bacAds.Count; i += 3)
-        {
-            <div class="row mb-4">
-                @for (int j = i; j < Math.Min(i + 3, bacAds.Count); j++)
-                {
-                    var ad = bacAds[j];
-                    var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
-                    var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
-                    var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
-                    var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
-                    <div class="col-md-4 mb-3">
-                        <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
-                            <div class="card silver-ad-card position-relative">
-                                <div class="silver-img-wrap">
-                                    @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
-                                    {
-                                        <img src="@images[0]" class="silver-img-demo img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                                    }
-                                    else
-                                    {
-                                        <img src="/images/no-image.png" class="silver-img-demo img-fluid" alt="No Image" />
-                                    }
-                                </div>
-                                <div class="ad-meta-below-img px-2 py-1">
-                                    <span class="me-2"><i class="fa fa-eye me-1"></i>@ad.ViewCount</span>
-                                    <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count</span>
-                                </div>
-                                <div class="card-body">
-                                    <h6 class="mb-2">@ad.Title</h6>
-                                    <span class="badge bg-secondary me-2">Bạc</span>
-                                    <span class="badge bg-primary me-2">@ad.Badge</span>
-                                    <div class="mb-2">
-                                        @if (minPrice > 0 && maxPrice > 0)
-                                        {
-                                            <span class="text-success fw-bold">@minPrice.ToString("N0")@(minPrice != maxPrice ? $" - {maxPrice.ToString("N0")}" : "") đ</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">Liên hệ giá</span>
-                                        }
-                                    </div>
-                                    <!-- Bạc -->
-                                    <div class="mt-2 position-relative">
-                                        <div class="ad-content-preview truncate-1" style="max-height: 22px; overflow: hidden;">@Html.Raw(ad.Content)</div>
-                                        <div class="text-center mt-1">
-                                            <button class="btn btn-link btn-sm p-0 ad-see-more-btn" type="button" tabindex="-1">Xem thêm</button>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
-                                        <span><i class="fa fa-calendar-alt me-1"></i>@ad.CreatedAt.ToString("dd/MM/yyyy")</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                }
-            </div>
+        @{
+            var lowerAds = bacAds.Concat(dongAds).ToList();
         }
-    </div>
-    <!-- Đồng: mỗi row 3 col-md-4 -->
-    <div class="mb-5">
-        @for (int i = 0; i < dongAds.Count; i += 3)
+        @for (int i = 0; i < lowerAds.Count; i += 3)
         {
             <div class="row mb-4">
-                @for (int j = i; j < Math.Min(i + 3, dongAds.Count); j++)
+                @for (int j = i; j < Math.Min(i + 3, lowerAds.Count); j++)
                 {
-                    var ad = dongAds[j];
+                    var ad = lowerAds[j];
                     var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
                     var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
                     var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
                     var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
+                    var isSilver = ad.PackageType == RentalService.Models.AdPackageType.Bac;
                     <div class="col-md-4 mb-3">
                         <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
-                            <div class="card bronze-ad-card position-relative">
-                                <div class="bronze-img-wrap">
+                            <div class="card @(isSilver ? "silver-ad-card highlight-silver" : "bronze-ad-card") position-relative">
+                                <div class="@(isSilver ? "silver-img-wrap highlight-silver-img" : "bronze-img-wrap")">
                                     @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
                                     {
-                                        <img src="@images[0]" class="bronze-img-demo img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                                        <img src="@images[0]" class="@(isSilver ? "silver-img-demo" : "bronze-img-demo") img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                                     }
                                     else
                                     {
-                                        <img src="/images/no-image.png" class="bronze-img-demo img-fluid" alt="No Image" />
+                                        <img src="/images/no-image.png" class="@(isSilver ? "silver-img-demo" : "bronze-img-demo") img-fluid" alt="No Image" />
                                     }
                                 </div>
                                 <div class="ad-meta-below-img px-2 py-1">
@@ -291,8 +164,14 @@
                                 </div>
                                 <div class="card-body">
                                     <h6 class="mb-2">@ad.Title</h6>
-                                    <span class="badge bg-primary me-2">Đồng</span>
-                                    <span class="badge bg-primary me-2">@ad.Badge</span>
+                                    @if (isSilver)
+                                    {
+                                        <span class="badge bg-gradient-silver animated-gradient text-dark me-2"><i class="fa fa-medal me-1"></i>Bạc</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-gradient-bronze animated-gradient text-dark me-2"><i class="fa fa-award me-1"></i>Đồng</span>
+                                    }
                                     <div class="mb-2">
                                         @if (minPrice > 0 && maxPrice > 0)
                                         {
@@ -303,7 +182,6 @@
                                             <span class="text-muted">Liên hệ giá</span>
                                         }
                                     </div>
-                                    <!-- Đồng -->
                                     <div class="mt-2 position-relative">
                                         <div class="ad-content-preview truncate-1" style="max-height: 22px; overflow: hidden;">@Html.Raw(ad.Content)</div>
                                         <div class="text-center mt-1">
@@ -322,6 +200,9 @@
         }
     </div>
 </div>
+<!-- Đảm bảo file CSS hiệu ứng động badge-animated-gradient.css được import trong <head> của _Layout.cshtml:
+<link rel="stylesheet" href="~/css/badge-animated-gradient.css?v=@DateTime.Now.Ticks" />
+Nếu chưa có, hãy thêm vào _Layout.cshtml trước thẻ </head> để tránh cache và đảm bảo hiệu ứng load đúng. -->
 <style>
     .ad-meta-top-left {
         position: static;
@@ -340,55 +221,58 @@
         padding-bottom: 0;
     }
     .diamond-ad-card {
-        border: 2.5px solid #0dcaf0;
-        background: linear-gradient(90deg, #e0f7fa 0%, #f8fafc 100%);
-        box-shadow: 0 4px 24px #0dcaf055, 0 2px 8px #e9ecef;
         border-radius: 16px;
-        min-height: 620px; /* tăng thêm 200px từ 420px lên 620px */
+        min-height: 340px;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 4px 18px #00bcd455, 0 2px 8px #e9ecef;
     }
     .gold-ad-card {
-        border: 2px solid #ffd700;
-        background: linear-gradient(90deg, #fffbe6 0%, #fffde7 100%);
-        box-shadow: 0 2px 8px #ffd70033, 0 2px 8px #e9ecef;
-        border-radius: 14px;
-        min-height: 320px; /* tăng từ 160px lên 320px cho cân đối */
+        border-radius: 16px;
+        min-height: 340px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 4px 16px #ffd70055, 0 2px 8px #e9ecef;
     }
     .silver-ad-card {
-        border: 1.5px solid #b0bec5;
-        background: linear-gradient(90deg, #f8fafc 0%, #eceff1 100%);
-        box-shadow: 0 2px 8px #b0bec522, 0 2px 8px #e9ecef;
         border-radius: 14px;
         min-height: 140px;
+        box-shadow: 0 2px 8px #b0bec522, 0 2px 8px #e9ecef;
     }
     .bronze-ad-card {
-        border: 1.5px solid #bdbdbd;
-        background: linear-gradient(90deg, #f8fafc 0%, #f5f5f5 100%);
-        box-shadow: 0 2px 8px #bdbdbd22, 0 2px 8px #e9ecef;
         border-radius: 14px;
         min-height: 120px;
+        box-shadow: 0 2px 8px #bdbdbd22, 0 2px 8px #e9ecef;
     }
-    .diamond-img-grid {
+    .diamond-img-wrap {
         width: 100%;
-    }
-    .diamond-img-main {
-        width: 100%;
-        height: 260px; /* giảm từ 370px xuống 260px */
-        background: #e0f7fa;
+        height: 190px;
+        background: linear-gradient(90deg, #e0f7fa 0%, #e3f0ff 100%);
         border-radius: 16px 16px 0 0;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-bottom: 2px solid #00bcd4;
+    }
+    .diamond-img-demo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: inherit;
+        display: block;
     }
     .gold-img-wrap {
         width: 100%;
-        height: 180px; /* tăng từ 120px lên 180px */
-        background: #fffde7;
-        border-radius: 14px 14px 0 0;
+        height: 190px;
+        background: linear-gradient(90deg, #fffbe6 0%, #fffde7 100%);
+        border-radius: 16px 16px 0 0;
         overflow: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
+        border-bottom: 2px solid #ffd700;
     }
     .silver-img-wrap {
         width: 100%;
@@ -409,14 +293,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-    .main-img-demo, .gold-img-demo, .silver-img-demo, .bronze-img-demo {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        border-radius: inherit;
-        display: block;
     }
     /* CSS bổ sung cho preview và nút xem thêm */
     .ad-content-preview {
@@ -553,4 +429,16 @@
     .homepage-hero .cta-box .fs-5 { font-size: 1.08rem !important; }
     .homepage-hero h1.display-2 { font-size: 2.2rem !important; }
     .homepage-hero p.lead { font-size: 1.15rem !important; }
+    .silver-ad-card.highlight-silver {
+        border: 2.5px solid #b0c4de;
+        background: linear-gradient(90deg, #f8fafc 0%, #e3eafc 100%);
+        box-shadow: 0 4px 16px #b0c4de55, 0 2px 8px #e9ecef;
+        position: relative;
+        z-index: 1;
+    }
+    .silver-img_wrap.highlight-silver-img {
+        background: linear-gradient(90deg, #e3eafc 0%, #f8fafc 100%);
+        border: 2px solid #b0c4de;
+    }
+    /* ĐÃ XÓA: .bg-gradient-silver, .bg-gradient-diamond, .bg-gradient-gold, .bg-gradient-bronze để không override hiệu ứng động từ file CSS ngoài */
 </style>

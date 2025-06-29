@@ -7,6 +7,7 @@
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/badge-animated-gradient.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
     <style>
@@ -290,5 +291,6 @@ $(function () {
 </script>
     @await RenderSectionAsync("Scripts", required: false)
     @await Html.PartialAsync("_floatingChatbotScript")
+    <script src="~/js/badge-animated-gradient.js" asp-append-version="true"></script>
 </body>
 </html>

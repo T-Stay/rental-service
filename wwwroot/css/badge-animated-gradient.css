@@ -1,0 +1,35 @@
+/* Animated gradient for badges */
+.animated-gradient {
+    background-size: 200% 200% !important;
+    animation: gradientMove 2.5s linear infinite;
+}
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.bg-gradient-diamond.animated-gradient {
+    background: linear-gradient(90deg, #00bcd4, #e0f7fa, #00bcd4, #e3f0ff) !important;
+}
+.bg-gradient-gold.animated-gradient {
+    background: linear-gradient(90deg, #ffd700, #fffbe6, #ffd700, #fffde7) !important;
+}
+.bg-gradient-silver.animated-gradient {
+    background: linear-gradient(90deg, #b0c4de, #e3eafc, #b0c4de, #f8fafc) !important;
+}
+.bg-gradient-bronze.animated-gradient {
+    background: linear-gradient(90deg, #cd7f32, #f5e6d3, #cd7f32, #fff3e0) !important;
+}
+.badge.animated-gradient {
+    font-size: 1.05em !important;
+    padding: 0.45em 1.1em !important;
+    border-radius: 1.2em !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 4px #0001;
+    min-width: 70px;
+    min-height: 1.8em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+}
