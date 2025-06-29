@@ -27,29 +27,22 @@
                         <div class="col-12 col-md-4">
                             <div class="cta-box p-5 rounded-4 bg-white border h-100 d-flex flex-column align-items-start">
                                 <div class="mb-2 fs-3 fw-bold text-primary"><i class="fa fa-search-location fa-xl text-info me-2"></i>Bạn là khách?</div>
-                                <div class="mb-3 fs-5 text-secondary">Khám phá hàng ngàn phòng trọ, căn hộ phù hợp nhu cầu của bạn.</div>
+                                <div class="mb-3 fs-5 cta-desc-sm text-secondary">Khám phá hàng ngàn phòng trọ, căn hộ phù hợp nhu cầu của bạn.</div>
                                 <a href="@Url.Action("Index", "Rooms")" class="btn btn-outline-primary btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-search me-1"></i>Tìm phòng ngay</a>
                             </div>
                         </div>
                         <div class="col-12 col-md-4">
                             <div class="cta-box p-5 rounded-4 bg-white border h-100 d-flex flex-column align-items-start">
                                 <div class="mb-2 fs-3 fw-bold text-success"><i class="fa fa-user-tie fa-xl text-success me-2"></i>Bạn là chủ nhà?</div>
-                                <div class="mb-3 fs-5 text-secondary">Đăng phòng cho thuê miễn phí, tiếp cận hàng ngàn khách thuê tiềm năng.</div>
+                                <div class="mb-3 fs-5 cta-desc-sm text-secondary">Đăng phòng cho thuê miễn phí, tiếp cận hàng ngàn khách thuê tiềm năng.</div>
                                 <a href="@Url.Action("Create", "HostRooms")" class="btn btn-outline-success btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-plus-circle me-1"></i>Đăng phòng ngay</a>
                             </div>
                         </div>
                         <div class="col-12 col-md-4">
                             <div class="cta-box p-5 rounded-4 bg-white border h-100 d-flex flex-column align-items-start">
-                                <div class="mb-2 fs-3 fw-bold text-info"><i class="fa fa-info-circle fa-xl text-info me-2"></i>Bạn muốn biết thêm?</div>
-                                <div class="mb-3 fs-5 text-secondary">Tìm hiểu về đội ngũ, sứ mệnh và giá trị của chúng tôi.</div>
-                                <a href="@Url.Action("About", "Home")" class="btn btn-outline-info btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-arrow-right me-1"></i>Về chúng tôi</a>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-4">
-                            <div class="cta-box p-5 rounded-4 bg-white border h-100 d-flex flex-column align-items-start">
-                                <div class="mb-2 fs-3 fw-bold text-warning"><i class="fa fa-video fa-xl text-warning me-2"></i>Video Hướng Dẫn</div>
-                                <div class="mb-3 fs-5 text-secondary">Xem video hướng dẫn sử dụng nền tảng nhanh chóng, dễ hiểu.</div>
-                                <a href="https://drive.google.com/drive/folders/1uCQQqT4Bh3MGg4RvMVPbFwGhTUY0CebY?usp=sharing" target="_blank" rel="noopener" class="btn btn-outline-warning btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-play-circle me-1"></i>Xem video</a>
+                                <div class="mb-2 fs-3 fw-bold text-danger"><i class="fa fa-video fa-xl text-danger me-2"></i>Video Hướng Dẫn</div>
+                                <div class="mb-3 fs-5 cta-desc-sm text-secondary">Xem video hướng dẫn sử dụng nền tảng nhanh chóng, dễ hiểu.</div>
+                                <a href="https://drive.google.com/drive/folders/1uCQQqT4Bh3MGg4RvMVPbFwGhTUY0CebY?usp=sharing" target="_blank" rel="noopener" class="btn btn-outline-danger btn-lg w-100 fw-bold py-3 fs-5"><i class="fa fa-play-circle me-1"></i>Xem video</a>
                             </div>
                         </div>
                     </div>
@@ -447,5 +440,6 @@ Nếu chưa có, hãy thêm vào _Layout.cshtml trước thẻ </head> để tr�
         background: linear-gradient(90deg, #e3eafc 0%, #f8fafc 100%);
         border: 2px solid #b0c4de;
     }
+    .cta-desc-sm { font-size: 1.01rem !important; }
     /* ĐÃ XÓA: .bg-gradient-silver, .bg-gradient-diamond, .bg-gradient-gold, .bg-gradient-bronze để không override hiệu ứng động từ file CSS ngoài */
 </style>
