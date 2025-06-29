@@ -1,0 +1,194 @@
+@{
+    ViewData["Title"] = "Thống kê hệ thống";
+}
+<!-- Navigation bar for admin views -->
+<nav class="mb-4">
+    <ul class="nav nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" href="@Url.Action("Index", "Admin")">
+                <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "UserList" ? "active" : "")" href="@Url.Action("UserList", "Admin")">
+                <i class="fa-solid fa-users"></i> Người dùng
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Statistics" ? "active" : "")" href="@Url.Action("Statistics", "Admin")">
+                <i class="fa-solid fa-chart-line"></i> Thống kê
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "RoomsToApprove" ? "active" : "")" href="@Url.Action("RoomsToApprove", "Admin")">
+                <i class="fa-solid fa-door-open"></i> Duyệt phòng
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AdPostsToApprove" ? "active" : "")" href="@Url.Action("AdPostsToApprove", "Admin")">
+                <i class="fa-solid fa-bullhorn"></i> Duyệt quảng cáo
+            </a>
+        </li>
+    </ul>
+</nav>
+<h2 class="fw-bold mb-4 text-info"><i class="fa-solid fa-chart-line me-2"></i>Thống kê hệ thống</h2>
+<div class="row g-4 mb-4">
+    <div class="col-md-4 col-6">
+        <div class="card bg-dark text-white text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@(ViewBag.TotalUsers != null ? ViewBag.TotalUsers : "-")</div>
+                <div>Người dùng</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-6">
+        <div class="card bg-danger text-white text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@(ViewBag.TotalRooms != null ? ViewBag.TotalRooms : "-")</div>
+                <div>Phòng cho thuê</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-6">
+        <div class="card bg-secondary text-white text-center h-100">
+            <div class="card-body">
+                <div class="fs-3 fw-bold">@(ViewBag.TotalBuildings != null ? ViewBag.TotalBuildings : "-")</div>
+                <div>Tòa nhà</div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr />
+<div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
+    <label class="fw-bold me-2 mb-0">Thời gian:</label>
+    <select id="timeUnit" class="form-select w-auto">
+        <option value="month" selected>Tháng</option>
+        <option value="week">Tuần</option>
+        <option value="day">Ngày</option>
+        <option value="year">Năm</option>
+    </select>
+    <input type="number" id="timeRange" class="form-control w-auto" min="1" max="36" value="12" style="width:90px;" />
+    <span class="ms-2">Số lượng mốc</span>
+</div>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white fw-bold">Tăng trưởng người dùng theo thời gian</div>
+            <div class="card-body">
+                <canvas id="userGrowthChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-danger text-white fw-bold">Tỉ lệ vai trò người dùng</div>
+            <div class="card-body d-flex justify-content-center">
+                <div style="max-width:320px;width:100%">
+                    <canvas id="userRolePie" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark fw-bold">Số lượng bài quảng cáo theo thời gian</div>
+            <div class="card-body">
+                <canvas id="adPostChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white fw-bold">Số lượng phòng mới theo thời gian</div>
+            <div class="card-body">
+                <canvas id="roomGrowthChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let userGrowthChart, userRolePie, adPostChart, roomGrowthChart;
+        async function fetchAndRenderAll(unit, range) {
+            // Fetch growth data
+            const growthRes = await fetch(`/api/admin/statistics/growth?unit=${unit}&range=${range}`);
+            const growth = await growthRes.json();
+            // Fetch role data
+            const roleRes = await fetch(`/api/admin/statistics/roles`);
+            const role = await roleRes.json();
+            // Render charts
+            renderCharts(growth.userGrowth, role, growth.adPostGrowth, growth.roomGrowth);
+        }
+        function renderCharts(userGrowth, userRole, adPost, roomGrowth) {
+            if (userGrowthChart) userGrowthChart.destroy();
+            if (userRolePie) userRolePie.destroy();
+            if (adPostChart) adPostChart.destroy();
+            if (roomGrowthChart) roomGrowthChart.destroy();
+            userGrowthChart = new Chart(document.getElementById('userGrowthChart'), {
+                type: 'line',
+                data: {
+                    labels: userGrowth.labels,
+                    datasets: [{
+                        label: 'Người dùng mới',
+                        data: userGrowth.data,
+                        borderColor: '#212529',
+                        backgroundColor: 'rgba(33,37,41,0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {responsive: true, plugins: {legend: {display: false}}}
+            });
+            userRolePie = new Chart(document.getElementById('userRolePie'), {
+                type: 'doughnut',
+                data: {
+                    labels: userRole.labels,
+                    datasets: [{
+                        data: userRole.data,
+                        backgroundColor: ['#212529', '#dc3545', '#ffc107', '#198754', '#0dcaf0']
+                    }]
+                },
+                options: {responsive: true, plugins: {legend: {position: 'bottom'}}, cutout: '70%'}
+            });
+            adPostChart = new Chart(document.getElementById('adPostChart'), {
+                type: 'bar',
+                data: {
+                    labels: adPost.labels,
+                    datasets: [{
+                        label: 'Bài quảng cáo',
+                        data: adPost.data,
+                        backgroundColor: '#dc3545'
+                    }]
+                },
+                options: {responsive: true, plugins: {legend: {display: false}}}
+            });
+            roomGrowthChart = new Chart(document.getElementById('roomGrowthChart'), {
+                type: 'bar',
+                data: {
+                    labels: roomGrowth.labels,
+                    datasets: [{
+                        label: 'Phòng mới',
+                        data: roomGrowth.data,
+                        backgroundColor: '#198754'
+                    }]
+                },
+                options: {responsive: true, plugins: {legend: {display: false}}}
+            });
+        }
+        // Khởi tạo lần đầu
+        fetchAndRenderAll('month', 12);
+        // Xử lý filter thời gian
+        document.getElementById('timeUnit').onchange = document.getElementById('timeRange').onchange = function() {
+            const unit = document.getElementById('timeUnit').value;
+            const range = parseInt(document.getElementById('timeRange').value) || 12;
+            fetchAndRenderAll(unit, range);
+        };
+    </script>
+}
+<style>
+    .card-header { font-size: 1.1rem; }
+    .card { border-radius: 1rem; }
+    .card .fw-bold { font-size: 1.3rem; }
+    #userRolePie { max-width: 320px; margin: 0 auto; }
+</style>

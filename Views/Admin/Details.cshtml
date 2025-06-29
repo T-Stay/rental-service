@@ -1,0 +1,33 @@
+@model RentalService.Models.User
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+}
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-user me-2"></i>Chi tiết người dùng</h2>
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-2">
+                    <img src="@Model.AvatarUrl" class="img-fluid rounded-circle border" style="max-width:100px;" alt="Avatar" />
+                </div>
+                <div class="col-md-10">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Họ tên</dt>
+                        <dd class="col-sm-9">@Model.Name</dd>
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">@Model.Email</dd>
+                        <dt class="col-sm-3">Vai trò</dt>
+                        <dd class="col-sm-9">@Model.Role</dd>
+                        <dt class="col-sm-3">Ngày tạo</dt>
+                        <dd class="col-sm-9">@Model.CreatedAt.ToString("dd/MM/yyyy")</dd>
+                        <dt class="col-sm-3">Trạng thái</dt>
+                        <dd class="col-sm-9">@(Model.LockoutEnd != null && Model.LockoutEnd > DateTimeOffset.Now ? "Đã khóa" : "Hoạt động")</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left"></i> Quay lại</a>
+    <a href="@Url.Action("Edit", new { id = Model.Id })" class="btn btn-primary"><i class="fa-solid fa-pen"></i> Sửa</a>
+    <a href="@Url.Action("Lock", new { id = Model.Id })" class="btn btn-danger"><i class="fa-solid fa-lock"></i> Khóa tài khoản</a>
+</div>

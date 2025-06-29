@@ -1,0 +1,20 @@
+@model RentalService.Models.User
+@{
+    ViewData["Title"] = "Sửa người dùng";
+}
+<div class="container mt-4">
+    <h2 class="fw-bold mb-4 text-primary"><i class="fa-solid fa-pen me-2"></i>Sửa người dùng</h2>
+    <form asp-action="Edit" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <div class="mb-3">
+            <label class="form-label">Họ tên</label>
+            <input type="text" name="name" class="form-control" value="@Model.Name" required />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" value="@Model.Email" required />
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Lưu</button>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2"><i class="fa-solid fa-arrow-left"></i> Quay lại</a>
+    </form>
+</div>

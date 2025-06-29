@@ -1,0 +1,82 @@
+@model List<RentalService.Models.User>
+@{
+    ViewData["Title"] = "Quản lý người dùng";
+}
+<!-- Navigation bar for admin views -->
+<nav class="mb-4">
+    <ul class="nav nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" href="@Url.Action("Index", "Admin")">
+                <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "UserList" ? "active" : "")" href="@Url.Action("UserList", "Admin")">
+                <i class="fa-solid fa-users"></i> Người dùng
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Statistics" ? "active" : "")" href="@Url.Action("Statistics", "Admin")">
+                <i class="fa-solid fa-chart-line"></i> Thống kê
+            </a>
+        </li>
+        <!-- Bỏ nút duyệt phòng -->
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AdPostsToApprove" ? "active" : "")" href="@Url.Action("AdPostsToApprove", "Admin")">
+                <i class="fa-solid fa-bullhorn"></i> Duyệt quảng cáo
+            </a>
+        </li>
+    </ul>
+</nav>
+<h2 class="fw-bold mb-4 text-info"><i class="fa-solid fa-users me-2"></i>Quản lý người dùng</h2>
+<table id="userTable" class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th style="display:none">Họ tên</th>
+            <th>Vai trò</th>
+            <th>Ngày tạo</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Email</td>
+                <td style="display:none">@user.Name</td>
+                <td>@user.Role.ToString()</td>
+                <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td>
+                    @(user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow ? "Đã khóa" : "Hoạt động")
+                </td>
+                <td>
+                    <a href="@Url.Action("Details", "Admin", new { id = user.Id })" class="btn btn-sm btn-info">Chi tiết</a>
+                    <a href="@Url.Action("Edit", "Admin", new { id = user.Id })" class="btn btn-sm btn-warning">Sửa</a>
+                    @if (user.LockoutEnd == null || user.LockoutEnd < DateTimeOffset.UtcNow)
+                    {
+                        <a href="@Url.Action("Lock", "Admin", new { id = user.Id })" class="btn btn-sm btn-danger">Khóa</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#userTable').DataTable({
+                "columnDefs": [
+                    { "targets": 1, "visible": false } // Ẩn cột họ tên (index 1)
+                ],
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json"
+                }
+            });
+        });
+    </script>
+}

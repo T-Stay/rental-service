@@ -1,0 +1,24 @@
+@model IEnumerable<RentalService.Models.User>
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Vai trò</th>
+                <th>Ngày tạo</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Model.OrderByDescending(u => u.CreatedAt).Take(8))
+        {
+            <tr>
+                <td>@user.Name</td>
+                <td>@user.Email</td>
+                <td>@user.Role</td>
+                <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

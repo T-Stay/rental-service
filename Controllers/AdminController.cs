@@ -24,10 +24,135 @@ namespace RentalService.Controllers
             _context = context;
         }
 
+        // Dashboard - hiển thị số liệu thống kê tổng quan
         public IActionResult Index()
         {
-            var users = _userManager.Users.ToList();
+            var totalUsers = _userManager.Users.Count();
+            var totalBuildings = _context.Buildings.Count();
+            var totalRooms = _context.Rooms.Count();
+            var totalPendingAds = _context.AdPosts.Count(a => !a.IsActive);
+
+            ViewBag.TotalUsers = totalUsers;
+            ViewBag.TotalBuildings = totalBuildings;
+            ViewBag.TotalRooms = totalRooms;
+            ViewBag.PendingAds = totalPendingAds;
+            return View();
+        }
+
+        // Quản lý người dùng
+        public IActionResult UserList()
+        {
+            var users = _userManager.Users.OrderByDescending(u => u.CreatedAt).ToList();
             return View(users);
+        }
+
+        // Thống kê hệ thống (chi tiết, truyền dữ liệu cho biểu đồ, hỗ trợ filter thời gian)
+        public IActionResult Statistics(string unit = "month", int range = 12)
+        {
+            var totalUsers = _userManager.Users.Count();
+            var totalRooms = _context.Rooms.Count();
+            var totalBuildings = _context.Buildings.Count();
+            var totalAdPosts = _context.AdPosts.Count();
+            var totalPendingAds = _context.AdPosts.Count(a => !a.IsActive);
+            var totalPendingRooms = _context.Rooms.Count(r => r.Status == RoomStatus.Inactive);
+
+            // Xác định bước thời gian
+            DateTime now = DateTime.UtcNow;
+            Func<DateTime, DateTime> stepBack;
+            Func<DateTime, string> labelFormat;
+            switch (unit)
+            {
+                case "day":
+                    stepBack = d => d.AddDays(-1);
+                    labelFormat = d => d.ToString("dd/MM");
+                    break;
+                case "week":
+                    stepBack = d => d.AddDays(-7);
+                    labelFormat = d => $"Tuần {System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(d, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday)}/{d.Year}";
+                    break;
+                case "year":
+                    stepBack = d => d.AddYears(-1);
+                    labelFormat = d => d.ToString("yyyy");
+                    break;
+                default:
+                    stepBack = d => d.AddMonths(-1);
+                    labelFormat = d => d.ToString("MM/yyyy");
+                    break;
+            }
+            // Tạo các mốc thời gian
+            var timePoints = Enumerable.Range(0, range)
+                .Select(i => {
+                    var d = now;
+                    for (int j = 0; j < i; j++) d = stepBack(d);
+                    return d;
+                })
+                .Reverse()
+                .ToList();
+
+            // Tăng trưởng người dùng
+            var userGrowth = timePoints.Select(d => new {
+                Label = labelFormat(d),
+                Count = unit switch
+                {
+                    "day" => _userManager.Users.Count(u => u.CreatedAt.Date == d.Date),
+                    "week" => _userManager.Users.Count(u => System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(u.CreatedAt, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday) == System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(d, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday) && u.CreatedAt.Year == d.Year),
+                    "year" => _userManager.Users.Count(u => u.CreatedAt.Year == d.Year),
+                    _ => _userManager.Users.Count(u => u.CreatedAt.Year == d.Year && u.CreatedAt.Month == d.Month)
+                }
+            }).ToList();
+            ViewBag.UserGrowthData = System.Text.Json.JsonSerializer.Serialize(new {
+                labels = userGrowth.Select(x => x.Label),
+                data = userGrowth.Select(x => x.Count)
+            });
+
+            // Tỉ lệ vai trò người dùng
+            var roles = Enum.GetValues(typeof(UserRole)).Cast<UserRole>().ToList();
+            var roleLabels = roles.Select(r => r.ToString()).ToList();
+            var roleCounts = roles.Select(r => _userManager.Users.Count(u => u.Role == r)).ToList();
+            ViewBag.UserRoleData = System.Text.Json.JsonSerializer.Serialize(new {
+                labels = roleLabels,
+                data = roleCounts
+            });
+
+            // Số lượng bài quảng cáo theo thời gian
+            var adPostGrowth = timePoints.Select(d => new {
+                Label = labelFormat(d),
+                Count = unit switch
+                {
+                    "day" => _context.AdPosts.Count(a => a.CreatedAt.Date == d.Date),
+                    "week" => _context.AdPosts.Count(a => System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(a.CreatedAt, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday) == System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(d, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday) && a.CreatedAt.Year == d.Year),
+                    "year" => _context.AdPosts.Count(a => a.CreatedAt.Year == d.Year),
+                    _ => _context.AdPosts.Count(a => a.CreatedAt.Year == d.Year && a.CreatedAt.Month == d.Month)
+                }
+            }).ToList();
+            ViewBag.AdPostData = System.Text.Json.JsonSerializer.Serialize(new {
+                labels = adPostGrowth.Select(x => x.Label),
+                data = adPostGrowth.Select(x => x.Count)
+            });
+
+            // Số lượng phòng mới theo thời gian
+            var roomGrowth = timePoints.Select(d => new {
+                Label = labelFormat(d),
+                Count = unit switch
+                {
+                    "day" => _context.Rooms.Count(r => r.CreatedAt.Date == d.Date),
+                    "week" => _context.Rooms.Count(r => System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(r.CreatedAt, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday) == System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(d, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday) && r.CreatedAt.Year == d.Year),
+                    "year" => _context.Rooms.Count(r => r.CreatedAt.Year == d.Year),
+                    _ => _context.Rooms.Count(r => r.CreatedAt.Year == d.Year && r.CreatedAt.Month == d.Month)
+                }
+            }).ToList();
+            ViewBag.RoomGrowthData = System.Text.Json.JsonSerializer.Serialize(new {
+                labels = roomGrowth.Select(x => x.Label),
+                data = roomGrowth.Select(x => x.Count)
+            });
+
+            ViewBag.TotalUsers = totalUsers;
+            ViewBag.TotalRooms = totalRooms;
+            ViewBag.TotalBuildings = totalBuildings;
+            ViewBag.TotalAdPosts = totalAdPosts;
+            ViewBag.PendingAds = totalPendingAds;
+            ViewBag.PendingRooms = totalPendingRooms;
+            return View();
         }
 
         // GET: /Admin/RoomsToApprove
@@ -117,6 +242,45 @@ namespace RentalService.Controllers
                 .OrderByDescending(r => r.CreatedAt)
                 .ToList();
             return View(rooms);
+        }
+
+        // GET: /Admin/Details/{id}
+        public IActionResult Details(Guid id)
+        {
+            var user = _userManager.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+            return View(user);
+        }
+
+        // GET: /Admin/Edit/{id}
+        public IActionResult Edit(Guid id)
+        {
+            var user = _userManager.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+            return View(user);
+        }
+
+        // POST: /Admin/Edit/{id}
+        [HttpPost]
+        public IActionResult Edit(Guid id, string name, string email)
+        {
+            var user = _userManager.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+            user.Name = name;
+            user.Email = email;
+            _context.SaveChanges();
+            return RedirectToAction("Index");
+        }
+
+        // GET: /Admin/Lock/{id}
+        public IActionResult Lock(Guid id)
+        {
+            var user = _userManager.Users.FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+            user.LockoutEnabled = true;
+            user.LockoutEnd = DateTimeOffset.MaxValue;
+            _context.SaveChanges();
+            return RedirectToAction("Index");
         }
 
         // Add more actions for role management as needed
