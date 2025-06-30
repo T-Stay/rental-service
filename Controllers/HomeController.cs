@@ -19,12 +19,11 @@ public class HomeController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index(string? search)
+    public async Task<IActionResult> Index(string? search, decimal? minPrice, decimal? maxPrice, string[] amenities, string sort, double? centerLat, double? centerLng, double? radius, string advanceAddress, double? minArea, double? maxArea)
     {
-        // if authenticated, redirect to the appropriate dashboard
         try
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 if (User.IsInRole("admin"))
                 {
@@ -35,23 +34,84 @@ public class HomeController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during authentication check in HomeController.Index");
-            // Handle the error as needed, e.g., show an error page or log it
         }
         var query = _context.AdPosts
             .Include(a => a.UserAdPackage)
             .Include(a => a.Rooms)
+                .ThenInclude(r => r.Amenities)
+            .Include(a => a.Rooms)
+                .ThenInclude(r => r.Building)
             .Where(a => a.IsActive && a.UserAdPackage.IsActive && a.UserAdPackage.ExpiryDate > DateTime.Now);
+        ViewBag.Amenities = await _context.Amenities.ToListAsync();
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(a => a.Title.Contains(search) || a.Content.Contains(search));
             ViewBag.Search = search;
         }
-        var ads = await query
+        var adList = await query
             .OrderByDescending(a => a.PackageType)
             .ThenBy(a => a.PriorityOrder)
-            .Take(12)
             .ToListAsync();
-        return View(ads);
+        // Lọc theo phòng bên trong quảng cáo
+        if (minPrice.HasValue)
+            adList = adList.Where(ad => ad.Rooms != null && ad.Rooms.Any(r => r.Price >= minPrice)).ToList();
+        if (maxPrice.HasValue)
+            adList = adList.Where(ad => ad.Rooms != null && ad.Rooms.Any(r => r.Price <= maxPrice)).ToList();
+        if (minArea.HasValue)
+            adList = adList.Where(ad => ad.Rooms != null && ad.Rooms.Any(r => r.Area >= minArea)).ToList();
+        if (maxArea.HasValue)
+            adList = adList.Where(ad => ad.Rooms != null && ad.Rooms.Any(r => r.Area <= maxArea)).ToList();
+        if (amenities != null && amenities.Length > 0)
+        {
+            var amenityGuids = amenities.Select(a => Guid.Parse(a)).ToList();
+            adList = adList.Where(ad => ad.Rooms != null && ad.Rooms.Any(r => r.Amenities != null && amenityGuids.All(ag => r.Amenities.Any(a => a.Id == ag)))).ToList();
+        }
+        // Lọc theo vị trí nâng cao (bán kính, lat/lng)
+        if (centerLat.HasValue && centerLng.HasValue && radius.HasValue && radius > 0)
+        {
+            double toRad(double deg) => deg * Math.PI / 180.0;
+            double haversine(double lat1, double lon1, double lat2, double lon2)
+            {
+                double R = 6371;
+                double dLat = toRad(lat2 - lat1);
+                double dLon = toRad(lon2 - lon1);
+                double a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(toRad(lat1)) * Math.Cos(toRad(lat2)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+                double c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+                return R * c;
+            }
+            adList = adList.Where(ad => ad.Rooms != null && ad.Rooms.Any(r =>
+                r.Building != null &&
+                !string.IsNullOrEmpty(r.Building.Location) &&
+                r.Building.Location.Contains(",") &&
+                double.TryParse(r.Building.Location.Split(',')[0], out double lat) &&
+                double.TryParse(r.Building.Location.Split(',')[1], out double lng) &&
+                haversine(centerLat.Value, centerLng.Value, lat, lng) <= radius.Value
+            )).ToList();
+        }
+        // Sắp xếp
+        switch (sort)
+        {
+            case "price_asc":
+                adList = adList.OrderBy(ad => ad.Rooms != null && ad.Rooms.Any() ? ad.Rooms.Min(r => r.Price) : decimal.MaxValue).ToList();
+                break;
+            case "price_desc":
+                adList = adList.OrderByDescending(ad => ad.Rooms != null && ad.Rooms.Any() ? ad.Rooms.Max(r => r.Price) : decimal.MinValue).ToList();
+                break;
+            case "area_asc":
+                adList = adList.OrderBy(ad => ad.Rooms != null && ad.Rooms.Any() ? ad.Rooms.Min(r => r.Area) : double.MaxValue).ToList();
+                break;
+            case "area_desc":
+                adList = adList.OrderByDescending(ad => ad.Rooms != null && ad.Rooms.Any() ? ad.Rooms.Max(r => r.Area) : double.MinValue).ToList();
+                break;
+            default:
+                adList = adList.OrderByDescending(ad => ad.PackageType).ThenBy(ad => ad.PriorityOrder).ToList();
+                break;
+        }
+        // Giới hạn số lượng hiển thị (giữ nguyên Take(12) như cũ)
+        adList = adList.Take(12).ToList();
+        return View(adList);
     }
 
     // Demo layout: render Index2.cshtml

@@ -1,0 +1,313 @@
+@* Sidebar filter for AdPost search (Home) *@
+@{
+    var amenities = ViewBag.Amenities as List<RentalService.Models.Amenity>;
+    var selectedAmenities = Context.Request.Query["amenities"].ToString().Split(',', System.StringSplitOptions.RemoveEmptyEntries);
+    var minPrice = Context.Request.Query["minPrice"];
+    var maxPrice = Context.Request.Query["maxPrice"];
+    var minArea = Context.Request.Query["minArea"];
+    var maxArea = Context.Request.Query["maxArea"];
+    var sort = Context.Request.Query["sort"];
+    var radius = Context.Request.Query["radius"];
+    var centerLat = Context.Request.Query["centerLat"];
+    var centerLng = Context.Request.Query["centerLng"];
+    var advanceAddress = Context.Request.Query["advanceAddress"];
+    var hasAdvance = !string.IsNullOrEmpty(radius) && !string.IsNullOrEmpty(centerLat) && !string.IsNullOrEmpty(centerLng);
+    if (amenities != null && selectedAmenities.Length > 0)
+    {
+        amenities = amenities.OrderByDescending(a => selectedAmenities.Contains(a.Id.ToString())).ToList();
+    }
+}
+<form method="get" id="adPostFilterForm">
+<div class="p-3 bg-light rounded shadow-sm mb-4">
+    <h5>Bộ lọc quảng cáo</h5>
+    <div class="mb-3">
+        <label class="form-label">Sắp xếp</label>
+        <select name="sort" class="form-select">
+            @if (string.IsNullOrEmpty(sort))
+            {
+                <option value="" selected>Mặc định</option>
+            }
+            else
+            {
+                <option value="">Mặc định</option>
+            }
+            @if (sort == "price_asc")
+            {
+                <option value="price_asc" selected>Giá tăng dần</option>
+            }
+            else
+            {
+                <option value="price_asc">Giá tăng dần</option>
+            }
+            @if (sort == "price_desc")
+            {
+                <option value="price_desc" selected>Giá giảm dần</option>
+            }
+            else
+            {
+                <option value="price_desc">Giá giảm dần</option>
+            }
+            @if (sort == "area_asc")
+            {
+                <option value="area_asc" selected>Diện tích tăng dần</option>
+            }
+            else
+            {
+                <option value="area_asc">Diện tích tăng dần</option>
+            }
+            @if (sort == "area_desc")
+            {
+                <option value="area_desc" selected>Diện tích giảm dần</option>
+            }
+            else
+            {
+                <option value="area_desc">Diện tích giảm dần</option>
+            }
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Giá phòng (VND)</label>
+        <div class="d-flex align-items-center gap-2">
+            <input type="number" name="minPrice" class="form-control" placeholder="Từ" value="@minPrice" min="0" style="max-width:100px;" />
+            <span>-</span>
+            <input type="number" name="maxPrice" class="form-control" placeholder="Đến" value="@maxPrice" min="0" style="max-width:100px;" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Diện tích phòng (m²)</label>
+        <div class="d-flex align-items-center gap-2">
+            <input type="number" name="minArea" class="form-control" placeholder="Từ" value="@minArea" min="0" style="max-width:100px;" step="0.1" />
+            <span>-</span>
+            <input type="number" name="maxArea" class="form-control" placeholder="Đến" value="@maxArea" min="0" style="max-width:100px;" step="0.1" />
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Tiện ích phòng</label>
+        <div class="d-flex flex-wrap gap-2 amenities-list expanded" id="adAmenitiesList" style="max-height:180px;overflow:auto;transition:max-height 0.5s cubic-bezier(0.4,0,0.2,1);will-change:max-height;overflow:hidden;">
+            @if (amenities != null)
+            {
+                foreach (var a in amenities)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="amenities" value="@a.Id" id="ad_amenity_@a.Id" @(selectedAmenities.Contains(a.Id.ToString()) ? "checked" : "") />
+                        <label class="form-check-label" for="ad_amenity_@a.Id">@a.Name</label>
+                    </div>
+                }
+            }
+        </div>
+        <div class="d-flex justify-content-center">
+            <button class="toggle-btn mt-1" type="button" id="toggleAmenitiesBtn"><i class="fa fa-chevron-down ms-1"></i></button>
+        </div>
+    </div>
+    <button class="toggle-btn-advance mb-2" type="button" id="toggleAdvanceBtn"><span>Tìm kiếm nâng cao</span> <i class="fa fa-chevron-down ms-1"></i></button>
+    <div id="advanceOptions" style="display:@(hasAdvance ? "block" : "none")">
+        <div class="mb-3">
+            <label class="form-label">Địa điểm cụ thể</label>
+            <input type="text" class="form-control" id="advanceAddress" name="advanceAddress" placeholder="Nhập địa chỉ hoặc chọn trên bản đồ" autocomplete="off" value="@advanceAddress" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Chọn vị trí trên bản đồ</label>
+            <div id="advanceMap" style="height: 250px;"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Bán kính (km)</label>
+            <input type="number" min="0.1" step="0.1" name="radius" class="form-control" placeholder="Nhập bán kính" value="@radius" />
+        </div>
+        <input type="hidden" name="centerLat" id="advanceLat" value="@centerLat" />
+        <input type="hidden" name="centerLng" id="advanceLng" value="@centerLng" />
+    </div>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary w-100">Áp dụng</button>
+        <button type="button" class="btn btn-secondary w-100" id="resetAdPostFilterBtn">Đặt lại</button>
+    </div>
+    <style>
+    .toggle-btn {
+        background: none;
+        border: none;
+        color: #0d6efd;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+        margin: 0 auto;
+        width: 100%;
+    }
+    .toggle-btn:focus {
+        outline: none;
+        color: #0a58ca;
+    }
+    .toggle-btn .fa-chevron-down {
+        transition: transform 0.3s;
+    }
+    .toggle-btn.expanded .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+    .amenities-list.collapsed {
+        max-height: 40px !important;
+        overflow: hidden !important;
+        mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    }
+    .amenities-list.expanded {
+        max-height: 1000px !important;
+        mask-image: none;
+    }
+    .amenities-list.scrolling {
+        overflow-y: auto !important;
+    }
+    .toggle-btn-advance {
+        background: none;
+        border: none;
+        color: #198754;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: color 0.2s;
+    }
+    .toggle-btn-advance:focus {
+        outline: none;
+        color: #145c32;
+    }
+    .toggle-btn-advance .fa-chevron-down {
+        transition: transform 0.3s;
+    }
+    .toggle-btn-advance.expanded .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var filterForm = document.getElementById('adPostFilterForm');
+    var toggleBtn = document.getElementById('toggleAdvanceBtn');
+    var advanceOptions = document.getElementById('advanceOptions');
+    var amenitiesList = document.getElementById('adAmenitiesList');
+    var toggleAmenitiesBtn = document.getElementById('toggleAmenitiesBtn');
+    var advanceExpanded = advanceOptions && advanceOptions.style.display !== 'none';
+    var collapsed = false;
+    if (toggleBtn && advanceOptions) {
+        toggleBtn.onclick = function(e) {
+            e.preventDefault();
+            advanceExpanded = !advanceExpanded;
+            advanceOptions.style.display = advanceExpanded ? 'block' : 'none';
+            if (advanceExpanded) {
+                toggleBtn.classList.add('expanded');
+            } else {
+                toggleBtn.classList.remove('expanded');
+            }
+            if (advanceExpanded && window.map) {
+                setTimeout(function() { window.map.invalidateSize(); }, 200);
+            }
+        };
+        if (advanceExpanded) toggleBtn.classList.add('expanded');
+        else toggleBtn.classList.remove('expanded');
+    }
+    if (toggleAmenitiesBtn && amenitiesList) {
+        amenitiesList.addEventListener('transitionend', function(e) {
+            if (!collapsed && amenitiesList.classList.contains('expanded')) {
+                amenitiesList.classList.add('scrolling');
+            } else {
+                amenitiesList.classList.remove('scrolling');
+            }
+        });
+        toggleAmenitiesBtn.onclick = function() {
+            collapsed = !collapsed;
+            if (collapsed) {
+                amenitiesList.classList.remove('expanded');
+                amenitiesList.classList.add('collapsed');
+                toggleAmenitiesBtn.classList.remove('expanded');
+                amenitiesList.classList.remove('scrolling');
+            } else {
+                amenitiesList.classList.remove('collapsed');
+                amenitiesList.classList.add('expanded');
+                toggleAmenitiesBtn.classList.add('expanded');
+            }
+        };
+        amenitiesList.classList.add('expanded');
+        toggleAmenitiesBtn.classList.add('expanded');
+        setTimeout(function() { amenitiesList.classList.add('scrolling'); }, 600);
+    }
+    if (filterForm) {
+        filterForm.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                return false;
+            }
+        });
+        var resetBtn = document.getElementById('resetAdPostFilterBtn');
+        if (resetBtn) {
+            resetBtn.onclick = function() {
+                var amenityCheckboxes = filterForm.querySelectorAll('input[name="amenities"]');
+                amenityCheckboxes.forEach(function(cb) { cb.checked = false; });
+                filterForm.querySelector('input[name="minPrice"]').value = '';
+                filterForm.querySelector('input[name="maxPrice"]').value = '';
+                filterForm.querySelector('input[name="minArea"]').value = '';
+                filterForm.querySelector('input[name="maxArea"]').value = '';
+                filterForm.querySelector('select[name="sort"]').selectedIndex = 0;
+                var radius = filterForm.querySelector('input[name="radius"]');
+                if (radius) radius.value = '';
+                var advanceAddress = filterForm.querySelector('input[name="advanceAddress"]');
+                if (advanceAddress) advanceAddress.value = '';
+                var advanceLat = filterForm.querySelector('input[name="centerLat"]');
+                var advanceLng = filterForm.querySelector('input[name="centerLng"]');
+                if (advanceLat) advanceLat.value = '';
+                if (advanceLng) advanceLng.value = '';
+                if (window.map) {
+                    var defaultLat = 21.0285, defaultLng = 105.8542;
+                    window.map.setView([defaultLat, defaultLng], 13);
+                    if (typeof window.marker !== 'undefined') {
+                        window.marker.setLatLng([defaultLat, defaultLng]);
+                    }
+                }
+            };
+        }
+    }
+    // Map init
+    if (document.getElementById('advanceMap')) {
+        var defaultLat = 21.0285, defaultLng = 105.8542;
+        var lat = document.getElementById('advanceLat').value || defaultLat;
+        var lng = document.getElementById('advanceLng').value || defaultLng;
+        lat = parseFloat(lat); lng = parseFloat(lng);
+        window.map = L.map('advanceMap').setView([lat, lng], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(window.map);
+        window.marker = L.marker([lat, lng], { draggable: true }).addTo(window.map);
+        function setAdvanceLocation(lat, lng) {
+            window.marker.setLatLng([lat, lng]);
+            window.map.setView([lat, lng], 16);
+            document.getElementById('advanceLat').value = lat;
+            document.getElementById('advanceLng').value = lng;
+        }
+        window.marker.on('dragend', function (e) {
+            let pos = window.marker.getLatLng();
+            setAdvanceLocation(pos.lat, pos.lng);
+        });
+        var addressInput = document.getElementById('advanceAddress');
+        if (addressInput) {
+            let debounceTimeout = null;
+            addressInput.addEventListener('input', function () {
+                let address = this.value;
+                if (debounceTimeout) clearTimeout(debounceTimeout);
+                debounceTimeout = setTimeout(function() {
+                    if (!address) return;
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                        .then(res => res.json())
+                        .then(function(data) {
+                            if (data && data.length > 0) {
+                                setAdvanceLocation(data[0].lat, data[0].lon);
+                            }
+                        });
+                }, 500);
+            });
+        }
+        var adv = document.getElementById('advanceOptions');
+        if (adv && adv.style.display !== 'none') {
+            setTimeout(function() { window.map.invalidateSize(); }, 200);
+        }
+    }
+});
+</script>
+</div>
+</form>
