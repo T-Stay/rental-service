@@ -283,6 +283,76 @@ namespace RentalService.Controllers
             return RedirectToAction("Index");
         }
 
+        // API: Thống kê số lượng gói được mua theo thời gian
+        [HttpGet]
+        [Route("api/admin/statistics/adpackages/growth")]
+        public IActionResult AdPackageGrowth(string unit = "month", int range = 12)
+        {
+            DateTime now = DateTime.UtcNow;
+            Func<DateTime, DateTime> stepBack;
+            Func<DateTime, string> labelFormat;
+            switch (unit)
+            {
+                case "day":
+                    stepBack = d => d.AddDays(-1);
+                    labelFormat = d => d.ToString("dd/MM");
+                    break;
+                case "week":
+                    stepBack = d => d.AddDays(-7);
+                    labelFormat = d => $"Tuần {System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(d, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday)}/{d.Year}";
+                    break;
+                case "year":
+                    stepBack = d => d.AddYears(-1);
+                    labelFormat = d => d.ToString("yyyy");
+                    break;
+                default:
+                    stepBack = d => d.AddMonths(-1);
+                    labelFormat = d => d.ToString("MM/yyyy");
+                    break;
+            }
+            var timePoints = Enumerable.Range(0, range)
+                .Select(i => { var d = now; for (int j = 0; j < i; j++) d = stepBack(d); return d; })
+                .Reverse().ToList();
+            var types = Enum.GetValues(typeof(AdPackageType)).Cast<AdPackageType>().ToList();
+            var labels = timePoints.Select(d => labelFormat(d)).ToList();
+
+            // Lấy toàn bộ UserAdPackages về memory để xử lý tuần
+            var allPackages = _context.UserAdPackages.AsNoTracking().ToList();
+            var datasets = types.Select(type => new {
+                label = type.ToVietnameseLabel(),
+                type = type,
+                data = timePoints.Select(d =>
+                {
+                    switch (unit)
+                    {
+                        case "day":
+                            return allPackages.Count(p => p.PackageType == type && p.PurchaseDate.Date == d.Date);
+                        case "week":
+                            var week = System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(d, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+                            return allPackages.Count(p => p.PackageType == type &&
+                                System.Globalization.CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(p.PurchaseDate, System.Globalization.CalendarWeekRule.FirstDay, DayOfWeek.Monday) == week &&
+                                p.PurchaseDate.Year == d.Year);
+                        case "year":
+                            return allPackages.Count(p => p.PackageType == type && p.PurchaseDate.Year == d.Year);
+                        default:
+                            return allPackages.Count(p => p.PackageType == type && p.PurchaseDate.Year == d.Year && p.PurchaseDate.Month == d.Month);
+                    }
+                }).ToList()
+            }).ToList();
+            return Json(new { labels, datasets });
+        }
+
+        // API: Tỉ lệ các loại gói đã được mua
+        [HttpGet]
+        [Route("api/admin/statistics/adpackages/ratio")]
+        public IActionResult AdPackageRatio()
+        {
+            var types = Enum.GetValues(typeof(AdPackageType)).Cast<AdPackageType>().ToList();
+            var labels = types.Select(t => t.ToVietnameseLabel()).ToList();
+            var data = types.Select(t => _context.UserAdPackages.Count(p => p.PackageType == t)).ToList();
+            return Json(new { labels, data });
+        }
+
         // Add more actions for role management as needed
     }
 }
