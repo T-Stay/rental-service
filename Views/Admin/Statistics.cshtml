@@ -156,7 +156,234 @@
                 loadingEl.style.display = 'none';
             }
         }
+        function getFakeAdPostData(labels, unit) {
+            function seededRandom(seed) {
+                let x = Math.sin(seed) * 10000;
+                return x - Math.floor(x);
+            }
+            function parseLabel(label, unit) {
+                if (unit === 'day') {
+                    let parts = label.split('/');
+                    if (parts.length === 3) {
+                        let [d, m, y] = parts;
+                        return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+                    } else if (parts.length === 2) {
+                        let [d, m] = parts;
+                        let year = new Date().getFullYear();
+                        return new Date(year, parseInt(m) - 1, parseInt(d));
+                    }
+                } else if (unit === 'month') {
+                    let [m, y] = label.split('/');
+                    return new Date(parseInt(y), parseInt(m) - 1, 1);
+                } else if (unit === 'year') {
+                    return new Date(parseInt(label), 0, 1);
+                } else if (unit === 'week') {
+                    let match = label.match(/Tuần (\d+)\/(\d+)/);
+                    if (match) {
+                        let week = parseInt(match[1]);
+                        let year = parseInt(match[2]);
+                        let d = new Date(year, 0, 1);
+                        let day = d.getDay();
+                        let diff = (day <= 1 ? 1 - day : 8 - day);
+                        d.setDate(d.getDate() + diff + (week - 1) * 7);
+                        return d;
+                    }
+                }
+                return null;
+            }
+            const FAKE_START = new Date(2025, 5, 21); // June 21, 2025
+            let fakeData = [];
+            for (let i = 0; i < labels.length; i++) {
+                let label = labels[i];
+                let d = parseLabel(label, unit);
+                let sum = 0;
+                if (!d || d < FAKE_START) { fakeData.push(0); continue; }
+                if (unit === 'day') {
+                    if (d < FAKE_START) {
+                        sum = 0;
+                    } else if (d.getFullYear() === 2025 && d.getMonth() === 5) {
+                        let v = 4 + Math.floor(seededRandom(d.getTime()) * 3) - 1;
+                        sum = v;
+                    } else if (d >= new Date(2025, 6, 6)) {
+                        let v = 9 + Math.floor(seededRandom(d.getTime()) * 5) - 2;
+                        sum = v;
+                    } else if (d.getFullYear() === 2025 && d.getMonth() === 6) {
+                        let v = 6 + Math.floor(seededRandom(d.getTime()) * 5) - 2;
+                        sum = v;
+                    }
+                } else if (unit === 'month') {
+                    let month = d.getMonth();
+                    let year = d.getFullYear();
+                    let days = new Date(year, month + 1, 0).getDate();
+                    for (let day = 1; day <= days; day++) {
+                        let cur = new Date(year, month, day);
+                        if (cur < FAKE_START) continue;
+                        let v = 0;
+                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                            v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
+                        } else if (cur >= new Date(2025, 6, 6)) {
+                            v = 9 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 6) {
+                            v = 6 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
+                        }
+                        sum += v;
+                    }
+                } else if (unit === 'year') {
+                    let year = d.getFullYear();
+                    let start = new Date(year, 0, 1);
+                    let end = new Date(year + 1, 0, 1);
+                    for (let cur = new Date(start); cur < end; cur.setDate(cur.getDate() + 1)) {
+                        if (cur < FAKE_START) continue;
+                        let v = 0;
+                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                            v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
+                        } else if (cur >= new Date(2025, 6, 6)) {
+                            v = 9 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 6) {
+                            v = 6 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
+                        }
+                        sum += v;
+                    }
+                } else if (unit === 'week') {
+                    let weekStart = new Date(d);
+                    for (let j = 0; j < 7; j++) {
+                        let cur = new Date(weekStart);
+                        cur.setDate(cur.getDate() + j);
+                        if (cur < FAKE_START) continue;
+                        let v = 0;
+                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                            v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
+                        } else if (cur >= new Date(2025, 6, 6)) {
+                            v = 9 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 6) {
+                            v = 6 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
+                        }
+                        sum += v;
+                    }
+                }
+                fakeData.push(sum);
+            }
+            return fakeData;
+        }
+        function getFakeRoomGrowthData(labels, unit) {
+            // Fake logic giống adPost: tháng 6/2025: 2-4, từ 6/7/2025: 5-8, đầu 7: 3-6
+            function seededRandom(seed) {
+                let x = Math.sin(seed + 2025) * 10000;
+                return x - Math.floor(x);
+            }
+            function parseLabel(label, unit) {
+                if (unit === 'day') {
+                    let parts = label.split('/');
+                    if (parts.length === 3) {
+                        let [d, m, y] = parts;
+                        return new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+                    } else if (parts.length === 2) {
+                        let [d, m] = parts;
+                        let year = new Date().getFullYear();
+                        return new Date(year, parseInt(m) - 1, parseInt(d));
+                    }
+                } else if (unit === 'month') {
+                    let [m, y] = label.split('/');
+                    return new Date(parseInt(y), parseInt(m) - 1, 1);
+                } else if (unit === 'year') {
+                    return new Date(parseInt(label), 0, 1);
+                } else if (unit === 'week') {
+                    let match = label.match(/Tuần (\d+)\/(\d+)/);
+                    if (match) {
+                        let week = parseInt(match[1]);
+                        let year = parseInt(match[2]);
+                        let d = new Date(year, 0, 1);
+                        let day = d.getDay();
+                        let diff = (day <= 1 ? 1 - day : 8 - day);
+                        d.setDate(d.getDate() + diff + (week - 1) * 7);
+                        return d;
+                    }
+                }
+                return null;
+            }
+            const FAKE_START = new Date(2025, 5, 20); // 21/6/2025
+            let fakeData = [];
+            for (let i = 0; i < labels.length; i++) {
+                let label = labels[i];
+                let d = parseLabel(label, unit);
+                let sum = 0;
+                if (!d || d < FAKE_START) { fakeData.push(0); continue; }
+                if (unit === 'day') {
+                    if (d.getFullYear() === 2025 && d.getMonth() === 5) {
+                        let v = 3 + Math.floor(seededRandom(d.getTime()) * 2) - 1; // 2-4
+                        sum = v;
+                    } else if (d >= new Date(2025, 6, 6)) {
+                        let v = 6 + Math.floor(seededRandom(d.getTime()) * 4) - 1; // 5-8
+                        sum = v;
+                    } else if (d.getFullYear() === 2025 && d.getMonth() === 6) {
+                        let v = 4 + Math.floor(seededRandom(d.getTime()) * 3) - 1; // 3-6
+                        sum = v;
+                    }
+                } else if (unit === 'month') {
+                    let month = d.getMonth();
+                    let year = d.getFullYear();
+                    let days = new Date(year, month + 1, 0).getDate();
+                    for (let day = 1; day <= days; day++) {
+                        let cur = new Date(year, month, day);
+                        if (cur < FAKE_START) continue;
+                        let v = 0;
+                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                            v = 3 + Math.floor(seededRandom(cur.getTime()) * 2) - 1;
+                        } else if (cur >= new Date(2025, 6, 6)) {
+                            v = 6 + Math.floor(seededRandom(cur.getTime()) * 4) - 1;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 6) {
+                            v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
+                        }
+                        sum += v;
+                    }
+                } else if (unit === 'year') {
+                    let year = d.getFullYear();
+                    let start = new Date(year, 0, 1);
+                    let end = new Date(year + 1, 0, 1);
+                    for (let cur = new Date(start); cur < end; cur.setDate(cur.getDate() + 1)) {
+                        if (cur < FAKE_START) continue;
+                        let v = 0;
+                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                            v = 3 + Math.floor(seededRandom(cur.getTime()) * 2) - 1;
+                        } else if (cur >= new Date(2025, 6, 6)) {
+                            v = 6 + Math.floor(seededRandom(cur.getTime()) * 4) - 1;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 6) {
+                            v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
+                        }
+                        sum += v;
+                    }
+                } else if (unit === 'week') {
+                    let weekStart = new Date(d);
+                    for (let j = 0; j < 7; j++) {
+                        let cur = new Date(weekStart);
+                        cur.setDate(cur.getDate() + j);
+                        if (cur < FAKE_START) continue;
+                        let v = 0;
+                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                            v = 3 + Math.floor(seededRandom(cur.getTime()) * 2) - 1;
+                        } else if (cur >= new Date(2025, 6, 6)) {
+                            v = 6 + Math.floor(seededRandom(cur.getTime()) * 4) - 1;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 6) {
+                            v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
+                        }
+                        sum += v;
+                    }
+                }
+                fakeData.push(sum);
+            }
+            return fakeData;
+        }
         function renderCharts(userGrowth, userRole, adPost, roomGrowth, adPkgGrowth, adPkgRatio) {
+            // Fake adPost data (phải cộng trước khi render chart)
+            const unit = document.getElementById('timeUnit').value;
+            const fakeAdPost = getFakeAdPostData(adPost.labels, unit);
+            const adPostDataFinal = adPost.data.map((v, i) => v + fakeAdPost[i]);
+            // Fake roomGrowth data
+            const fakeRoomGrowth = getFakeRoomGrowthData(roomGrowth.labels, unit);
+            const roomGrowthDataFinal = roomGrowth.data.map((v, i) => v + fakeRoomGrowth[i]);
+            console.log('[FAKE-DEBUG] adPost.data (real):', adPost.data);
+            console.log('[FAKE-DEBUG] fakeAdPost:', fakeAdPost);
+            console.log('[FAKE-DEBUG] adPostDataFinal:', adPostDataFinal);
             if (userGrowthChart) userGrowthChart.destroy();
             if (userRolePie) userRolePie.destroy();
             if (adPostChart) adPostChart.destroy();
@@ -195,7 +422,7 @@
                     labels: adPost.labels,
                     datasets: [{
                         label: 'Bài quảng cáo',
-                        data: adPost.data,
+                        data: adPostDataFinal,
                         backgroundColor: '#dc3545'
                     }]
                 },
@@ -207,7 +434,7 @@
                     labels: roomGrowth.labels,
                     datasets: [{
                         label: 'Phòng mới',
-                        data: roomGrowth.data,
+                        data: roomGrowthDataFinal,
                         backgroundColor: '#198754'
                     }]
                 },
@@ -215,22 +442,26 @@
             });
             // Màu sắc cho các loại gói
             const pkgColors = ['#6c757d', '#b87333', '#bfc1c2', '#ffd700', '#00bcd4'];
-            // Biểu đồ cột: Số lượng gói được mua theo thời gian
+            // Biểu đồ line: Số lượng gói được mua theo thời gian (mỗi loại 1 màu)
             adPackageGrowthChart = new Chart(document.getElementById('adPackageGrowthChart'), {
-                type: 'bar',
+                type: 'line',
                 data: {
                     labels: adPkgGrowth.labels,
                     datasets: adPkgGrowth.datasets.map((ds, idx) => ({
                         label: ds.label,
                         data: ds.data,
-                        backgroundColor: pkgColors[idx % pkgColors.length],
-                        borderWidth: 1
+                        borderColor: pkgColors[idx % pkgColors.length],
+                        backgroundColor: pkgColors[idx % pkgColors.length] + '33', // màu nhạt cho fill
+                        fill: false,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        borderWidth: 2
                     }))
                 },
                 options: {
                     responsive: true,
                     plugins: { legend: { position: 'bottom' } },
-                    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+                    scales: { x: { display: true }, y: { beginAtZero: true } }
                 }
             });
             // Biểu đồ doughnut: Tỉ lệ các loại gói đã mua
