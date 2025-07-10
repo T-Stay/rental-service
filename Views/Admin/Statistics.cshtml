@@ -192,6 +192,7 @@
                 return null;
             }
             const FAKE_START = new Date(2025, 5, 21); // June 21, 2025
+            const FAKE_BOOM = new Date(2025, 5, 27); // June 27, 2025
             let fakeData = [];
             for (let i = 0; i < labels.length; i++) {
                 let label = labels[i];
@@ -201,6 +202,10 @@
                 if (unit === 'day') {
                     if (d < FAKE_START) {
                         sum = 0;
+                    } else if (d >= FAKE_BOOM) {
+                        // Bùng nổ: 18-25
+                        let v = 21 + Math.floor(seededRandom(d.getTime()) * 7) - 3;
+                        sum = v;
                     } else if (d.getFullYear() === 2025 && d.getMonth() === 5) {
                         let v = 4 + Math.floor(seededRandom(d.getTime()) * 3) - 1;
                         sum = v;
@@ -219,7 +224,9 @@
                         let cur = new Date(year, month, day);
                         if (cur < FAKE_START) continue;
                         let v = 0;
-                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                        if (cur >= FAKE_BOOM) {
+                            v = 21 + Math.floor(seededRandom(cur.getTime()) * 7) - 3;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
                             v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
                         } else if (cur >= new Date(2025, 6, 6)) {
                             v = 9 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
@@ -235,7 +242,9 @@
                     for (let cur = new Date(start); cur < end; cur.setDate(cur.getDate() + 1)) {
                         if (cur < FAKE_START) continue;
                         let v = 0;
-                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                        if (cur >= FAKE_BOOM) {
+                            v = 21 + Math.floor(seededRandom(cur.getTime()) * 7) - 3;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
                             v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
                         } else if (cur >= new Date(2025, 6, 6)) {
                             v = 9 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
@@ -251,7 +260,9 @@
                         cur.setDate(cur.getDate() + j);
                         if (cur < FAKE_START) continue;
                         let v = 0;
-                        if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
+                        if (cur >= FAKE_BOOM) {
+                            v = 21 + Math.floor(seededRandom(cur.getTime()) * 7) - 3;
+                        } else if (cur.getFullYear() === 2025 && cur.getMonth() === 5) {
                             v = 4 + Math.floor(seededRandom(cur.getTime()) * 3) - 1;
                         } else if (cur >= new Date(2025, 6, 6)) {
                             v = 9 + Math.floor(seededRandom(cur.getTime()) * 5) - 2;
@@ -266,7 +277,6 @@
             return fakeData;
         }
         function getFakeRoomGrowthData(labels, unit) {
-            // Fake logic giống adPost: tháng 6/2025: 2-4, từ 6/7/2025: 5-8, đầu 7: 3-6
             function seededRandom(seed) {
                 let x = Math.sin(seed + 2025) * 10000;
                 return x - Math.floor(x);
@@ -301,7 +311,7 @@
                 }
                 return null;
             }
-            const FAKE_START = new Date(2025, 5, 20); // 21/6/2025
+            const FAKE_START = new Date(2025, 5, 20); // June 20, 2025
             let fakeData = [];
             for (let i = 0; i < labels.length; i++) {
                 let label = labels[i];
