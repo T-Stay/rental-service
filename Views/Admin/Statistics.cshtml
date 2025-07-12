@@ -44,7 +44,7 @@
     <div class="col-md-4 col-6">
         <div class="card bg-danger text-white text-center h-100">
             <div class="card-body">
-                <div class="fs-3 fw-bold">@(ViewBag.TotalRooms != null ? ViewBag.TotalRooms : "-")</div>
+                <div id="totalRooms" class="fs-3 fw-bold">@(ViewBag.TotalRooms != null ? ViewBag.TotalRooms : "-")</div>
                 <div>Phòng cho thuê</div>
             </div>
         </div>
@@ -52,7 +52,7 @@
     <div class="col-md-4 col-6">
         <div class="card bg-secondary text-white text-center h-100">
             <div class="card-body">
-                <div class="fs-3 fw-bold">@(ViewBag.TotalBuildings != null ? ViewBag.TotalBuildings : "-")</div>
+                <div id="totalBuildings" class="fs-3 fw-bold">@(ViewBag.TotalBuildings != null ? ViewBag.TotalBuildings : "-")</div>
                 <div>Tòa nhà</div>
             </div>
         </div>
@@ -152,7 +152,26 @@
                 // Fetch ad package ratio
                 const adPkgRatioRes = await fetch(`/api/admin/statistics/adpackages/ratio`);
                 const adPkgRatio = await adPkgRatioRes.json();
-                // Render charts
+                // Calculate fake totals for rooms and ad posts
+                const fakeRoomGrowth = getFakeRoomGrowthData(growth.roomGrowth.labels, unit);
+                const fakeAdPost = getFakeAdPostData(growth.adPostGrowth.labels, unit);
+                const totalFakeRooms = fakeRoomGrowth.reduce((a, b) => a + b, 0);
+                const totalFakeAdPosts = fakeAdPost.reduce((a, b) => a + b, 0);
+                // Update top total rooms
+                const roomTotalEl = document.getElementById('totalRooms');
+                if (roomTotalEl) {
+                    let realRooms = parseInt(roomTotalEl.getAttribute('data-real') || roomTotalEl.textContent.replace(/\D/g, '')) || 0;
+                    roomTotalEl.textContent = realRooms + totalFakeRooms;
+                }
+                // Update top total buildings (fake: 1 building per 8 rooms, rounded up)
+                const buildingTotalEl = document.getElementById('totalBuildings');
+                if (buildingTotalEl) {
+                    let realBuildings = parseInt(buildingTotalEl.getAttribute('data-real') || buildingTotalEl.textContent.replace(/\D/g, '')) || 0;
+                    const fakeBuildings = Math.ceil(totalFakeRooms / 8);
+                    buildingTotalEl.textContent = realBuildings + fakeBuildings;
+                }
+                // Optionally update ad post total if you show it at the top
+                // ...existing code...
                 renderCharts(growth.userGrowth, role, growth.adPostGrowth, growth.roomGrowth, adPkgGrowth, adPkgRatio);
             } finally {
                 loadingEl.style.display = 'none';

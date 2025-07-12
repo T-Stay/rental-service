@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -15,30 +16,37 @@
     <link rel="stylesheet" href="~/css/badge-animated-gradient.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
-    <meta name="description" content="Trọ Tốt ⭐ | trotot.com.vn - Nền tảng tìm kiếm & đăng tin cho thuê phòng trọ, căn hộ, nhà nguyên căn uy tín tại Việt Nam. Đăng tin miễn phí, tìm phòng nhanh chóng, an toàn, tiện lợi. Truy cập ngay trotot.com.vn!" />
+    <meta name="description"
+        content="Trọ Tốt ⭐ | trotot.com.vn - Nền tảng tìm kiếm & đăng tin cho thuê phòng trọ, căn hộ, nhà nguyên căn uy tín tại Việt Nam. Đăng tin miễn phí, tìm phòng nhanh chóng, an toàn, tiện lợi. Truy cập ngay trotot.com.vn!" />
     <meta name="robots" content="index, follow" />
     <style>
         /* ĐÃ MOVE TOÀN BỘ CSS header/navbar/footer/dropdown sang site.css cho gọn gàng. */
     </style>
 </head>
+
 <body>
     <header>
         <nav class="navbar navbar-expand-lg main-header-bar shadow-sm">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index"><i class="fa-solid fa-house-chimney"></i> Trọ Tốt</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index"><i
+                        class="fa-solid fa-house-chimney"></i> Trọ Tốt</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav nav nav-pills me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                                asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")" asp-controller="Rooms" asp-action="Index">Phòng</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")"
+                                asp-controller="Rooms" asp-action="Index">Phòng</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "About" ? "active" : "")" asp-controller="Home" asp-action="About">Về chúng tôi</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "About" ? "active" : "")"
+                                asp-controller="Home" asp-action="About">Về chúng tôi</a>
                         </li>
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
@@ -46,13 +54,18 @@
                             if (role == "customer")
                             {
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "BookingRequests" || ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" || (ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "CustomerDashboard") ? "active" : "")" href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "BookingRequests" || ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" || (ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "CustomerDashboard") ? "active" : "")"
+                                        href="#" id="customerDropdown" role="button" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
                                         Khách hàng
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BookingRequests" ? "active" : "")" asp-controller="BookingRequests" asp-action="Index">Đặt phòng</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" asp-controller="ViewAppointments" asp-action="Index">Lịch hẹn</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "CustomerDashboard" ? "active" : "")" asp-controller="Home" asp-action="CustomerDashboard">Bảng điều khiển</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BookingRequests" ? "active" : "")"
+                                                asp-controller="BookingRequests" asp-action="Index">Đặt phòng</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                                                asp-controller="ViewAppointments" asp-action="Index">Lịch hẹn</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "CustomerDashboard" ? "active" : "")"
+                                                asp-controller="Home" asp-action="CustomerDashboard">Bảng điều khiển</a></li>
                                     </ul>
                                 </li>
                             }
@@ -60,29 +73,46 @@
                             {
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" 
-                                    || ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" 
-                                    || ViewContext.RouteData.Values["controller"]?.ToString() == "HostAdPosts"
-                                    || (ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments") || ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" href="#" id="hostDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                           || ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" 
+                                                                           || ViewContext.RouteData.Values["controller"]?.ToString() == "HostAdPosts"
+                                                                           || (ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments") || ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")"
+                                        href="#" id="hostDropdown" role="button" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
                                         Chủ nhà
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")" asp-controller="HostDashboard" asp-action="Index"><i class="fa-solid fa-gauge-high me-2"></i>Bảng điều khiển</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" ? "active" : "")" asp-controller="HostBuildings" asp-action="Index"><i class="fa-solid fa-building me-2"></i>Tòa nhà của tôi</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")" asp-controller="HostRooms" asp-action="Index"><i class="fa-solid fa-door-open me-2"></i>Phòng của tôi</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")" asp-controller="ViewAppointments" asp-action="HostRoomAppointments"><i class="fa-solid fa-calendar-check me-2"></i>Lịch xem phòng</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostAdPosts" ? "active" : "")" asp-controller="HostAdPosts" asp-action="MyAdPosts"><i class="fa-solid fa-bullhorn me-2"></i>Quản lý quảng cáo</a></li>
-                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Profile" && ViewContext.RouteData.Values["action"]?.ToString() == "PaymentHistory" ? "active" : "")" asp-controller="Profile" asp-action="PaymentHistory"><i class="fa-solid fa-receipt me-2"></i>Lịch sử thanh toán</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostDashboard" ? "active" : "")"
+                                                asp-controller="HostDashboard" asp-action="Index"><i
+                                                    class="fa-solid fa-gauge-high me-2"></i>Bảng điều khiển</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostBuildings" ? "active" : "")"
+                                                asp-controller="HostBuildings" asp-action="Index"><i
+                                                    class="fa-solid fa-building me-2"></i>Tòa nhà của tôi</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostRooms" ? "active" : "")"
+                                                asp-controller="HostRooms" asp-action="Index"><i
+                                                    class="fa-solid fa-door-open me-2"></i>Phòng của tôi</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ViewAppointments" && ViewContext.RouteData.Values["action"]?.ToString() == "HostRoomAppointments" ? "active" : "")"
+                                                asp-controller="ViewAppointments" asp-action="HostRoomAppointments"><i
+                                                    class="fa-solid fa-calendar-check me-2"></i>Lịch xem phòng</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HostAdPosts" ? "active" : "")"
+                                                asp-controller="HostAdPosts" asp-action="MyAdPosts"><i
+                                                    class="fa-solid fa-bullhorn me-2"></i>Quản lý quảng cáo</a></li>
+                                        <li><a class="dropdown-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Profile" && ViewContext.RouteData.Values["action"]?.ToString() == "PaymentHistory" ? "active" : "")"
+                                                asp-controller="Profile" asp-action="PaymentHistory"><i
+                                                    class="fa-solid fa-receipt me-2"></i>Lịch sử thanh toán</a></li>
                                     </ul>
                                 </li>
                             }
                             else if (role == "admin")
                             {
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle text-danger @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link dropdown-toggle text-danger @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")"
+                                        href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
                                         Quản trị
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item text-danger @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")" asp-controller="Admin" asp-action="Index">Trang quản trị</a></li>
+                                        <li><a class="dropdown-item text-danger @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" ? "active" : "")"
+                                                asp-controller="Admin" asp-action="Index">Trang quản trị</a></li>
                                     </ul>
                                 </li>
                             }
@@ -93,29 +123,42 @@
                         {
                             var role = (User.FindFirst("role")?.Value ?? "user").ToLower();
                             <li class="nav-item dropdown position-relative me-2" id="notificationDropdown">
-                                <a class="nav-link position-relative" href="#" id="notificationBell" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link position-relative" href="#" id="notificationBell" role="button"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fa fa-bell fa-lg"></i>
-                                    <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.9em; display:none;">0</span>
+                                    <span id="notificationBadge"
+                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                        style="font-size:0.9em; display:none;">0</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="notificationBell" style="min-width: 320px; max-width: 400px;">
+                                <ul class="dropdown-menu dropdown-menu-end p-0" aria-labelledby="notificationBell"
+                                    style="min-width: 320px; max-width: 400px;">
                                     <li id="notificationList" style="max-height: 350px; overflow-y: auto;">
                                         <div class="text-center p-3 text-muted">Loading...</div>
                                     </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item text-center" href="@Url.Action("CustomerDashboard", "Home")">Xem tất cả thông báo</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item text-center"
+                                            href="@Url.Action("CustomerDashboard", "Home")">Xem tất cả thông báo</a></li>
                                 </ul>
                             </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
                                     <i class="fa-solid fa-user fa-lg"></i>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <li class="dropdown-header"><i class="fa-solid fa-user me-2"></i>@User.Identity.Name</li>
-                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Profile")"><i class="fa-solid fa-id-badge me-2"></i>Hồ sơ</a></li>
-                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="dropdown-header"><i class="fa-solid fa-user me-2"></i>@User.Identity.Name
+                                    </li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index", "Profile")"><i
+                                                class="fa-solid fa-id-badge me-2"></i>Hồ sơ</a></li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
                                     <li>
                                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                            <button type="submit" class="dropdown-item"><i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</button>
+                                            <button type="submit" class="dropdown-item"><i
+                                                    class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -124,10 +167,12 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Login" ? "active" : "")" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Login" ? "active" : "")"
+                                    asp-controller="Account" asp-action="Login">Đăng nhập</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Register" ? "active" : "")" asp-controller="Account" asp-action="Register">Đăng ký</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Register" ? "active" : "")"
+                                    asp-controller="Account" asp-action="Register">Đăng ký</a>
                             </li>
                         }
                     </ul>
@@ -136,8 +181,10 @@
         </nav>
         <!-- Search Bar with Animation -->
         <div class="search-bar-animated-container">
-            <form id="globalSearchForm" class="search-bar-animated" autocomplete="off" action="/Home/Index" method="get">
-                <input type="text" id="globalSearchInput" name="search" class="search-bar-input" placeholder="Tìm kiếm quảng cáo, phòng trọ..." aria-label="Tìm kiếm" />
+            <form id="globalSearchForm" class="search-bar-animated" autocomplete="off" action="/Home/Index"
+                method="get">
+                <input type="text" id="globalSearchInput" name="search" class="search-bar-input"
+                    placeholder="Tìm kiếm quảng cáo, phòng trọ..." aria-label="Tìm kiếm" />
                 <button type="submit" class="search-bar-btn"><i class="fa fa-search"></i></button>
                 <div class="search-bar-suggestions" id="searchSuggestions" style="display:none;"></div>
             </form>
@@ -159,7 +206,8 @@
                     <h5 class="fw-bold mb-2 d-flex align-items-center justify-content-center justify-content-md-start">
                         <i class="fa-solid fa-house-chimney me-2"></i>Trọ Tốt
                     </h5>
-                    <div class="mb-1 small"><i class="fa fa-map-marker-alt me-2"></i>Km29 Đại lộ Thăng Long, Thạch Thất, Hà Nội</div>
+                    <div class="mb-1 small"><i class="fa fa-map-marker-alt me-2"></i>Km29 Đại lộ Thăng Long, Thạch Thất,
+                        Hà Nội</div>
                     <div class="mb-1 small"><i class="fa fa-phone me-2"></i>0975 907 414</div>
                     <div class="mb-1 small"><i class="fa fa-envelope me-2"></i>support@tstay.vn</div>
                     <div class="mt-2">
@@ -178,12 +226,14 @@
                 <div class="col-6 col-md-2 mb-3 mb-md-0">
                     <h6 class="fw-bold">Chính sách</h6>
                     <ul class="list-unstyled mb-0">
-                        <li><a asp-area="" asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-light">Bảo mật</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Privacy"
+                                class="text-decoration-none text-light">Bảo mật</a></li>
                         <li><a href="#" class="text-decoration-none text-light">Điều khoản</a></li>
                     </ul>
                 </div>
                 <div class="col-12 col-md-4 d-flex flex-column align-items-center align-items-md-end mt-3 mt-md-0">
-                    <button id="scrollToTopBtn" class="btn btn-outline-light rounded-circle shadow" style="width:44px;height:44px;" title="Lên đầu trang">
+                    <button id="scrollToTopBtn" class="btn btn-outline-light rounded-circle shadow"
+                        style="width:44px;height:44px;" title="Lên đầu trang">
                         <i class="fa fa-arrow-up"></i>
                     </button>
                 </div>
@@ -195,14 +245,20 @@
     </footer>
 
     <div id="seo-footer-content" style="font-size: 1px; opacity: 0.1; position: absolute; z-index: -9999;">
-        <h2>Trọ Tốt - Nền Tảng Tìm Phòng Trọ, Nhà Trọ, Căn Hộ Dịch Vụ Uy Tín Hàng Đầu Việt Nam</h2>
+        <p>Trọ Tốt - Nền Tảng Tìm Phòng Trọ, Nhà Trọ, Căn Hộ Dịch Vụ Uy Tín Hàng Đầu Việt Nam</p>
         <p>
-            <strong>Trọ Tốt (trotot.com.vn)</strong> là kênh thông tin số 1 về phòng trọ, nhà trọ, nhà cho thuê, căn hộ mini, chung cư mini tại Việt Nam. Chúng tôi kết nối hàng triệu người có nhu cầu tìm kiếm nơi ở với các chủ nhà, chủ đầu tư uy tín trên khắp cả nước. Sứ mệnh của Trọ Tốt là mang đến một giải pháp tìm kiếm và cho thuê nhà ở <strong>nhanh chóng, dễ dàng, minh bạch và hiệu quả</strong>.
+            <strong>Trọ Tốt (trotot.com.vn)</strong> là kênh thông tin số 1 về phòng trọ, nhà trọ, nhà cho thuê, căn hộ
+            mini, chung cư mini tại Việt Nam. Chúng tôi kết nối hàng triệu người có nhu cầu tìm kiếm nơi ở với các chủ
+            nhà, chủ đầu tư uy tín trên khắp cả nước. Sứ mệnh của Trọ Tốt là mang đến một giải pháp tìm kiếm và cho thuê
+            nhà ở <strong>nhanh chóng, dễ dàng, minh bạch và hiệu quả</strong>.
         </p>
-        <h3>Từ khóa tìm kiếm phổ biến nhất tại Trọ Tốt:</h3>
+        <p>Từ khóa tìm kiếm phổ biến nhất tại Trọ Tốt:</p>
         <p>
-            Tìm phòng trọ, thuê phòng trọ, phòng trọ giá rẻ, phòng trọ sinh viên, phòng trọ gần các trường đại học, phòng trọ TPHCM, phòng trọ Hà Nội, phòng trọ Đà Nẵng, phòng trọ Cần Thơ, phòng trọ Bình Dương, phòng trọ gần đây.
-            Nhà trọ giá rẻ, thuê nhà trọ, nhà trọ nguyên căn, nhà trọ sinh viên, nhà trọ an ninh tốt, nhà trọ có gác lửng, nhà trọ đầy đủ nội thất.
+            Tìm phòng trọ, thuê phòng trọ, phòng trọ giá rẻ, phòng trọ sinh viên, phòng trọ gần các trường đại học,
+            phòng trọ TPHCM, phòng trọ Hà Nội, phòng trọ Đà Nẵng, phòng trọ Cần Thơ, phòng trọ Bình Dương, phòng trọ gần
+            đây.
+            Nhà trọ giá rẻ, thuê nhà trọ, nhà trọ nguyên căn, nhà trọ sinh viên, nhà trọ an ninh tốt, nhà trọ có gác
+            lửng, nhà trọ đầy đủ nội thất.
             Thuê nhà nguyên căn, thuê nhà giá rẻ, thuê nhà TPHCM, thuê nhà Hà Nội.
             Căn hộ mini, thuê căn hộ mini, căn hộ dịch vụ, căn hộ studio, căn hộ có bếp, căn hộ gần trung tâm.
             Tìm người ở ghép, tìm bạn ở ghép, ở ghép TPHCM, ở ghép Hà Nội, ở ghép sinh viên.
@@ -210,18 +266,24 @@
         </p>
         <h3>Khu vực cho thuê phòng trọ nổi bật:</h3>
         <ul>
-            <li><strong>Phòng trọ TP. Hồ Chí Minh:</strong> Quận 1, Quận 3, Quận 10, Bình Thạnh, Gò Vấp, Tân Bình, Phú Nhuận, Thủ Đức, Quận 7, Quận 2.</li>
-            <li><strong>Phòng trọ Hà Nội:</strong> Cầu Giấy, Đống Đa, Ba Đình, Hai Bà Trưng, Thanh Xuân, Hà Đông, Hoàng Mai, Nam Từ Liêm, Bắc Từ Liêm.</li>
+            <li><strong>Phòng trọ TP. Hồ Chí Minh:</strong> Quận 1, Quận 3, Quận 10, Bình Thạnh, Gò Vấp, Tân Bình, Phú
+                Nhuận, Thủ Đức, Quận 7, Quận 2.</li>
+            <li><strong>Phòng trọ Hà Nội:</strong> Cầu Giấy, Đống Đa, Ba Đình, Hai Bà Trưng, Thanh Xuân, Hà Đông, Hoàng
+                Mai, Nam Từ Liêm, Bắc Từ Liêm.</li>
             <li><strong>Phòng trọ Đà Nẵng:</strong> Hải Châu, Thanh Khê, Sơn Trà, Liên Chiểu, Ngũ Hành Sơn.</li>
-            <li><strong>Phòng trọ các tỉnh thành khác:</strong> Bình Dương, Đồng Nai, Cần Thơ, Hải Phòng, Nha Trang, Vũng Tàu, Quy Nhơn, Vinh.</li>
+            <li><strong>Phòng trọ các tỉnh thành khác:</strong> Bình Dương, Đồng Nai, Cần Thơ, Hải Phòng, Nha Trang,
+                Vũng Tàu, Quy Nhơn, Vinh.</li>
         </ul>
         <dl>
             <dt><strong>Làm thế nào để tìm phòng trọ ưng ý trên Trọ Tốt?</strong></dt>
-            <dd>Sử dụng bộ lọc thông minh của chúng tôi để tìm kiếm theo giá, diện tích, khu vực, tiện ích (gác lửng, ban công, máy lạnh, wifi, an ninh 24/7, v.v.).</dd>
+            <dd>Sử dụng bộ lọc thông minh của chúng tôi để tìm kiếm theo giá, diện tích, khu vực, tiện ích (gác lửng,
+                ban công, máy lạnh, wifi, an ninh 24/7, v.v.).</dd>
             <dt><strong>Làm sao để tránh lừa đảo khi thuê phòng?</strong></dt>
-            <dd>Luôn đến xem phòng trực tiếp, kiểm tra kỹ hợp đồng, không đặt cọc trước khi chưa xác thực thông tin chủ nhà và tình trạng phòng. Trọ Tốt có hệ thống xác thực tin đăng để giảm thiểu rủi ro.</dd>
+            <dd>Luôn đến xem phòng trực tiếp, kiểm tra kỹ hợp đồng, không đặt cọc trước khi chưa xác thực thông tin chủ
+                nhà và tình trạng phòng. Trọ Tốt có hệ thống xác thực tin đăng để giảm thiểu rủi ro.</dd>
             <dt><strong>Giá thuê phòng trọ đã bao gồm điện, nước, internet chưa?</strong></dt>
-            <dd>Thông thường giá thuê chưa bao gồm các chi phí này. Bạn cần hỏi rõ chủ nhà về cách tính và giá của từng dịch vụ.</dd>
+            <dd>Thông thường giá thuê chưa bao gồm các chi phí này. Bạn cần hỏi rõ chủ nhà về cách tính và giá của từng
+                dịch vụ.</dd>
         </dl>
         <p>
             Hotline hỗ trợ: 1900 9999 (placeholder) | Email: support@trotot.com.vn (placeholder)<br>
@@ -251,133 +313,134 @@
         });
     </script>
     <script>
-$(function () {
-    function loadNotifications(updateList = true) {
-        $.get('@Url.Action("GetNotifications", "Profile")', function (data) {
-            var list = $('#notificationList');
-            var badge = $('#notificationBadge');
-            var unread = data.filter(n => !n.isRead);
-            badge.text(unread.length).toggle(unread.length > 0);
-            if (updateList) {
-                if (unread.length > 0) {
-                    list.empty();
-                    unread.slice(0, 3).forEach(function (n) {
-                        var item = `<div class="dropdown-item fw-bold">
+        $(function () {
+            function loadNotifications(updateList = true) {
+                $.get('@Url.Action("GetNotifications", "Profile")', function (data) {
+                    var list = $('#notificationList');
+                    var badge = $('#notificationBadge');
+                    var unread = data.filter(n => !n.isRead);
+                    badge.text(unread.length).toggle(unread.length > 0);
+                    if (updateList) {
+                        if (unread.length > 0) {
+                            list.empty();
+                            unread.slice(0, 3).forEach(function (n) {
+                                var item = `<div class="dropdown-item fw-bold">
                             <div class='notification-text text-wrap text-break'>${n.title}</div>
                             <div class='notification-text small text-muted text-wrap text-break'>${n.message}</div>
                             <div class='small text-muted'>${n.createdAt}</div>
                         </div>`;
-                        list.append(item);
-                    });
+                                list.append(item);
+                            });
+                        } else {
+                            list.html('<div class="text-center p-3 text-muted">Không có thông báo mới</div>');
+                        }
+                    }
+                });
+            }
+            // Load notifications when dropdown is shown
+            $('#notificationDropdown').on('show.bs.dropdown', function () {
+                loadNotifications(true);
+            });
+            // Update badge every 60s, but don't update list unless dropdown is open
+            setInterval(function () {
+                loadNotifications(false);
+            }, 60000);
+            // Initial badge load
+            loadNotifications(false);
+        });
+    </script>
+    <script>
+        // Nút lướt lên đầu trang
+        const scrollBtn = document.getElementById('scrollToTopBtn');
+        if (scrollBtn) {
+            scrollBtn.onclick = function () {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 200) {
+                    scrollBtn.style.display = 'block';
                 } else {
-                    list.html('<div class="text-center p-3 text-muted">Không có thông báo mới</div>');
+                    scrollBtn.style.display = 'none';
                 }
-            }
-        });
-    }
-    // Load notifications when dropdown is shown
-    $('#notificationDropdown').on('show.bs.dropdown', function () {
-        loadNotifications(true);
-    });
-    // Update badge every 60s, but don't update list unless dropdown is open
-    setInterval(function() {
-        loadNotifications(false);
-    }, 60000);
-    // Initial badge load
-    loadNotifications(false);
-});
-</script>
+            });
+            scrollBtn.style.display = 'none';
+        }
+    </script>
     <script>
-    // Nút lướt lên đầu trang
-    const scrollBtn = document.getElementById('scrollToTopBtn');
-    if(scrollBtn){
-        scrollBtn.onclick = function() {
-            window.scrollTo({top:0, behavior:'smooth'});
-        };
-        window.addEventListener('scroll', function(){
-            if(window.scrollY > 200){
-                scrollBtn.style.display = 'block';
-            } else {
-                scrollBtn.style.display = 'none';
-            }
+        // Dropdown hover fix: chỉ áp dụng cho menu chính (me-auto), bỏ qua notification và profile
+        $(function () {
+            // Hover chỉ cho menu chính
+            $('.main-header-bar .navbar-nav.me-auto .nav-item.dropdown').each(function () {
+                var $dropdown = $(this);
+                var timer;
+                $dropdown.on('mouseenter', function () {
+                    clearTimeout(timer);
+                    $dropdown.addClass('show');
+                    $dropdown.find('.dropdown-menu').addClass('show');
+                });
+                $dropdown.on('mouseleave', function () {
+                    timer = setTimeout(function () {
+                        $dropdown.removeClass('show');
+                        $dropdown.find('.dropdown-menu').removeClass('show');
+                    }, 180);
+                });
+                $dropdown.find('.dropdown-menu').on('mouseenter', function () {
+                    clearTimeout(timer);
+                    $dropdown.addClass('show');
+                    $(this).addClass('show');
+                });
+                $dropdown.find('.dropdown-menu').on('mouseleave', function () {
+                    timer = setTimeout(function () {
+                        $dropdown.removeClass('show');
+                        $dropdown.find('.dropdown-menu').removeClass('show');
+                    }, 180);
+                });
+            });
+            // KHÔNG can thiệp dropdown notification/profile (ms-auto) nữa, để Bootstrap xử lý click mặc định
         });
-        scrollBtn.style.display = 'none';
-    }
-</script>
-    <script>
-// Dropdown hover fix: chỉ áp dụng cho menu chính (me-auto), bỏ qua notification và profile
-$(function () {
-    // Hover chỉ cho menu chính
-    $('.main-header-bar .navbar-nav.me-auto .nav-item.dropdown').each(function () {
-        var $dropdown = $(this);
-        var timer;
-        $dropdown.on('mouseenter', function () {
-            clearTimeout(timer);
-            $dropdown.addClass('show');
-            $dropdown.find('.dropdown-menu').addClass('show');
-        });
-        $dropdown.on('mouseleave', function () {
-            timer = setTimeout(function () {
-                $dropdown.removeClass('show');
-                $dropdown.find('.dropdown-menu').removeClass('show');
-            }, 180);
-        });
-        $dropdown.find('.dropdown-menu').on('mouseenter', function () {
-            clearTimeout(timer);
-            $dropdown.addClass('show');
-            $(this).addClass('show');
-        });
-        $dropdown.find('.dropdown-menu').on('mouseleave', function () {
-            timer = setTimeout(function () {
-                $dropdown.removeClass('show');
-                $dropdown.find('.dropdown-menu').removeClass('show');
-            }, 180);
-        });
-    });
-    // KHÔNG can thiệp dropdown notification/profile (ms-auto) nữa, để Bootstrap xử lý click mặc định
-});
-</script>
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
     @await Html.PartialAsync("_floatingChatbotScript")
     <script src="~/js/badge-animated-gradient.js" asp-append-version="true"></script>
     <script>
-    // Ẩn section SEO khi user cuộn gần đến cuối trang (footer), nhưng Googlebot vẫn crawl được
-    (function() {
-        function isGoogleBot() {
-            // Cập nhật danh sách user-agent của Googlebot để nhận diện tốt hơn
-            return /googlebot|adsbot-google|mediapartners-google/i.test(navigator.userAgent);
-        }
-
-        var seoSection = document.getElementById('seo-footer-content'); // SỬA LẠI ID CHO ĐÚNG
-
-        // Nếu không phải Googlebot và tìm thấy section SEO thì mới chạy script ẩn
-        if (seoSection && !isGoogleBot()) {
-            var footer = document.querySelector('.footer');
-            
-            // Hàm kiểm tra và ẩn section
-            function checkAndHideSeoSection() {
-                if (!footer) return;
-                
-                var footerRect = footer.getBoundingClientRect();
-                var windowHeight = window.innerHeight || document.documentElement.clientHeight;
-
-                // Nếu phần đầu của footer bắt đầu xuất hiện trong viewport (người dùng cuộn xuống gần cuối)
-                // thì ẩn section SEO đi để tránh bất kỳ ảnh hưởng nào đến layout.
-                if (footerRect.top < windowHeight) {
-                    seoSection.style.display = 'none';
-                } else {
-                    // Khi cuộn lên lại, hiện nó ra (dù nó vẫn vô hình với mắt thường)
-                    // để đảm bảo logic hoạt động nếu người dùng cuộn lên xuống nhiều lần.
-                    seoSection.style.display = 'block'; 
-                }
+        // Ẩn section SEO khi user cuộn gần đến cuối trang (footer), nhưng Googlebot vẫn crawl được
+        (function () {
+            function isGoogleBot() {
+                // Cập nhật danh sách user-agent của Googlebot để nhận diện tốt hơn
+                return /googlebot|adsbot-google|mediapartners-google/i.test(navigator.userAgent);
             }
 
-            // Chạy hàm khi cuộn trang
-            window.addEventListener('scroll', checkAndHideSeoSection);
-            // Chạy hàm khi tải trang xong
-            window.addEventListener('load', checkAndHideSeoSection);
-        }
-    })();
+            var seoSection = document.getElementById('seo-footer-content'); // SỬA LẠI ID CHO ĐÚNG
+
+            // Nếu không phải Googlebot và tìm thấy section SEO thì mới chạy script ẩn
+            if (seoSection && !isGoogleBot()) {
+                var footer = document.querySelector('.footer');
+
+                // Hàm kiểm tra và ẩn section
+                function checkAndHideSeoSection() {
+                    if (!footer) return;
+
+                    var footerRect = footer.getBoundingClientRect();
+                    var windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
+                    // Nếu phần đầu của footer bắt đầu xuất hiện trong viewport (người dùng cuộn xuống gần cuối)
+                    // thì ẩn section SEO đi để tránh bất kỳ ảnh hưởng nào đến layout.
+                    if (footerRect.top < windowHeight) {
+                        seoSection.style.display = 'none';
+                    } else {
+                        // Khi cuộn lên lại, hiện nó ra (dù nó vẫn vô hình với mắt thường)
+                        // để đảm bảo logic hoạt động nếu người dùng cuộn lên xuống nhiều lần.
+                        seoSection.style.display = 'block';
+                    }
+                }
+
+                // Chạy hàm khi cuộn trang
+                window.addEventListener('scroll', checkAndHideSeoSection);
+                // Chạy hàm khi tải trang xong
+                window.addEventListener('load', checkAndHideSeoSection);
+            }
+        })();
     </script>
 </body>
+
 </html>
