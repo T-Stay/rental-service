@@ -28,6 +28,36 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
     // --- CSS ---
     const style = document.createElement('style');
     style.innerHTML = `
+    #floating-call-btn {
+        position: fixed;
+        bottom: 90px;
+        right: 24px;
+        z-index: 9999;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #28a745;
+        color: #fff;
+        border: none;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.18);
+        font-size: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+        outline: none;
+        animation: chatbot-fadein 0.5s;
+    }
+    #floating-call-btn:hover {
+        background: #218838;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+        transform: scale(1.08);
+    }
+    #floating-call-btn i {
+        font-size: 22px;
+        display: block;
+    }
     #floating-chatbot-btn {
         position: fixed;
         bottom: 24px;
@@ -334,6 +364,16 @@ Nếu người dùng hỏi về các thao tác trên, hãy hướng dẫn chi ti
     }
     `;
     document.head.appendChild(style);
+
+    // --- Floating Call Button ---
+    const callBtn = document.createElement('button');
+    callBtn.id = 'floating-call-btn';
+    callBtn.title = 'Gọi 0975 907 414';
+    callBtn.innerHTML = '<i class="fa fa-phone"></i>';
+    callBtn.onclick = function() {
+        window.location.href = 'tel:0975907414';
+    };
+    document.body.appendChild(callBtn);
 
     // --- HTML ---
     const btn = document.createElement('button');
