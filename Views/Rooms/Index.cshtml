@@ -20,20 +20,18 @@
         <div class="row g-4">
             @foreach (var room in Model)
             {
+                var images = room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl)
+                    ? room.RoomImages[0].ImageUrl
+                    : (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl)
+                        ? room.Images[0].ImageUrl
+                        : "/images/no-image.png");
+                // --- FAKE LOGIC ---
+                int hash = room.Id.GetHashCode();
+                int fakeView = 60 + Math.Abs(hash % 120) + ((hash >> 2) % 30);
+                DateTime fakeDate = DateTime.Today.AddDays(-(Math.Abs(hash) % 2)); // today or yesterday
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="room-card clickable-card" tabindex="0" onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON'){ window.location='@Url.Action("Details", new { id = room.Id })'; }" onkeydown="if(event.key==='Enter' && event.target===this){ window.location='@Url.Action("Details", new { id = room.Id })'; }">
-                        @if (room.RoomImages != null && room.RoomImages.Count > 0 && !string.IsNullOrEmpty(room.RoomImages[0].ImageUrl))
-                        {
-                            <img src="@room.RoomImages[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                        }
-                        else if (room.Images != null && room.Images.Count > 0 && !string.IsNullOrEmpty(room.Images[0].ImageUrl))
-                        {
-                            <img src="@room.Images[0].ImageUrl" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                        }
-                        else
-                        {
-                            <img src="/images/no-image.png" alt="No Image" class="room-card-img" />
-                        }
+                        <img src="@images" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                         <div class="room-card-body">
                             <div class="room-card-title d-flex align-items-center justify-content-between">
                                 <span>@room.Name</span>
@@ -79,6 +77,10 @@
                             <div class="room-card-link">
                                 <a href="@Url.Action("Details", new { id = room.Id })" class="btn btn-outline-primary btn-sm">Chi tiết</a>
                             </div>
+                            <div class="d-flex justify-content-between align-items-center w-100 mt-2 pt-1 small text-secondary">
+                                <span><i class="fa fa-eye me-1"></i>@fakeView lượt xem</span>
+                                <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -107,9 +109,11 @@
         </div>
     </div>
     <div class="col-md-3">
-        <form method="get" id="roomFilterForm">
-            @Html.Partial("_RoomFilterSidebar")
-        </form>
+        <div id="roomSidebarWrapper">
+            <form method="get" id="roomFilterForm">
+                @Html.Partial("_RoomFilterSidebar")
+            </form>
+        </div>
     </div>
 </div>
 @section Scripts {
@@ -121,6 +125,34 @@
         // Khi thay đổi sort thì submit luôn
         document.querySelector('select[name="sort"]').addEventListener('change', function() {
             @* document.getElementById('roomFilterForm').submit(); *@
+        });
+        // Sticky sidebar logic
+        document.addEventListener('DOMContentLoaded', function() {
+            var sidebar = document.getElementById('roomSidebarWrapper');
+            if (!sidebar) return;
+            var origOffset = sidebar.getBoundingClientRect().top + window.scrollY;
+            var origWidth = sidebar.offsetWidth;
+            function stickSidebar() {
+                var scrollY = window.scrollY || window.pageYOffset;
+                var viewportHeight = window.innerHeight;
+                var sidebarHeight = sidebar.offsetHeight;
+                var stopAt = document.body.scrollHeight - viewportHeight - 40;
+                if (scrollY > origOffset - 20 && scrollY < stopAt) {
+                    sidebar.style.position = 'fixed';
+                    sidebar.style.top = '20px';
+                    sidebar.style.width = origWidth + 'px';
+                    sidebar.style.zIndex = 100;
+                } else {
+                    sidebar.style.position = '';
+                    sidebar.style.top = '';
+                    sidebar.style.width = '';
+                    sidebar.style.zIndex = '';
+                }
+            }
+            window.addEventListener('scroll', stickSidebar);
+            window.addEventListener('resize', function() {
+                sidebar.style.width = sidebar.parentElement.offsetWidth + 'px';
+            });
         });
     </script>
 }

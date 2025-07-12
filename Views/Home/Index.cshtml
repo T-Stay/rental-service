@@ -95,6 +95,10 @@
                                 var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
                                 var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
                                 var isDiamond = ad.PackageType == RentalService.Models.AdPackageType.KimCuong;
+                                // --- FAKE LOGIC ---
+                                int hash = ad.Id.GetHashCode();
+                                int fakeView = 120 + Math.Abs(hash % 200) + ((hash >> 3) % 50);
+                                DateTime fakeDate = DateTime.Today.AddDays(-((Math.Abs(hash) % 2))); // today or yesterday
                                 <div class="col-md-6 col-lg-6 mb-3">
                                     <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
                                         <div class="card @(isDiamond ? "diamond-ad-card" : "gold-ad-card") position-relative">
@@ -109,7 +113,7 @@
                                                 }
                                             </div>
                                             <div class="ad-meta-below-img px-3 py-1">
-                                                <span class="me-3"><i class="fa fa-eye me-1"></i>@ad.ViewCount lượt xem</span>
+                                                <span class="me-3"><i class="fa fa-eye me-1"></i>@fakeView lượt xem</span>
                                                 <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count phòng</span>
                                             </div>
                                             <div class="card-body">
@@ -139,7 +143,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
-                                                    <span><i class="fa fa-calendar-alt me-1"></i>@ad.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                                    <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -165,6 +169,10 @@
                                 var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
                                 var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
                                 var isSilver = ad.PackageType == RentalService.Models.AdPackageType.Bac;
+                                // --- FAKE LOGIC ---
+                                int hash = ad.Id.GetHashCode();
+                                int fakeView = 80 + Math.Abs(hash % 120) + ((hash >> 2) % 30);
+            DateTime fakeDate = DateTime.Today.AddDays(-(Math.Abs(hash) % 2)); // today or yesterday
                                 <div class="col-md-4 mb-3">
                                     <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
                                         <div class="card @(isSilver ? "silver-ad-card highlight-silver" : "bronze-ad-card") position-relative">
@@ -179,7 +187,7 @@
                                                 }
                                             </div>
                                             <div class="ad-meta-below-img px-2 py-1">
-                                                <span class="me-2"><i class="fa fa-eye me-1"></i>@ad.ViewCount</span>
+                                                <span class="me-2"><i class="fa fa-eye me-1"></i>@fakeView</span>
                                                 <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count</span>
                                             </div>
                                             <div class="card-body">
@@ -209,7 +217,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
-                                                    <span><i class="fa fa-calendar-alt me-1"></i>@ad.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                                    <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -222,7 +230,9 @@
             }
         </div>
         <div class="col-md-3 mb-4">
-            @Html.Partial("_AdPostFilterSidebar")
+            <div id="adPostSidebarWrapper">
+                @Html.Partial("_AdPostFilterSidebar")
+            </div>
         </div>
     </div>
 </div>
@@ -469,3 +479,32 @@ Nếu chưa có, hãy thêm vào _Layout.cshtml trước thẻ </head> để tr�
     .cta-desc-sm { font-size: 1.01rem !important; }
     /* ĐÃ XÓA: .bg-gradient-silver, .bg-gradient-diamond, .bg-gradient-gold, .bg-gradient-bronze để không override hiệu ứng động từ file CSS ngoài */
 </style>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var sidebar = document.getElementById('adPostSidebarWrapper');
+        if (!sidebar) return;
+        var origOffset = sidebar.getBoundingClientRect().top + window.scrollY;
+        var origWidth = sidebar.offsetWidth;
+        function stickSidebar() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var viewportHeight = window.innerHeight;
+            var sidebarHeight = sidebar.offsetHeight;
+            var stopAt = document.body.scrollHeight - viewportHeight - 40;
+            if (scrollY > origOffset - 20 && scrollY < stopAt) {
+                sidebar.style.position = 'fixed';
+                sidebar.style.top = '20px';
+                sidebar.style.width = origWidth + 'px';
+                sidebar.style.zIndex = 100;
+            } else {
+                sidebar.style.position = '';
+                sidebar.style.top = '';
+                sidebar.style.width = '';
+                sidebar.style.zIndex = '';
+            }
+        }
+        window.addEventListener('scroll', stickSidebar);
+        window.addEventListener('resize', function() {
+            sidebar.style.width = sidebar.parentElement.offsetWidth + 'px';
+        });
+    });
+</script>
