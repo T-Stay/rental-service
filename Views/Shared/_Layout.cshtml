@@ -44,10 +44,16 @@
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Rooms" ? "active" : "")"
                                 asp-controller="Rooms" asp-action="Index">Phòng</a>
                         </li>
+                        <li class="nav-item"></li>
+                            <a class="nav-link" href="https://docs.google.com/forms/d/e/1FAIpQLSfm0CYuS32ADqSJtyX2bM7ND5QbPSQcPF4XbpE9QGYsczXHlQ/viewform" target="_blank" rel="noopener">
+                                Đóng góp ý kiến
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "About" ? "active" : "")"
                                 asp-controller="Home" asp-action="About">Về chúng tôi</a>
                         </li>
+                        
                         @if (User?.Identity != null && User.Identity.IsAuthenticated)
                         {
                             var role = User.FindFirst("role")?.Value ?? "user";
@@ -179,6 +185,8 @@
                 </div>
             </div>
         </nav>
+        <!-- Đóng góp ý kiến header -->
+        <!-- REMOVE the previous yellow header bar for feedback if present -->
         <!-- Search Bar with Animation -->
         <div class="search-bar-animated-container">
             <form id="globalSearchForm" class="search-bar-animated" autocomplete="off" action="/Home/Index"
@@ -209,17 +217,16 @@
                     <div class="mb-1 small"><i class="fa fa-map-marker-alt me-2"></i>Km29 Đại lộ Thăng Long, Thạch Thất,
                         Hà Nội</div>
                     <div class="mb-1 small"><i class="fa fa-phone me-2"></i>0975 907 414</div>
-                    <div class="mb-1 small"><i class="fa fa-envelope me-2"></i>support@tstay.vn</div>
+                    <div class="mb-1 small"><i class="fa fa-envelope me-2"></i>support@trotot.com.vn</div>
                     <div class="mt-2">
-                        <a href="#" class="me-2 text-light"><i class="fab fa-facebook fa-lg"></i></a>
-                        <a href="#" class="me-2 text-light"><i class="fab fa-instagram fa-lg"></i></a>
-                        <a href="#" class="me-2 text-light"><i class="fab fa-twitter fa-lg"></i></a>
+                        <a href="https://www.facebook.com/people/Tr%E1%BB%8D-T%E1%BB%90T/61576989519526/" class="me-2 text-light"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="https://www.tiktok.com/@@trotot250" class="me-2 text-light"><i class="fab fa-tiktok fa-lg"></i></a>
                     </div>
                 </div>
                 <div class="col-6 col-md-2 mb-3 mb-md-0">
                     <h6 class="fw-bold">Tài liệu</h6>
                     <ul class="list-unstyled mb-0">
-                        <li><a href="#" class="text-decoration-none text-light">Hướng dẫn</a></li>
+                        <li><a href="https://drive.google.com/drive/u/1/folders/1uCQQqT4Bh3MGg4RvMVPbFwGhTUY0CebY" target="_blank" rel="noopener" class="text-decoration-none text-light">Hướng dẫn</a></li>
                         <li><a href="#" class="text-decoration-none text-light">FAQ</a></li>
                     </ul>
                 </div>
@@ -228,7 +235,8 @@
                     <ul class="list-unstyled mb-0">
                         <li><a asp-area="" asp-controller="Home" asp-action="Privacy"
                                 class="text-decoration-none text-light">Bảo mật</a></li>
-                        <li><a href="#" class="text-decoration-none text-light">Điều khoản</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Terms"
+                                class="text-decoration-none text-light">Điều khoản</a></li>
                     </ul>
                 </div>
                 <div class="col-12 col-md-4 d-flex flex-column align-items-center align-items-md-end mt-3 mt-md-0">
