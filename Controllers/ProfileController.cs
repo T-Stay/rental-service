@@ -48,19 +48,7 @@ namespace RentalService.Controllers
             // Basic validation
             if (type == ContactType.Email && !data.Contains("@")) ModelState.AddModelError("data", "Invalid email");
             if (type == ContactType.PhoneNumber && data.Length < 8) ModelState.AddModelError("data", "Invalid phone number");
-            if (type == ContactType.PhoneNumber)
-            {
-                // Kiểm tra OTP đã xác thực chưa
-                var otpEntity = await _context.PhoneOtps
-                    .Where(x => x.PhoneNumber == data && x.IsUsed && x.ExpiredAt > DateTime.UtcNow)
-                    .OrderByDescending(x => x.LastSentAt)
-                    .FirstOrDefaultAsync();
-                if (otpEntity == null)
-                {
-                    ModelState.AddModelError("data", "Bạn cần xác thực OTP trước khi thêm số điện thoại.");
-                    return RedirectToAction("Index");
-                }
-            }
+
             if (!ModelState.IsValid) return RedirectToAction("Index");
             var contact = new ContactInformation { Id = Guid.NewGuid(), UserId = user.Id, Type = type, Data = data, CreatedAt = DateTime.UtcNow, IsVerified = (type == ContactType.PhoneNumber) };
             _context.ContactInformations.Add(contact);
