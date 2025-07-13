@@ -25,7 +25,7 @@
                 <div class="mb-3"><strong>Tiện nghi:</strong> @string.Join(", ", Model.Amenities.Select(a => a.Name))</div>
             }
             <div class="mb-2"><strong>Diện tích:</strong> @Model.Area.ToString("N1") m²</div>
-            @if (Model.Building?.Host?.ContactInformations != null && Model.Building.Host.ContactInformations.Count > 0)
+            @if (Model.Building?.Host?.ContactInformations != null && Model.Building.Host.ContactInformations.Count > 0 && ViewBag.CanReview == true)
             {
                 <div class="mt-3">
                     <h5>Thông tin liên hệ chủ nhà</h5>
@@ -50,6 +50,13 @@
                             }
                         }
                     </ul>
+                </div>
+            }
+            else if (User?.Identity != null && User.Identity.IsAuthenticated && (User.FindFirst("role")?.Value == "customer"))
+            {
+                <div class="mt-3">
+                    <div class="alert alert-warning">
+                                            <i class="fa fa-info-circle"></i> Chỉ người dùng có <b>đặt phòng xác nhận</b> cho phòng này mới có thể xem thông tin liên hệ của chủ nhà.</div>
                 </div>
             }
             <div class="d-flex flex-wrap gap-2 mb-3 mt-3">
