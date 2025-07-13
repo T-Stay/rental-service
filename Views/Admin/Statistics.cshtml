@@ -279,7 +279,17 @@ function getFakeRoomGrowthData(labels, unit) {
         if (!d) { fakeData.push(0); continue; }
         if (unit === 'day') {
             let key = formatDateYMD(d);
-            fakeData.push(fakePerDay[key] || 0);
+            // Nếu là hôm nay thì fake = 0
+            const today = new Date();
+            if (
+                d.getFullYear() === today.getFullYear() &&
+                d.getMonth() === today.getMonth() &&
+                d.getDate() === today.getDate()
+            ) {
+                fakeData.push(0);
+            } else {
+                fakeData.push(fakePerDay[key] || 0);
+            }
         } else if (unit === 'month') {
             let from = new Date(d.getFullYear(), d.getMonth(), 1);
             let to = new Date(d.getFullYear(), d.getMonth() + 1, 0);
@@ -386,7 +396,17 @@ function getFakeAdPostData(labels, unit) {
         if (!d) { fakeData.push(0); continue; }
         if (unit === 'day') {
             let key = formatDateYMD(d);
-            fakeData.push(fakePerDay[key] || 0);
+            // Nếu là hôm nay thì fake = 0
+            const today = new Date();
+            if (
+                d.getFullYear() === today.getFullYear() &&
+                d.getMonth() === today.getMonth() &&
+                d.getDate() === today.getDate()
+            ) {
+                fakeData.push(0);
+            } else {
+                fakeData.push(fakePerDay[key] || 0);
+            }
         } else if (unit === 'month') {
             let from = new Date(d.getFullYear(), d.getMonth(), 1);
             let to = new Date(d.getFullYear(), d.getMonth() + 1, 0);
