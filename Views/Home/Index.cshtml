@@ -98,7 +98,7 @@
                                 var isGold = ad.PackageType == RentalService.Models.AdPackageType.Vang;
                                 // --- FAKE LOGIC ---
                                 int hash = ad.Id.GetHashCode();
-                                int fakeView = 0;
+                                int fakeView = ad.ViewCount;
                                 DateTime fakeDate = DateTime.Today;
                                 if (ad.CreatedAt.Date < DateTime.Today) {
                                     // Fake ngày: hôm qua, hôm kia, hoặc 3 ngày trước (dựa vào hash)
