@@ -51,6 +51,7 @@ public class HomeController : Controller
         var adList = await query
             .OrderByDescending(a => a.PackageType)
             .ThenBy(a => a.PriorityOrder)
+            .ThenByDescending(a => a.CreatedAt)
             .ToListAsync();
         // Lọc theo phòng bên trong quảng cáo
         if (minPrice.HasValue)
