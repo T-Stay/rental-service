@@ -27,8 +27,11 @@
                         : "/images/no-image.png");
                 // --- FAKE LOGIC ---
                 int hash = room.Id.GetHashCode();
-                int fakeView = 60 + Math.Abs(hash % 120) + ((hash >> 2) % 30);
-                DateTime fakeDate = DateTime.Today.AddDays(-(Math.Abs(hash) % 2)); // today or yesterday
+                int fakeView = 0;
+                if (room.CreatedAt.Date < DateTime.Today)
+                {
+                    fakeView = 60 + Math.Abs(hash % 120) + ((hash >> 2) % 30);
+                }
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="room-card clickable-card" tabindex="0" onclick="if(event.target.tagName !== 'A' && event.target.tagName !== 'BUTTON'){ window.location='@Url.Action("Details", new { id = room.Id })'; }" onkeydown="if(event.key==='Enter' && event.target===this){ window.location='@Url.Action("Details", new { id = room.Id })'; }">
                         <img src="@images" alt="Room Image" class="room-card-img" onerror="this.onerror=null;this.src='/images/no-image.png';" />
@@ -79,7 +82,6 @@
                             </div>
                             <div class="d-flex justify-content-between align-items-center w-100 mt-2 pt-1 small text-secondary">
                                 <span><i class="fa fa-eye me-1"></i>@fakeView lượt xem</span>
-                                <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
                             </div>
                         </div>
                     </div>

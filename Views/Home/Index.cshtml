@@ -95,10 +95,22 @@
                                 var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
                                 var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
                                 var isDiamond = ad.PackageType == RentalService.Models.AdPackageType.KimCuong;
+                                var isGold = ad.PackageType == RentalService.Models.AdPackageType.Vang;
                                 // --- FAKE LOGIC ---
                                 int hash = ad.Id.GetHashCode();
-                                int fakeView = 120 + Math.Abs(hash % 200) + ((hash >> 3) % 50);
-                                DateTime fakeDate = DateTime.Today.AddDays(-((Math.Abs(hash) % 2))); // today or yesterday
+                                int fakeView = 0;
+                                DateTime fakeDate = DateTime.Today;
+                                if (ad.CreatedAt.Date < DateTime.Today) {
+                                    // Fake ngày: hôm qua, hôm kia, hoặc 3 ngày trước (dựa vào hash)
+                                    int daysAgo = 1 + Math.Abs(hash % 3); // 1, 2, hoặc 3
+                                    fakeDate = DateTime.Today.AddDays(-daysAgo);
+                                    // Tỉ lệ lượt xem theo loại gói
+                                    int baseView = 0;
+                                    if (isDiamond) baseView = 300;
+                                    else if (isGold) baseView = 180;
+                                    else baseView = 100;
+                                    fakeView = baseView + Math.Abs(hash % (baseView / 2)) + ((hash >> 3) % (baseView / 4));
+                                }
                                 <div class="col-md-6 col-lg-6 mb-3">
                                     <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
                                         <div class="card @(isDiamond ? "diamond-ad-card" : "gold-ad-card") position-relative">
@@ -169,10 +181,20 @@
                                 var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
                                 var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
                                 var isSilver = ad.PackageType == RentalService.Models.AdPackageType.Bac;
+                                var isBronze = ad.PackageType == RentalService.Models.AdPackageType.Dong || ad.PackageType == RentalService.Models.AdPackageType.Free;
                                 // --- FAKE LOGIC ---
                                 int hash = ad.Id.GetHashCode();
-                                int fakeView = 80 + Math.Abs(hash % 120) + ((hash >> 2) % 30);
-            DateTime fakeDate = DateTime.Today.AddDays(-(Math.Abs(hash) % 2)); // today or yesterday
+                                int fakeView = 0;
+                                DateTime fakeDate = DateTime.Today;
+                                if (ad.CreatedAt.Date < DateTime.Today) {
+                                    int daysAgo = 1 + Math.Abs(hash % 3); // 1, 2, hoặc 3
+                                    fakeDate = DateTime.Today.AddDays(-daysAgo);
+                                    int baseView = 0;
+                                    if (isSilver) baseView = 120;
+                                    else if (isBronze) baseView = 60;
+                                    else baseView = 100;
+                                    fakeView = baseView + Math.Abs(hash % (baseView / 2)) + ((hash >> 2) % (baseView / 4));
+                                }
                                 <div class="col-md-4 mb-3">
                                     <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
                                         <div class="card @(isSilver ? "silver-ad-card highlight-silver" : "bronze-ad-card") position-relative">
