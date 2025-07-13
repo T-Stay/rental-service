@@ -34,15 +34,15 @@
                         {
                             if (c.Type.ToString() == "FacebookLink")
                             {
-                                <li><strong>@c.Type:</strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem Facebook</a></li>
+                                <li><strong>Liên kết Facebook: </strong> <a href="@c.Data" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg me-1"></i>Xem Facebook</a></li>
                             }
                             else if (c.Type.ToString() == "Email")
                             {
-                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
+                                <li><strong>Email: </strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép email"><i class="fa fa-copy"></i></button></li>
                             }
                             else if (c.Type.ToString() == "PhoneNumber")
                             {
-                                <li><strong>@c.Type:</strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
+                                <li><strong>Số điện thoại: </strong> @c.Data <button class="copy-btn" onclick="copyToClipboard('@c.Data')" title="Sao chép số điện thoại"><i class="fa fa-copy"></i></button></li>
                             }
                             else
                             {
