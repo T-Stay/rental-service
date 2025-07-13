@@ -5,6 +5,14 @@
 }
 <div class="container mt-4">
     <h2>Add Building</h2>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
@@ -72,10 +80,6 @@
                 let [lat, lng] = loc.split(',');
                 setLocation(lat, lng);
             }
-        }
-    </script>
-    @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
-}
         }
     </script>
     @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")

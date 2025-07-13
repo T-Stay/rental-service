@@ -171,5 +171,34 @@ namespace RentalService.Controllers
             var ads = await adsQuery.ToListAsync();
             return View(ads);
         }
+
+        // POST: /HostAdPosts/Repost/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Repost(Guid id)
+        {
+            var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+            var ad = await _context.AdPosts.Include(a => a.Rooms).FirstOrDefaultAsync(a => a.Id == id && a.HostId == userId);
+            if (ad == null)
+            {
+                TempData["Error"] = "Không tìm thấy bài quảng cáo.";
+                return RedirectToAction("MyAdPosts");
+            }
+            // Lấy gói dịch vụ hiện tại của bài
+            var package = await _context.UserAdPackages.FirstOrDefaultAsync(p => p.Id == ad.UserAdPackageId && p.UserId == userId && p.IsActive && p.RemainingPosts > 0 && p.ExpiryDate > DateTime.Now);
+            if (package == null)
+            {
+                TempData["Error"] = "Gói dịch vụ đã hết lượt đăng hoặc hết hạn.";
+                return RedirectToAction("MyAdPosts");
+            }
+            // Trừ lượt đăng
+            package.RemainingPosts--;
+            // Cập nhật ngày đăng lại và trạng thái duyệt
+            ad.CreatedAt = DateTime.Now;
+            ad.IsActive = true;
+            await _context.SaveChangesAsync();
+            TempData["Success"] = "Đăng lại bài thành công!";
+            return RedirectToAction("MyAdPosts");
+        }
     }
 }

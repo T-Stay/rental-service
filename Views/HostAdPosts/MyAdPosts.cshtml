@@ -117,11 +117,23 @@ else
 </span> • Lượt xem: @ad.ViewCount</div>
                 </div>
                 <span class="badge @(ad.IsActive ? "bg-success" : "bg-secondary")">@(ad.IsActive ? "Đã duyệt" : "Chờ duyệt")</span>
+                <form asp-action="Repost" asp-controller="HostAdPosts" method="post" style="display:inline" onsubmit="return confirm('Bạn có chắc muốn đăng lại bài này?');">
+                    <input type="hidden" name="id" value="@ad.Id" />
+                    <button type="submit" class="btn btn-sm btn-outline-primary ms-2">Đăng lại</button>
+                </form>
             </a>
         }
     </div>
 }
 <a href="@Url.Action("Create")" class="btn btn-success mt-4">Đăng bài mới</a>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger mt-2">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mt-2">@TempData["Success"]</div>
+}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.querySelector('form');

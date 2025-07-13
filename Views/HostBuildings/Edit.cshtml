@@ -5,6 +5,14 @@
 }
 <div class="container mt-4">
     <h2>Chỉnh sửa tòa nhà</h2>
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
     @if (!string.IsNullOrEmpty(error))
     {
         <div class="alert alert-danger">@error</div>
