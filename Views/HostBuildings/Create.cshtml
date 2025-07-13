@@ -26,11 +26,7 @@
             <input asp-for="Description" class="form-control" />
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
-        <div class="mb-3">
-            <label>Location</label>
-            <input asp-for="Location" class="form-control" id="locationInput" readonly />
-            <span asp-validation-for="Location" class="text-danger"></span>
-        </div>
+        <input asp-for="Location" type="hidden" id="locationInput" />
         <div class="mb-3">
             <label>Bản đồ vị trí</label>
             <div id="map" style="height: 350px;"></div>
@@ -76,6 +72,10 @@
                 let [lat, lng] = loc.split(',');
                 setLocation(lat, lng);
             }
+        }
+    </script>
+    @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
+}
         }
     </script>
     @await Html.PartialAsync("~/Views/Shared/_ValidationScriptsPartial.cshtml")
