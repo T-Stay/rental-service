@@ -47,7 +47,9 @@
                 <td>@user.Email</td>
                 <td style="display:none">@user.Name</td>
                 <td>@user.Role.ToString()</td>
-                <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                <td data-order="@user.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")">
+                    @user.CreatedAt.ToString("dd/MM/yyyy")
+                </td>
                 <td>
                     @(user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow ? "Đã khóa" : "Hoạt động")
                 </td>
@@ -71,7 +73,8 @@
         $(document).ready(function () {
             $('#userTable').DataTable({
                 "columnDefs": [
-                    { "targets": 1, "visible": false } // Ẩn cột họ tên (index 1)
+                    { "targets": 1, "visible": false }, // Ẩn cột họ tên (index 1)
+                    { "type": "date", "targets": 3 }    // Đặt kiểu dữ liệu cho cột ngày tạo (index 3)
                 ],
                 "language": {
                     "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json"
