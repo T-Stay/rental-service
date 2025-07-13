@@ -20,11 +20,6 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "RoomsToApprove" ? "active" : "")" href="@Url.Action("RoomsToApprove", "Admin")">
-                <i class="fa-solid fa-door-open"></i> Duyệt phòng
-            </a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AdPostsToApprove" ? "active" : "")" href="@Url.Action("AdPostsToApprove", "Admin")">
                 <i class="fa-solid fa-bullhorn"></i> Duyệt quảng cáo
             </a>
