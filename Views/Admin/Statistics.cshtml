@@ -44,7 +44,8 @@
     <div class="col-md-4 col-6">
         <div class="card bg-danger text-white text-center h-100">
             <div class="card-body">
-                <div id="totalRooms" class="fs-3 fw-bold">@(ViewBag.TotalRooms != null ? ViewBag.TotalRooms : "-")</div>
+                <div id="totalRooms" class="fs-3 fw-bold">-</div>
+                <span id="realRoomsHidden" data-real="@(ViewBag.TotalRooms != null ? ViewBag.TotalRooms : "0")" style="display:none"></span>
                 <div>Phòng cho thuê</div>
             </div>
         </div>
@@ -52,7 +53,8 @@
     <div class="col-md-4 col-6">
         <div class="card bg-secondary text-white text-center h-100">
             <div class="card-body">
-                <div id="totalBuildings" class="fs-3 fw-bold">@(ViewBag.TotalBuildings != null ? ViewBag.TotalBuildings : "-")</div>
+                <div id="totalBuildings" class="fs-3 fw-bold">-</div>
+                <span id="realBuildingsHidden" data-real="@(ViewBag.TotalBuildings != null ? ViewBag.TotalBuildings : "0")" style="display:none"></span>
                 <div>Tòa nhà</div>
             </div>
         </div>
@@ -152,25 +154,36 @@
                 // Fetch ad package ratio
                 const adPkgRatioRes = await fetch(`/api/admin/statistics/adpackages/ratio`);
                 const adPkgRatio = await adPkgRatioRes.json();
-                // Calculate fake totals for rooms and ad posts
+
+
+                // --- FIX: Always use 36 months of fake data for top summary ---
+                let topSummaryLabels = [];
+                const now = new Date();
+                for (let i = 0; i < 36; i++) {
+                    let d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    topSummaryLabels.unshift((d.getMonth() + 1) + '/' + d.getFullYear());
+                }
+                const topFakeRoomGrowth = getFakeRoomGrowthData(topSummaryLabels, 'month');
+                const topTotalFakeRooms = topFakeRoomGrowth.reduce((a, b) => a + b, 0);
+                const topFakeBuildings = Math.ceil(topTotalFakeRooms / 8);
+
+                // Update top total rooms/buildings using hidden real value (never changes)
+                const roomTotalEl = document.getElementById('totalRooms');
+                const realRoomsHidden = document.getElementById('realRoomsHidden');
+                if (roomTotalEl && realRoomsHidden) {
+                    let realRooms = parseInt(realRoomsHidden.getAttribute('data-real')) || 0;
+                    roomTotalEl.textContent = realRooms + topTotalFakeRooms;
+                }
+                const buildingTotalEl = document.getElementById('totalBuildings');
+                const realBuildingsHidden = document.getElementById('realBuildingsHidden');
+                if (buildingTotalEl && realBuildingsHidden) {
+                    let realBuildings = parseInt(realBuildingsHidden.getAttribute('data-real')) || 0;
+                    buildingTotalEl.textContent = realBuildings + topFakeBuildings;
+                }
+
+                // --- Chart data still uses filtered range ---
                 const fakeRoomGrowth = getFakeRoomGrowthData(growth.roomGrowth.labels, unit);
                 const fakeAdPost = getFakeAdPostData(growth.adPostGrowth.labels, unit);
-                const totalFakeRooms = fakeRoomGrowth.reduce((a, b) => a + b, 0);
-                const totalFakeAdPosts = fakeAdPost.reduce((a, b) => a + b, 0);
-                // Update top total rooms
-                const roomTotalEl = document.getElementById('totalRooms');
-                if (roomTotalEl) {
-                    let realRooms = parseInt(roomTotalEl.getAttribute('data-real') || roomTotalEl.textContent.replace(/\D/g, '')) || 0;
-                    roomTotalEl.textContent = realRooms + totalFakeRooms;
-                }
-                // Update top total buildings (fake: 1 building per 8 rooms, rounded up)
-                const buildingTotalEl = document.getElementById('totalBuildings');
-                if (buildingTotalEl) {
-                    let realBuildings = parseInt(buildingTotalEl.getAttribute('data-real') || buildingTotalEl.textContent.replace(/\D/g, '')) || 0;
-                    const fakeBuildings = Math.ceil(totalFakeRooms / 8);
-                    buildingTotalEl.textContent = realBuildings + fakeBuildings;
-                }
-                // Optionally update ad post total if you show it at the top
                 // ...existing code...
                 renderCharts(growth.userGrowth, role, growth.adPostGrowth, growth.roomGrowth, adPkgGrowth, adPkgRatio);
             } finally {
