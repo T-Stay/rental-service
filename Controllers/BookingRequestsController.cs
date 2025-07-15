@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentalService.Data;
 using RentalService.Models;
+using RentalService.Services;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -14,9 +15,12 @@ namespace RentalService.Controllers
     public class BookingRequestsController : Controller
     {
         private readonly AppDbContext _context;
-        public BookingRequestsController(AppDbContext context)
+        private readonly IEmailService _emailService;
+        
+        public BookingRequestsController(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // GET: /BookingRequests
@@ -91,6 +95,7 @@ namespace RentalService.Controllers
                 ViewBag.Rooms = rooms;
                 return View();
             }
+            
             var request = new BookingRequest
             {
                 Id = Guid.NewGuid(),
@@ -101,11 +106,21 @@ namespace RentalService.Controllers
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
+            
             _context.BookingRequests.Add(request);
-            // Notify host
-            var room = await _context.Rooms.Include(r => r.Building).FirstOrDefaultAsync(r => r.Id == roomId.Value);
+
+            // Get room, host, and customer info for email
+            var room = await _context.Rooms
+                .Include(r => r.Building)
+                .ThenInclude(b => b.Host)
+                .ThenInclude(h => h.ContactInformations)
+                .FirstOrDefaultAsync(r => r.Id == roomId.Value);
+                
+            var customer = await _context.Users.FirstOrDefaultAsync(u => u.Id.ToString() == userId);
+
             if (room?.Building != null)
             {
+                // Notify host in database
                 _context.Notifications.Add(new Notification {
                     Id = Guid.NewGuid(),
                     UserId = room.Building.HostId,
@@ -114,7 +129,26 @@ namespace RentalService.Controllers
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
+                
+                // Send email to host
+                if (room.Building.Host != null)
+                {
+                    var hostEmail = room.Building.Host.ContactInformations?
+                        .FirstOrDefault(c => c.Type == ContactType.Email)?.Data;
+                        
+                    if (!string.IsNullOrEmpty(hostEmail))
+                    {
+                        var detailsUrl = Url.Action("Details", "HostBookingRequests", new { id = request.Id }, Request.Scheme);
+                        await _emailService.SendNewBookingRequestNotificationAsync(
+                            hostEmail,
+                            room.Building.Host.Name,
+                            room.Name,
+                            customer?.Name ?? "Khách hàng",
+                            detailsUrl);
+                    }
+                }
             }
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }

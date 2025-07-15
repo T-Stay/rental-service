@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentalService.Data;
+using RentalService.Services;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -13,9 +14,12 @@ namespace RentalService.Controllers
     public class HostBookingRequestsController : Controller
     {
         private readonly AppDbContext _context;
-        public HostBookingRequestsController(AppDbContext context)
+        private readonly IEmailService _emailService;
+        
+        public HostBookingRequestsController(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // GET: /HostBookingRequests
@@ -107,7 +111,12 @@ namespace RentalService.Controllers
                 var request = await _context.BookingRequests
                     .Include(b => b.Room)
                     .ThenInclude(r => r.Building)
+                    .ThenInclude(b => b.Host)
+                    .ThenInclude(h => h.ContactInformations)
+                    .Include(b => b.User)
+                    .ThenInclude(u => u.ContactInformations)
                     .FirstOrDefaultAsync(b => b.Id == id);
+                    
                 if (request == null || request.Room == null || request.Room.Building == null)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -115,6 +124,7 @@ namespace RentalService.Controllers
                     TempData["ToastError"] = "Booking request not found.";
                     return RedirectToAction("Details", new { id });
                 }
+                
                 if (request.Room.Building.HostId.ToString() != userId)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -122,6 +132,7 @@ namespace RentalService.Controllers
                     TempData["ToastError"] = "Unauthorized.";
                     return RedirectToAction("Details", new { id });
                 }
+                
                 if (request.Status != RentalService.Models.BookingRequestStatus.Pending)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -129,8 +140,10 @@ namespace RentalService.Controllers
                     TempData["ToastError"] = "Only pending requests can be approved.";
                     return RedirectToAction("Details", new { id });
                 }
+                
                 request.Status = RentalService.Models.BookingRequestStatus.Approved;
                 request.UpdatedAt = DateTime.UtcNow;
+                
                 // Create notification for customer
                 _context.Notifications.Add(new RentalService.Models.Notification {
                     Id = Guid.NewGuid(),
@@ -140,7 +153,38 @@ namespace RentalService.Controllers
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
+
+                // Send email to customer
+                if (request.User != null)
+                {
+                    var customerEmail = request.User.ContactInformations?
+                        .FirstOrDefault(c => c.Type == RentalService.Models.ContactType.Email)?.Data;
+                        
+                    if (!string.IsNullOrEmpty(customerEmail))
+                    {
+                        // Prepare host contact info
+                        string? hostContactInfo = null;
+                        if (request.Room.Building.Host?.ContactInformations?.Any() == true)
+                        {
+                            var contacts = request.Room.Building.Host.ContactInformations
+                                .Select(c => $"<p><strong>{c.Type}:</strong> {c.Data}</p>")
+                                .ToList();
+                            hostContactInfo = string.Join("", contacts);
+                        }
+                        
+                        var detailsUrl = Url.Action("Details", "BookingRequests", new { id = request.Id }, Request.Scheme);
+                        await _emailService.SendBookingRequestStatusUpdateAsync(
+                            customerEmail,
+                            request.User.Name,
+                            request.Room.Name,
+                            "Approved",
+                            detailsUrl,
+                            hostContactInfo);
+                    }
+                }
+                
                 await _context.SaveChangesAsync();
+                
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     return Json(new { success = true, message = "Booking request approved." });
                 TempData["ToastSuccess"] = "Booking request approved.";
@@ -166,7 +210,10 @@ namespace RentalService.Controllers
                 var request = await _context.BookingRequests
                     .Include(b => b.Room)
                     .ThenInclude(r => r.Building)
+                    .Include(b => b.User)
+                    .ThenInclude(u => u.ContactInformations)
                     .FirstOrDefaultAsync(b => b.Id == id);
+                    
                 if (request == null || request.Room == null || request.Room.Building == null)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -174,6 +221,7 @@ namespace RentalService.Controllers
                     TempData["ToastError"] = "Booking request not found.";
                     return RedirectToAction("Details", new { id });
                 }
+                
                 if (request.Room.Building.HostId.ToString() != userId)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -181,6 +229,7 @@ namespace RentalService.Controllers
                     TempData["ToastError"] = "Unauthorized.";
                     return RedirectToAction("Details", new { id });
                 }
+                
                 if (request.Status != RentalService.Models.BookingRequestStatus.Pending)
                 {
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -188,8 +237,10 @@ namespace RentalService.Controllers
                     TempData["ToastError"] = "Only pending requests can be rejected.";
                     return RedirectToAction("Details", new { id });
                 }
+                
                 request.Status = RentalService.Models.BookingRequestStatus.Rejected;
                 request.UpdatedAt = DateTime.UtcNow;
+                
                 // Create notification for customer
                 _context.Notifications.Add(new RentalService.Models.Notification {
                     Id = Guid.NewGuid(),
@@ -199,7 +250,27 @@ namespace RentalService.Controllers
                     IsRead = false,
                     CreatedAt = DateTime.UtcNow
                 });
+
+                // Send email to customer
+                if (request.User != null)
+                {
+                    var customerEmail = request.User.ContactInformations?
+                        .FirstOrDefault(c => c.Type == RentalService.Models.ContactType.Email)?.Data;
+                        
+                    if (!string.IsNullOrEmpty(customerEmail))
+                    {
+                        var detailsUrl = Url.Action("Details", "BookingRequests", new { id = request.Id }, Request.Scheme);
+                        await _emailService.SendBookingRequestStatusUpdateAsync(
+                            customerEmail,
+                            request.User.Name,
+                            request.Room.Name,
+                            "Rejected",
+                            detailsUrl);
+                    }
+                }
+                
                 await _context.SaveChangesAsync();
+                
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     return Json(new { success = true, message = "Booking request rejected." });
                 TempData["ToastSuccess"] = "Booking request rejected.";

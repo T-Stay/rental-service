@@ -115,7 +115,7 @@ namespace RentalService.Controllers
         <p style='font-size:12px;color:#888;text-align:center;'>Trọ Tốt Team</p>
     </div>
 </body></html>";
-                    SendEmail(user.Email, "Confirm your email - Rental Service", emailBody);
+                    SendEmail(user.Email, "Confirm your email - Trọ Tốt", emailBody);
                 }
                 // Chuyển hướng sang trang xác nhận đăng ký thành công
                 return RedirectToAction("RegisterSuccess");
@@ -223,7 +223,7 @@ namespace RentalService.Controllers
         <p style='font-size:12px;color:#888;text-align:center;'>Trọ Tốt Team</p>
     </div>
 </body></html>";
-                SendEmail(user.Email, "Reset your password - Rental Service", emailBody);
+                SendEmail(user.Email, "Reset your password - Trọ Tốt", emailBody);
             }
             return RedirectToAction("ForgotPasswordConfirmation");
         }

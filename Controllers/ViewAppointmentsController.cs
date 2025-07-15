@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentalService.Data;
 using RentalService.Models;
+using RentalService.Services;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -14,9 +15,12 @@ namespace RentalService.Controllers
     public class ViewAppointmentsController : Controller
     {
         private readonly AppDbContext _context;
-        public ViewAppointmentsController(AppDbContext context)
+        private readonly IEmailService _emailService;
+        
+        public ViewAppointmentsController(AppDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         // GET: /ViewAppointments
@@ -71,6 +75,7 @@ namespace RentalService.Controllers
             {
                 return Unauthorized();
             }
+            
             var appointment = new ViewAppointment
             {
                 Id = Guid.NewGuid(),
@@ -80,7 +85,33 @@ namespace RentalService.Controllers
                 Status = ViewAppointmentStatus.Pending,
                 CreatedAt = DateTime.UtcNow
             };
+            
             _context.ViewAppointments.Add(appointment);
+            
+            // Get room and host info for email
+            var room = await _context.Rooms
+                .Include(r => r.Building)
+                .ThenInclude(b => b.Host)
+                .ThenInclude(h => h.ContactInformations)
+                .FirstOrDefaultAsync(r => r.Id == roomId);
+                
+            if (room?.Building?.Host != null)
+            {
+                var hostEmail = room.Building.Host.ContactInformations?
+                    .FirstOrDefault(c => c.Type == ContactType.Email)?.Data;
+                    
+                if (!string.IsNullOrEmpty(hostEmail))
+                {
+                    var detailsUrl = Url.Action("HostDetails", "ViewAppointments", new { id = appointment.Id }, Request.Scheme);
+                    await _emailService.SendNewViewAppointmentNotificationAsync(
+                        hostEmail, 
+                        room.Building.Host.Name, 
+                        room.Name, 
+                        appointmentTime, 
+                        detailsUrl);
+                }
+            }
+            
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
@@ -158,15 +189,37 @@ namespace RentalService.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateAppointmentStatus(Guid id, string action)
         {
-            var appt = await _context.ViewAppointments.Include(a => a.Room).ThenInclude(r => r.Building).FirstOrDefaultAsync(a => a.Id == id);
+            var appt = await _context.ViewAppointments
+                .Include(a => a.Room)
+                .ThenInclude(r => r.Building)
+                .ThenInclude(b => b.Host)
+                .ThenInclude(h => h.ContactInformations)
+                .Include(a => a.User)
+                .ThenInclude(u => u.ContactInformations)
+                .FirstOrDefaultAsync(a => a.Id == id);
+                
             if (appt == null || appt.Room == null || appt.Room.Building == null) return NotFound();
+            
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (appt.Room?.Building?.HostId.ToString() != userId) return Forbid();
-            // Eager load customer for notification
-            await _context.Entry(appt).Reference(a => a.User).LoadAsync();
+
+            string status = "";
+            string? hostContactInfo = null;
+
             if (action == "accept")
             {
                 appt.Status = ViewAppointmentStatus.Confirmed;
+                status = "Confirmed";
+                
+                // Prepare host contact info for email
+                if (appt.Room.Building.Host?.ContactInformations?.Any() == true)
+                {
+                    var contacts = appt.Room.Building.Host.ContactInformations
+                        .Select(c => $"<p><strong>{c.Type}:</strong> {c.Data}</p>")
+                        .ToList();
+                    hostContactInfo = string.Join("", contacts);
+                }
+                
                 // Notify customer
                 if (appt.User != null)
                 {
@@ -183,6 +236,8 @@ namespace RentalService.Controllers
             else if (action == "decline")
             {
                 appt.Status = ViewAppointmentStatus.Cancelled;
+                status = "Cancelled";
+                
                 // Notify customer
                 if (appt.User != null)
                 {
@@ -196,6 +251,26 @@ namespace RentalService.Controllers
                     });
                 }
             }
+
+            // Send email to customer
+            if (appt.User != null && !string.IsNullOrEmpty(status))
+            {
+                var customerEmail = appt.User.ContactInformations?
+                    .FirstOrDefault(c => c.Type == ContactType.Email)?.Data;
+                    
+                if (!string.IsNullOrEmpty(customerEmail))
+                {
+                    var detailsUrl = Url.Action("Details", "ViewAppointments", new { id = appt.Id }, Request.Scheme);
+                    await _emailService.SendViewAppointmentStatusUpdateAsync(
+                        customerEmail,
+                        appt.User.Name,
+                        appt.Room.Name,
+                        status,
+                        detailsUrl,
+                        hostContactInfo);
+                }
+            }
+
             await _context.SaveChangesAsync();
             return RedirectToAction("HostRoomAppointments");
         }
