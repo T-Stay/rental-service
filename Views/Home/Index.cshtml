@@ -6,6 +6,28 @@
     var bacAds = Model?.Where(ad => ad.PackageType == RentalService.Models.AdPackageType.Bac).ToList() ?? new List<RentalService.Models.AdPost>();
     var dongAds = Model?.Where(ad => ad.PackageType == RentalService.Models.AdPackageType.Dong || ad.PackageType == RentalService.Models.AdPackageType.Free).ToList() ?? new List<RentalService.Models.AdPost>();
     var search = ViewBag.Search as string;
+    
+    // Pagination logic
+    var currentPage = int.TryParse(Context.Request.Query["page"], out var p) ? p : 1;
+    if (currentPage < 1) currentPage = 1;
+    if (currentPage > 2) currentPage = 2;
+    
+    var topAds = kimCuongAds.Concat(vangAds).ToList();
+    var lowerAds = bacAds.Concat(dongAds).ToList();
+    
+    // Determine which ads to show based on current page
+    var currentAds = currentPage == 1 ? topAds : lowerAds;
+    var pageTitle = currentPage == 1 ? "Bài viết nổi bật" : "Bài viết đề xuất";
+    
+    // Build query string for pagination links
+    var queryParams = new Dictionary<string, string>();
+    foreach (var key in Context.Request.Query.Keys)
+    {
+        if (key != "page" && !string.IsNullOrEmpty(Context.Request.Query[key]))
+        {
+            queryParams[key] = Context.Request.Query[key];
+        }
+    }
 }
 @if (!string.IsNullOrWhiteSpace(search))
 {
@@ -78,176 +100,241 @@
             }
             else
             {
-                <h2 class="mb-4">Bài viết đề xuất</h2>
-                <!-- Kim cương + Vàng: mỗi row 2 col-md-6, trộn chung, ưu tiên kim cương lên trước -->
-                <div class="mb-5">
-                    @{
-                        var topAds = kimCuongAds.Concat(vangAds).ToList();
-                    }
-                    @for (int i = 0; i < topAds.Count; i += 2)
-                    {
-                        <div class="row mb-4">
-                            @for (int j = i; j < Math.Min(i + 2, topAds.Count); j++)
-                            {
-                                var ad = topAds[j];
-                                var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
-                                var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
-                                var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
-                                var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
-                                var isDiamond = ad.PackageType == RentalService.Models.AdPackageType.KimCuong;
-                                var isGold = ad.PackageType == RentalService.Models.AdPackageType.Vang;
-                                // --- FAKE LOGIC ---
-                                int hash = ad.Id.GetHashCode();
-                                int fakeView = ad.ViewCount;
-                                DateTime fakeDate = DateTime.Today;
-                                if (ad.CreatedAt.Date < DateTime.Today) {
-                                    // Fake ngày: hôm qua, hôm kia, hoặc 3 ngày trước (dựa vào hash)
-                                    int daysAgo = 1 + Math.Abs(hash % 3); // 1, 2, hoặc 3
-                                    fakeDate = DateTime.Today.AddDays(-daysAgo);
-                                    // Tỉ lệ lượt xem theo loại gói
-                                    int baseView = 0;
-                                    if (isDiamond) baseView = 300;
-                                    else if (isGold) baseView = 180;
-                                    else baseView = 100;
-                                    fakeView = baseView + Math.Abs(hash % (baseView / 2)) + ((hash >> 3) % (baseView / 4));
-                                }
-                                <div class="col-md-6 col-lg-6 mb-3">
-                                    <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
-                                        <div class="card @(isDiamond ? "diamond-ad-card" : "gold-ad-card") position-relative">
-                                            <div class="@(isDiamond ? "diamond-img-wrap" : "gold-img-wrap")">
-                                                @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
-                                                {
-                                                    <img src="@images[0]" class="@(isDiamond ? "diamond-img-demo" : "gold-img-demo") img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                                                }
-                                                else
-                                                {
-                                                    <img src="/images/no-image.png" class="@(isDiamond ? "diamond-img-demo" : "gold-img-demo") img-fluid" alt="No Image" />
-                                                }
-                                            </div>
-                                            <div class="ad-meta-below-img px-3 py-1">
-                                                <span class="me-3"><i class="fa fa-eye me-1"></i>@fakeView lượt xem</span>
-                                                <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count phòng</span>
-                                            </div>
-                                            <div class="card-body">
-                                                <h5 class="mb-2">@ad.Title</h5>
-                                                @if (isDiamond)
-                                                {
-                                                    <span class="badge bg-gradient-diamond animated-gradient me-2"><i class="fa fa-gem me-1"></i>Kim cương</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-gradient-gold animated-gradient me-2"><i class="fa fa-crown me-1"></i>Vàng</span>
-                                                }
-                                                <div class="mb-2">
-                                                    @if (minPrice > 0 && maxPrice > 0)
-                                                    {
-                                                        <span class="text-success fw-bold">@minPrice.ToString("N0")@(minPrice != maxPrice ? $" - {maxPrice.ToString("N0")}" : "") đ</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="text-muted">Liên hệ giá</span>
-                                                    }
-                                                </div>
-                                                <div class="mt-2 position-relative">
-                                                    <div class="ad-content-preview truncate-2">@Html.Raw(ad.Content)</div>
-                                                    <div class="text-center mt-1">
-                                                        <button class="btn btn-link btn-sm p-0 ad-see-more-btn" type="button" tabindex="-1">Xem thêm</button>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
-                                                    <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            }
-                        </div>
-                    }
+                <!-- Pagination tabs -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">@pageTitle</h2>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@(currentPage == 1 ? "#" : Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "1") }).ToDictionary(x => x.Key, x => x.Value)))" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 1 ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "1") }).ToDictionary(x => x.Key, x => x.Value))">
+                                    1
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 2 ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "2") }).ToDictionary(x => x.Key, x => x.Value))">
+                                    2
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 2 ? "disabled" : "")">
+                                <a class="page-link" href="@(currentPage == 2 ? "#" : Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "2") }).ToDictionary(x => x.Key, x => x.Value)))" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
-                <!-- Bạc + Đồng: mỗi row 3 col-md-4, trộn chung, ưu tiên bạc lên trước -->
-                <div class="mb-5">
-                    @{
-                        var lowerAds = bacAds.Concat(dongAds).ToList();
-                    }
-                    @for (int i = 0; i < lowerAds.Count; i += 3)
-                    {
-                        <div class="row mb-4">
-                            @for (int j = i; j < Math.Min(i + 3, lowerAds.Count); j++)
-                            {
-                                var ad = lowerAds[j];
-                                var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
-                                var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
-                                var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
-                                var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
-                                var isSilver = ad.PackageType == RentalService.Models.AdPackageType.Bac;
-                                var isBronze = ad.PackageType == RentalService.Models.AdPackageType.Dong || ad.PackageType == RentalService.Models.AdPackageType.Free;
-                                // --- FAKE LOGIC ---
-                                int hash = ad.Id.GetHashCode();
-                                int fakeView = 0;
-                                DateTime fakeDate = DateTime.Today;
-                                if (ad.CreatedAt.Date < DateTime.Today) {
-                                    int daysAgo = 1 + Math.Abs(hash % 3); // 1, 2, hoặc 3
-                                    fakeDate = DateTime.Today.AddDays(-daysAgo);
-                                    int baseView = 0;
-                                    if (isSilver) baseView = 120;
-                                    else if (isBronze) baseView = 60;
-                                    else baseView = 100;
-                                    fakeView = baseView + Math.Abs(hash % (baseView / 2)) + ((hash >> 2) % (baseView / 4));
-                                }
-                                <div class="col-md-4 mb-3">
-                                    <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
-                                        <div class="card @(isSilver ? "silver-ad-card highlight-silver" : "bronze-ad-card") position-relative">
-                                            <div class="@(isSilver ? "silver-img-wrap highlight-silver-img" : "bronze-img-wrap")">
-                                                @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
-                                                {
-                                                    <img src="@images[0]" class="@(isSilver ? "silver-img-demo" : "bronze-img-demo") img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
-                                                }
-                                                else
-                                                {
-                                                    <img src="/images/no-image.png" class="@(isSilver ? "silver-img-demo" : "bronze-img-demo") img-fluid" alt="No Image" />
-                                                }
-                                            </div>
-                                            <div class="ad-meta-below-img px-2 py-1">
-                                                <span class="me-2"><i class="fa fa-eye me-1"></i>@fakeView</span>
-                                                <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count</span>
-                                            </div>
-                                            <div class="card-body">
-                                                <h6 class="mb-2">@ad.Title</h6>
-                                                @if (isSilver)
-                                                {
-                                                    <span class="badge bg-gradient-silver animated-gradient text-dark me-2"><i class="fa fa-medal me-1"></i>Bạc</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-gradient-bronze animated-gradient text-dark me-2"><i class="fa fa-award me-1"></i>Đồng</span>
-                                                }
-                                                <div class="mb-2">
-                                                    @if (minPrice > 0 && maxPrice > 0)
+
+                @if (!currentAds.Any())
+                {
+                    <div class="alert alert-info mt-4">
+                        Không có quảng cáo nào trong trang này. 
+                        <a href="@Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", currentPage == 1 ? "2" : "1") }).ToDictionary(x => x.Key, x => x.Value))" class="alert-link">
+                            Xem trang @(currentPage == 1 ? "Thông thường" : "Nổi bật")
+                        </a>
+                    </div>
+                }
+                else if (currentPage == 1)
+                {
+                    <!-- Kim cương + Vàng: mỗi row 2 col-md-6, trộn chung, ưu tiên kim cương lên trước -->
+                    <div class="mb-5">
+                        @for (int i = 0; i < currentAds.Count; i += 2)
+                        {
+                            <div class="row mb-4">
+                                @for (int j = i; j < Math.Min(i + 2, currentAds.Count); j++)
+                                {
+                                    var ad = currentAds[j];
+                                    var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
+                                    var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
+                                    var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
+                                    var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
+                                    var isDiamond = ad.PackageType == RentalService.Models.AdPackageType.KimCuong;
+                                    var isGold = ad.PackageType == RentalService.Models.AdPackageType.Vang;
+                                    // --- FAKE LOGIC ---
+                                    int hash = ad.Id.GetHashCode();
+                                    int fakeView = ad.ViewCount;
+                                    DateTime fakeDate = DateTime.Today;
+                                    if (ad.CreatedAt.Date < DateTime.Today) {
+                                        // Fake ngày: hôm qua, hôm kia, hoặc 3 ngày trước (dựa vào hash)
+                                        int daysAgo = 1 + Math.Abs(hash % 3); // 1, 2, hoặc 3
+                                        fakeDate = DateTime.Today.AddDays(-daysAgo);
+                                        // Tỉ lệ lượt xem theo loại gói
+                                        int baseView = 0;
+                                        if (isDiamond) baseView = 300;
+                                        else if (isGold) baseView = 180;
+                                        else baseView = 100;
+                                        fakeView += baseView + Math.Abs(hash % (baseView / 2)) + ((hash >> 3) % (baseView / 4));
+                                    }
+                                    <div class="col-md-6 col-lg-6 mb-3">
+                                        <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
+                                            <div class="card @(isDiamond ? "diamond-ad-card" : "gold-ad-card") position-relative">
+                                                <div class="@(isDiamond ? "diamond-img-wrap" : "gold-img-wrap")">
+                                                    @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
                                                     {
-                                                        <span class="text-success fw-bold">@minPrice.ToString("N0")@(minPrice != maxPrice ? $" - {maxPrice.ToString("N0")}" : "") đ</span>
+                                                        <img src="@images[0]" class="@(isDiamond ? "diamond-img-demo" : "gold-img-demo") img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
                                                     }
                                                     else
                                                     {
-                                                        <span class="text-muted">Liên hệ giá</span>
+                                                        <img src="/images/no-image.png" class="@(isDiamond ? "diamond-img-demo" : "gold-img-demo") img-fluid" alt="No Image" />
                                                     }
                                                 </div>
-                                                <div class="mt-2 position-relative">
-                                                    <div class="ad-content-preview truncate-1" style="max-height: 22px; overflow: hidden;">@Html.Raw(ad.Content)</div>
-                                                    <div class="text-center mt-1">
-                                                        <button class="btn btn-link btn-sm p-0 ad-see-more-btn" type="button" tabindex="-1">Xem thêm</button>
+                                                <div class="ad-meta-below-img px-3 py-1">
+                                                    <span class="me-3"><i class="fa fa-eye me-1"></i>@fakeView lượt xem</span>
+                                                    <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count phòng</span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h5 class="mb-2">@ad.Title</h5>
+                                                    @if (isDiamond)
+                                                    {
+                                                        <span class="badge bg-gradient-diamond animated-gradient me-2"><i class="fa fa-gem me-1"></i>Kim cương</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-gradient-gold animated-gradient me-2"><i class="fa fa-crown me-1"></i>Vàng</span>
+                                                    }
+                                                    <div class="mb-2">
+                                                        @if (minPrice > 0 && maxPrice > 0)
+                                                        {
+                                                            <span class="text-success fw-bold">@minPrice.ToString("N0")@(minPrice != maxPrice ? $" - {maxPrice.ToString("N0")}" : "") đ</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Liên hệ giá</span>
+                                                        }
+                                                    </div>
+                                                    <div class="mt-2 position-relative">
+                                                        <div class="ad-content-preview truncate-2">@Html.Raw(ad.Content)</div>
+                                                        <div class="text-center mt-1">
+                                                            <button class="btn btn-link btn-sm p-0 ad-see-more-btn" type="button" tabindex="-1">Xem thêm</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
+                                                        <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
                                                     </div>
                                                 </div>
-                                                <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
-                                                    <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <!-- Bạc + Đồng: mỗi row 3 col-md-4, trộn chung, ưu tiên bạc lên trước -->
+                    <div class="mb-5">
+                        @for (int i = 0; i < currentAds.Count; i += 3)
+                        {
+                            <div class="row mb-4">
+                                @for (int j = i; j < Math.Min(i + 3, currentAds.Count); j++)
+                                {
+                                    var ad = currentAds[j];
+                                    var images = !string.IsNullOrEmpty(ad.ImageUrls) ? ad.ImageUrls.Split(',') : new string[0];
+                                    var activeRooms = ad.Rooms?.Where(r => r.Status == RentalService.Models.RoomStatus.Active).ToList() ?? new List<RentalService.Models.Room>();
+                                    var minPrice = activeRooms.Any() ? activeRooms.Min(r => r.Price) : 0;
+                                    var maxPrice = activeRooms.Any() ? activeRooms.Max(r => r.Price) : 0;
+                                    var isSilver = ad.PackageType == RentalService.Models.AdPackageType.Bac;
+                                    var isBronze = ad.PackageType == RentalService.Models.AdPackageType.Dong || ad.PackageType == RentalService.Models.AdPackageType.Free;
+                                    // --- FAKE LOGIC ---
+                                    int hash = ad.Id.GetHashCode();
+                                    int fakeView = 0;
+                                    DateTime fakeDate = DateTime.Today;
+                                    if (ad.CreatedAt.Date < DateTime.Today) {
+                                        int daysAgo = 1 + Math.Abs(hash % 3); // 1, 2, hoặc 3
+                                        fakeDate = DateTime.Today.AddDays(-daysAgo);
+                                        int baseView = 0;
+                                        if (isSilver) baseView = 120;
+                                        else if (isBronze) baseView = 60;
+                                        else baseView = 100;
+                                        fakeView = baseView + Math.Abs(hash % (baseView / 2)) + ((hash >> 2) % (baseView / 4));
+                                    }
+                                    <div class="col-md-4 mb-3">
+                                        <a href="@Url.Action("Details", "AdPosts", new { id = ad.Id })" class="ad-card-link">
+                                            <div class="card @(isSilver ? "silver-ad-card highlight-silver" : "bronze-ad-card") position-relative">
+                                                <div class="@(isSilver ? "silver-img-wrap highlight-silver-img" : "bronze-img-wrap")">
+                                                    @if (images.Length > 0 && !string.IsNullOrEmpty(images[0]))
+                                                    {
+                                                        <img src="@images[0]" class="@(isSilver ? "silver-img-demo" : "bronze-img-demo") img-fluid" alt="Ad Image" onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <img src="/images/no-image.png" class="@(isSilver ? "silver-img-demo" : "bronze-img-demo") img-fluid" alt="No Image" />
+                                                    }
+                                                </div>
+                                                <div class="ad-meta-below-img px-2 py-1">
+                                                    <span class="me-2"><i class="fa fa-eye me-1"></i>@fakeView</span>
+                                                    <span><i class="fa fa-door-open me-1"></i>@activeRooms.Count</span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h6 class="mb-2">@ad.Title</h6>
+                                                    @if (isSilver)
+                                                    {
+                                                        <span class="badge bg-gradient-silver animated-gradient text-dark me-2"><i class="fa fa-medal me-1"></i>Bạc</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-gradient-bronze animated-gradient text-dark me-2"><i class="fa fa-award me-1"></i>Đồng</span>
+                                                    }
+                                                    <div class="mb-2">
+                                                        @if (minPrice > 0 && maxPrice > 0)
+                                                        {
+                                                            <span class="text-success fw-bold">@minPrice.ToString("N0")@(minPrice != maxPrice ? $" - {maxPrice.ToString("N0")}" : "") đ</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-muted">Liên hệ giá</span>
+                                                        }
+                                                    </div>
+                                                    <div class="mt-2 position-relative">
+                                                        <div class="ad-content-preview truncate-1" style="max-height: 22px; overflow: hidden;">@Html.Raw(ad.Content)</div>
+                                                        <div class="text-center mt-1">
+                                                            <button class="btn btn-link btn-sm p-0 ad-see-more-btn" type="button" tabindex="-1">Xem thêm</button>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center w-100 mt-3 pt-2 small text-secondary">
+                                                        <span><i class="fa fa-calendar-alt me-1"></i>@fakeDate.ToString("dd/MM/yyyy")</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            }
-                        </div>
-                    }
+                                        </a>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Bottom pagination -->
+                <div class="d-flex justify-content-center mt-4">
+                    <nav>
+                        <ul class="pagination">
+                            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                                <a class="page-link" href="@(currentPage == 1 ? "#" : Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "1") }).ToDictionary(x => x.Key, x => x.Value)))" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 1 ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "1") }).ToDictionary(x => x.Key, x => x.Value))">
+                                    1
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 2 ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "2") }).ToDictionary(x => x.Key, x => x.Value))">
+                                    2
+                                </a>
+                            </li>
+                            <li class="page-item @(currentPage == 2 ? "disabled" : "")">
+                                <a class="page-link" href="@(currentPage == 2 ? "#" : Url.Action("Index", "Home", queryParams.Concat(new[] { new KeyValuePair<string, string>("page", "2") }).ToDictionary(x => x.Key, x => x.Value)))" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             }
         </div>
