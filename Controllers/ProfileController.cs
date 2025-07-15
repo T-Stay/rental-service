@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentalService.Data;
 using RentalService.Models;
+using RentalService.Services;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -16,11 +17,13 @@ namespace RentalService.Controllers
     {
         private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IEmailService _emailService;
 
-        public ProfileController(AppDbContext context, UserManager<User> userManager)
+        public ProfileController(AppDbContext context, UserManager<User> userManager, IEmailService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Index()
@@ -279,6 +282,30 @@ namespace RentalService.Controllers
                 pkg.IsActive = true;
                 pkg.PurchaseDate = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
+
+                // Send email notification for successful package purchase
+                var user = await _userManager.FindByIdAsync(pkg.UserId);
+                if (user != null && !string.IsNullOrEmpty(user.Email))
+                {
+                    var packageName = pkg.PackageType.ToVietnameseLabel();
+                    int postsIncluded = pkg.PackageType switch
+                    {
+                        AdPackageType.Dong => 3,
+                        AdPackageType.Bac => 7,
+                        AdPackageType.Vang => 15,
+                        AdPackageType.KimCuong => 40,
+                        _ => 0
+                    };
+                    
+                    await _emailService.SendPackagePurchaseConfirmationAsync(
+                        user.Email, 
+                        user.Name, 
+                        packageName, 
+                        pkg.PurchaseDate, 
+                        pkg.ExpiryDate, 
+                        postsIncluded
+                    );
+                }
             }
             ViewBag.Status = pkg != null && pkg.IsActive ? "success" : "fail";
             return View();

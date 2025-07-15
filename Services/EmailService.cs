@@ -152,6 +152,41 @@ namespace RentalService.Services
             SendEmail(customerEmail, subject, body);
         }
 
+        public async Task SendPackagePurchaseConfirmationAsync(string userEmail, string userName, string packageName, DateTime purchaseDate, DateTime expiryDate, int postsIncluded)
+        {
+            var subject = "Xác nhận mua gói quảng cáo - Trọ Tốt";
+            var body = $@"<html><body style='font-family:sans-serif;background:#f8fafc;margin:0;padding:0;'>
+    <div style='background:linear-gradient(90deg,#1b6ec2 0%,#0077cc 100%);padding:24px 0;text-align:center;'>
+        <span style='font-size:2rem;color:#fff;font-weight:bold;letter-spacing:1px;'>
+            Trọ Tốt
+        </span>
+    </div>
+    <div style='padding:32px 16px 16px 16px;max-width:480px;margin:0 auto;background:#fff;border-radius:0 0 12px 12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);'>
+        <h2 style='color:#1b6ec2;'>Cảm ơn bạn đã mua gói quảng cáo!</h2>
+        <p>Xin chào {System.Net.WebUtility.HtmlEncode(userName)},</p>
+        <p>Chúng tôi xác nhận bạn đã mua thành công <strong>{System.Net.WebUtility.HtmlEncode(packageName)}</strong>.</p>
+        <div style='background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;'>
+            <h4 style='color:#1b6ec2;margin-top:0;'>Chi tiết gói:</h4>
+            <ul style='margin:10px 0;'>
+                <li><strong>Gói:</strong> {System.Net.WebUtility.HtmlEncode(packageName)}</li>
+                <li><strong>Số bài đăng:</strong> {postsIncluded} bài</li>
+                <li><strong>Ngày mua:</strong> {purchaseDate:dd/MM/yyyy HH:mm}</li>
+                <li><strong>Hết hạn:</strong> {expiryDate:dd/MM/yyyy}</li>
+            </ul>
+        </div>
+        <p>Bây giờ bạn có thể tạo tin đăng quảng cáo cho phòng trọ của mình với những ưu đãi đặc biệt!</p>
+        <p style='text-align:center;margin:32px 0;'>
+            <a href='https://trotot.com.vn/Profile' style='background:#28a745;color:#fff;padding:12px 28px;text-decoration:none;border-radius:5px;font-size:1.1rem;font-weight:bold;display:inline-block;'>Xem gói của tôi</a>
+        </p>
+        <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi.</p>
+        <hr style='margin:32px 0 16px 0;border:none;border-top:1px solid #eee;'>
+        <p style='font-size:12px;color:#888;text-align:center;'>Trọ Tốt Team</p>
+    </div>
+</body></html>";
+            
+            SendEmail(userEmail, subject, body);
+        }
+
         private void SendEmail(string to, string subject, string html)
         {
             Task.Run(() =>
