@@ -121,6 +121,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // Add this line to serve static files from wwwroot
 app.UseRouting();
 
 app.UseAuthentication();

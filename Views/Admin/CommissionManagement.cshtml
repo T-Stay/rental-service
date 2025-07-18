@@ -47,13 +47,23 @@ else
     <div class="mb-4">
         <ul class="nav nav-tabs" id="monthTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="june-tab" data-bs-toggle="tab" data-bs-target="#june" type="button" role="tab">
+                <button class="nav-link" id="may-tab" data-bs-toggle="tab" data-bs-target="#may" type="button" role="tab">
+                    <i class="fa-solid fa-calendar me-1"></i>Tháng 5/2025
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="june-tab" data-bs-toggle="tab" data-bs-target="#june" type="button" role="tab">
                     <i class="fa-solid fa-calendar me-1"></i>Tháng 6/2025
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="july-tab" data-bs-toggle="tab" data-bs-target="#july" type="button" role="tab">
+                <button class="nav-link active" id="july-tab" data-bs-toggle="tab" data-bs-target="#july" type="button" role="tab">
                     <i class="fa-solid fa-calendar me-1"></i>Tháng 7/2025
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="total-tab" data-bs-toggle="tab" data-bs-target="#total" type="button" role="tab">
+                    <i class="fa-solid fa-chart-bar me-1"></i>Tổng kết
                 </button>
             </li>
         </ul>
@@ -61,8 +71,17 @@ else
 
     <!-- Tab content -->
     <div class="tab-content" id="monthTabContent">
+        <!-- May 2025 -->
+        <div class="tab-pane fade" id="may" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-primary"><i class="fa-solid fa-check-circle me-2"></i>Tháng 5/2025 - Tất cả đã thanh toán</h4>
+                <span class="badge bg-success fs-6">Hoàn thành</span>
+            </div>
+            <div id="may-data" class="commission-data"></div>
+        </div>
+
         <!-- June 2025 -->
-        <div class="tab-pane fade show active" id="june" role="tabpanel">
+        <div class="tab-pane fade" id="june" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="text-primary"><i class="fa-solid fa-check-circle me-2"></i>Tháng 6/2025 - Tất cả đã thanh toán</h4>
                 <span class="badge bg-success fs-6">Hoàn thành</span>
@@ -71,12 +90,21 @@ else
         </div>
 
         <!-- July 2025 -->
-        <div class="tab-pane fade" id="july" role="tabpanel">
+        <div class="tab-pane fade show active" id="july" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="text-warning"><i class="fa-solid fa-clock me-2"></i>Tháng 7/2025 - Thanh toán hỗn hợp</h4>
                 <span class="badge bg-warning fs-6">Đang xử lý</span>
             </div>
             <div id="july-data" class="commission-data"></div>
+        </div>
+
+        <!-- Total Summary -->
+        <div class="tab-pane fade" id="total" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-info"><i class="fa-solid fa-chart-bar me-2"></i>Tổng kết tất cả các tháng</h4>
+                <span class="badge bg-info fs-6">Báo cáo</span>
+            </div>
+            <div id="total-data" class="commission-data"></div>
         </div>
     </div>
 }
@@ -120,6 +148,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load commission data
     const commissionData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.CommissionData ?? new object()));
     
+    if (commissionData && commissionData['2025-05']) {
+        renderCommissionData('may-data', commissionData['2025-05']);
+    }
+    
     if (commissionData && commissionData['2025-06']) {
         renderCommissionData('june-data', commissionData['2025-06']);
     }
@@ -127,7 +159,162 @@ document.addEventListener('DOMContentLoaded', function() {
     if (commissionData && commissionData['2025-07']) {
         renderCommissionData('july-data', commissionData['2025-07']);
     }
+
+    // Render total summary
+    if (commissionData) {
+        renderTotalSummary('total-data', commissionData);
+    }
 });
+
+function renderTotalSummary(containerId, allData) {
+    const container = document.getElementById(containerId);
+    if (!container || !allData) return;
+    
+    let monthlyStats = [];
+    let totalCommissionAll = 0;
+    let totalPaidAll = 0;
+    let totalUnpaidAll = 0;
+    let totalHostsAll = new Set();
+    let totalRoomsAll = 0;
+    
+    // Process each month
+    Object.keys(allData).forEach(monthKey => {
+        const monthData = allData[monthKey];
+        let monthPaid = 0;
+        let monthUnpaid = 0;
+        let monthHosts = 0;
+        let monthRooms = 0;
+        
+        monthData.forEach(host => {
+            totalHostsAll.add(host.host);
+            monthHosts++;
+            monthRooms += host.rooms.length;
+            totalRoomsAll += host.rooms.length;
+            
+            if (host.paymentStatus === 'paid') {
+                monthPaid += host.totalCommission;
+                totalPaidAll += host.totalCommission;
+            } else {
+                monthUnpaid += host.totalCommission;
+                totalUnpaidAll += host.totalCommission;
+            }
+            totalCommissionAll += host.totalCommission;
+        });
+        
+        monthlyStats.push({
+            month: monthKey,
+            monthName: monthKey === '2025-05' ? 'Tháng 5/2025' : 
+                      monthKey === '2025-06' ? 'Tháng 6/2025' : 'Tháng 7/2025',
+            paid: monthPaid,
+            unpaid: monthUnpaid,
+            total: monthPaid + monthUnpaid,
+            hosts: monthHosts,
+            rooms: monthRooms
+        });
+    });
+    
+    // Generate monthly breakdown table
+    const monthlyBreakdown = monthlyStats.map(stat => `
+        <tr>
+            <td><strong>${stat.monthName}</strong></td>
+            <td>${stat.hosts}</td>
+            <td>${stat.rooms}</td>
+            <td class="text-success">${new Intl.NumberFormat('vi-VN').format(stat.paid)}đ</td>
+            <td class="text-danger">${new Intl.NumberFormat('vi-VN').format(stat.unpaid)}đ</td>
+            <td class="text-primary fw-bold">${new Intl.NumberFormat('vi-VN').format(stat.total)}đ</td>
+        </tr>
+    `).join('');
+    
+    const html = `
+    <!-- Overall Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h5>${totalHostsAll.size}</h5>
+                    <small>Tổng chủ nhà</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white">
+                <div class="card-body text-center">
+                    <h5>${totalRoomsAll}</h5>
+                    <small>Tổng phòng</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h6>${new Intl.NumberFormat('vi-VN').format(totalPaidAll)}đ</h6>
+                    <small>Đã thu</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h6>${new Intl.NumberFormat('vi-VN').format(totalUnpaidAll)}đ</h6>
+                    <small>Chưa thu</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h6>${new Intl.NumberFormat('vi-VN').format(totalCommissionAll)}đ</h6>
+                    <small>Tổng cộng</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h5>${((totalPaidAll / totalCommissionAll) * 100).toFixed(1)}%</h5>
+                    <small>Tỷ lệ thu</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Breakdown Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fa-solid fa-table me-2"></i>Báo cáo theo tháng</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tháng</th>
+                            <th>Số chủ nhà</th>
+                            <th>Số phòng</th>
+                            <th class="text-success">Đã thu</th>
+                            <th class="text-danger">Chưa thu</th>
+                            <th class="text-primary">Tổng cộng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${monthlyBreakdown}
+                        <tr class="table-light border-top border-2 fw-bold" style="background-color: #f8f9fa !important;">
+                            <td class="text-primary">TỔNG CỘNG</td>
+                            <td class="text-primary">${totalHostsAll.size}</td>
+                            <td class="text-primary">${totalRoomsAll}</td>
+                            <td class="text-success">${new Intl.NumberFormat('vi-VN').format(totalPaidAll)}đ</td>
+                            <td class="text-danger">${new Intl.NumberFormat('vi-VN').format(totalUnpaidAll)}đ</td>
+                            <td class="text-primary">${new Intl.NumberFormat('vi-VN').format(totalCommissionAll)}đ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    `;
+    
+    container.innerHTML = html;
+}
 
 function renderCommissionData(containerId, data) {
     const container = document.getElementById(containerId);
@@ -199,7 +386,7 @@ function renderCommissionData(containerId, data) {
                         `}
                         ${host['bill-path'] ? `
                             <div class="mt-2">
-                                <a href="/wwwroot/${host['bill-path']}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <a href="/${host['bill-path']}" class="btn btn-sm btn-outline-primary" target="_blank">
                                     <i class="fa-solid fa-file-pdf me-1"></i>Xem hóa đơn
                                 </a>
                             </div>

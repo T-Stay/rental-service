@@ -22,4 +22,10 @@
     <PackageReference Include="X.PagedList.Mvc.Core" Version="8.2.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\bills\buivien.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>
