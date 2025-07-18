@@ -209,44 +209,6 @@
             "bill-path": "bills/buixuansinh25_july2025_pending.pdf"
         },
         {
-            "host": "datluu1408@gmail.com",
-            "rooms": [
-                {
-                    "roomId": "g7h8i9j0-k1l2-3456-ghij-789012345678",
-                    "price-vnd": 10333000,
-                    "customer": "hoanga32821999@gmail.com",
-                    "bookingDate": "2025-07-03",
-                    "monthlyRent": 10333000,
-                    "commissionRate": 0.18,
-                    "commissionAmount": 1860000,
-                    "commissionType": "one-time"
-                }
-            ],
-            "paymentStatus": "unpaid",
-            "totalCommission": 1860000,
-            "dueDate": "2025-08-12",
-            "bill-path": "bills/datluu1408_july2025_pending.pdf"
-        },
-        {
-            "host": "thuykieu888@gmail.com",
-            "rooms": [
-                {
-                    "roomId": "z0k1l2m3-n4o5-6789-zklm-012345678901",
-                    "price-vnd": 6176000,
-                    "customer": "tranthanhhue139@gmail.com",
-                    "bookingDate": "2025-07-25",
-                    "monthlyRent": 6176000,
-                    "commissionRate": 0.18,
-                    "commissionAmount": 1110000,
-                    "commissionType": "one-time"
-                }
-            ],
-            "paymentStatus": "unpaid",
-            "totalCommission": 1110000,
-            "dueDate": "2025-08-15",
-            "bill-path": "bills/thuykieu888_july2025_pending.pdf"
-        },
-        {
             "host": "quanganh1210@gmail.com",
             "rooms": [
                 {
