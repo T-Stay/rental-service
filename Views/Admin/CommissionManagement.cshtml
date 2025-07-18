@@ -1,0 +1,252 @@
+@{
+    ViewData["Title"] = "Quản lý hoa hồng";
+}
+
+<!-- Navigation bar for admin views -->
+<nav class="mb-4">
+    <ul class="nav nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")" href="@Url.Action("Index", "Admin")">
+                <i class="fa-solid fa-gauge"></i> Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "UserList" ? "active" : "")" href="@Url.Action("UserList", "Admin")">
+                <i class="fa-solid fa-users"></i> Người dùng
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Statistics" ? "active" : "")" href="@Url.Action("Statistics", "Admin")">
+                <i class="fa-solid fa-chart-line"></i> Thống kê
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "AdPostsToApprove" ? "active" : "")" href="@Url.Action("AdPostsToApprove", "Admin")">
+                <i class="fa-solid fa-bullhorn"></i> Duyệt quảng cáo
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "CommissionManagement" ? "active" : "")" href="@Url.Action("CommissionManagement", "Admin")">
+                <i class="fa-solid fa-money-bill-wave"></i> Quản lý hoa hồng
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<h2 class="fw-bold mb-4 text-success"><i class="fa-solid fa-money-bill-wave me-2"></i>Quản lý hoa hồng</h2>
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        <i class="fa-solid fa-exclamation-triangle me-2"></i>@ViewBag.ErrorMessage
+    </div>
+}
+else
+{
+    <!-- Month selection tabs -->
+    <div class="mb-4">
+        <ul class="nav nav-tabs" id="monthTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="june-tab" data-bs-toggle="tab" data-bs-target="#june" type="button" role="tab">
+                    <i class="fa-solid fa-calendar me-1"></i>Tháng 6/2025
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="july-tab" data-bs-toggle="tab" data-bs-target="#july" type="button" role="tab">
+                    <i class="fa-solid fa-calendar me-1"></i>Tháng 7/2025
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab content -->
+    <div class="tab-content" id="monthTabContent">
+        <!-- June 2025 -->
+        <div class="tab-pane fade show active" id="june" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-primary"><i class="fa-solid fa-check-circle me-2"></i>Tháng 6/2025 - Tất cả đã thanh toán</h4>
+                <span class="badge bg-success fs-6">Hoàn thành</span>
+            </div>
+            <div id="june-data" class="commission-data"></div>
+        </div>
+
+        <!-- July 2025 -->
+        <div class="tab-pane fade" id="july" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-warning"><i class="fa-solid fa-clock me-2"></i>Tháng 7/2025 - Thanh toán hỗn hợp</h4>
+                <span class="badge bg-warning fs-6">Đang xử lý</span>
+            </div>
+            <div id="july-data" class="commission-data"></div>
+        </div>
+    </div>
+}
+
+<style>
+.commission-card {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+}
+.commission-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.commission-card.paid {
+    border-left: 4px solid #28a745;
+}
+.commission-card.unpaid {
+    border-left: 4px solid #dc3545;
+}
+.room-item {
+    background: #f8f9fa;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+.commission-amount {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+.paid .commission-amount {
+    color: #28a745;
+}
+.unpaid .commission-amount {
+    color: #dc3545;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load commission data
+    const commissionData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.CommissionData ?? new object()));
+    
+    if (commissionData && commissionData['2025-06']) {
+        renderCommissionData('june-data', commissionData['2025-06']);
+    }
+    
+    if (commissionData && commissionData['2025-07']) {
+        renderCommissionData('july-data', commissionData['2025-07']);
+    }
+});
+
+function renderCommissionData(containerId, data) {
+    const container = document.getElementById(containerId);
+    if (!container || !data) return;
+    
+    let html = '';
+    let totalPaid = 0;
+    let totalUnpaid = 0;
+    let paidCount = 0;
+    let unpaidCount = 0;
+    
+    data.forEach(host => {
+        const isPaid = host.paymentStatus === 'paid';
+        const statusClass = isPaid ? 'paid' : 'unpaid';
+        const statusIcon = isPaid ? 'fa-check-circle text-success' : 'fa-clock text-warning';
+        const statusText = isPaid ? 'Đã thanh toán' : 'Chưa thanh toán';
+        
+        if (isPaid) {
+            totalPaid += host.totalCommission;
+            paidCount++;
+        } else {
+            totalUnpaid += host.totalCommission;
+            unpaidCount++;
+        }
+        
+        html += `
+        <div class="commission-card ${statusClass}">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-2">
+                            <h5 class="mb-0 me-3">${host.host}</h5>
+                            <span class="badge ${isPaid ? 'bg-success' : 'bg-warning'}">
+                                <i class="fa-solid ${statusIcon.split(' ')[0]} me-1"></i>${statusText}
+                            </span>
+                        </div>
+                        <div class="mb-2">
+                            <strong>Số phòng:</strong> ${host.rooms.length} phòng
+                        </div>
+                        <div class="rooms-list">
+                            ${host.rooms.map(room => `
+                                <div class="room-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Khách:</strong> ${room.customer || 'Chưa có'}</span>
+                                        <span><strong>Tiền thuê:</strong> ${new Intl.NumberFormat('vi-VN').format(room.monthlyRent)}đ</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Ngày thuê:</strong> ${room.bookingDate}</span>
+                                        <span><strong>Hoa hồng:</strong> ${new Intl.NumberFormat('vi-VN').format(room.commissionAmount)}đ</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="commission-amount ${statusClass}">
+                            <i class="fa-solid fa-money-bill-wave me-1"></i>
+                            ${new Intl.NumberFormat('vi-VN').format(host.totalCommission)}đ
+                        </div>
+                        <small class="text-muted">Tổng hoa hồng</small>
+                        ${isPaid ? `
+                            <div class="mt-2">
+                                <small><strong>Ngày TT:</strong> ${host.paymentDate}</small>
+                            </div>
+                        ` : `
+                            <div class="mt-2">
+                                <small><strong>Hạn TT:</strong> ${host.dueDate}</small>
+                            </div>
+                        `}
+                        ${host['bill-path'] ? `
+                            <div class="mt-2">
+                                <a href="/wwwroot/${host['bill-path']}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                    <i class="fa-solid fa-file-pdf me-1"></i>Xem hóa đơn
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    });
+    
+    // Add summary
+    const summaryHtml = `
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h5>${paidCount}</h5>
+                    <small>Đã thanh toán</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h5>${unpaidCount}</h5>
+                    <small>Chưa thanh toán</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h5>${new Intl.NumberFormat('vi-VN').format(totalPaid)}đ</h5>
+                    <small>Đã thu</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h5>${new Intl.NumberFormat('vi-VN').format(totalUnpaid)}đ</h5>
+                    <small>Chưa thu</small>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    
+    container.innerHTML = summaryHtml + html;
+}
+</script>

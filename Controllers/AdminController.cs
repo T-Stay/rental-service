@@ -7,6 +7,8 @@ using RentalService.Models;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.IO;
 
 namespace RentalService.Controllers
 {
@@ -351,6 +353,31 @@ namespace RentalService.Controllers
             var labels = types.Select(t => t.ToVietnameseLabel()).ToList();
             var data = types.Select(t => _context.UserAdPackages.Count(p => p.PackageType == t)).ToList();
             return Json(new { labels, data });
+        }
+
+        // GET: /Admin/CommissionManagement
+        public IActionResult CommissionManagement()
+        {
+            // Read the JSON file for commission data
+            var jsonPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "host-customer-room.json");
+            if (!System.IO.File.Exists(jsonPath))
+            {
+                ViewBag.ErrorMessage = "Không tìm thấy file dữ liệu hoa hồng.";
+                return View();
+            }
+
+            try
+            {
+                var jsonContent = System.IO.File.ReadAllText(jsonPath);
+                var commissionData = System.Text.Json.JsonSerializer.Deserialize<object>(jsonContent);
+                ViewBag.CommissionData = commissionData;
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = $"Lỗi đọc dữ liệu: {ex.Message}";
+                return View();
+            }
         }
 
         // Add more actions for role management as needed
